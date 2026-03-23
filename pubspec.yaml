@@ -1,0 +1,42 @@
+name: iron_log
+description: "A new Flutter fitness application focused on declarative local persistence."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Routing
+  go_router: ^13.2.0
+
+  # Local DB
+  sqflite: ^2.3.0
+  path_provider: ^2.1.2
+  path: ^1.9.0
+
+  # Immutable Classes
+  freezed_annotation: ^2.4.1
+  json_annotation: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  build_runner: ^2.4.8 # For codegen
+  riverpod_generator: ^2.4.0
+  freezed: ^2.4.7
+  json_serializable: any
+
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true

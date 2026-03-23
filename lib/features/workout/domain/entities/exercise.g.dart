@@ -1,0 +1,21 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'exercise.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+_$ExerciseImpl _$$ExerciseImplFromJson(Map<String, dynamic> json) =>
+    _$ExerciseImpl(
+      id: (json['id'] as num?)?.toInt(),
+      name: json['name'] as String,
+      bodyPart: json['bodyPart'] as String,
+    );
+
+Map<String, dynamic> _$$ExerciseImplToJson(_$ExerciseImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'bodyPart': instance.bodyPart,
+    };
