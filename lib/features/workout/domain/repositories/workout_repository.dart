@@ -5,6 +5,7 @@ import '../entities/routine_exercise_detail.dart';
 import '../entities/workout_session_summary.dart';
 import '../entities/routine_summary.dart';
 import '../entities/weekly_stats.dart';
+import '../entities/body_weight_log.dart';
 
 abstract class WorkoutRepository {
   Future<List<Exercise>> getExercises();
@@ -13,6 +14,7 @@ abstract class WorkoutRepository {
   Future<int> logSet(WorkoutSet set);
   Future<void> endSession(int sessionId);
   Future<void> deleteSession(int sessionId);
+  Future<void> updateSessionNotes(String sessionId, String notes);
   Future<List<RoutineExerciseDetail>> getExercisesForRoutine(int routineId);
   Future<List<WorkoutSessionSummary>> getCompletedSessions();
   Future<List<WorkoutSet>> getSetsForSession(int sessionId);
@@ -59,4 +61,9 @@ abstract class WorkoutRepository {
   // PR Methods
   Future<bool> isPersonalRecord(int exerciseId, double weight, int reps, int currentSetId);
   Future<int> countPRsInSession(int sessionId);
+
+  // Body Weight Methods
+  Future<void> saveBodyWeightLog(BodyWeightLog log);
+  Future<void> deleteBodyWeightLog(String id);
+  Future<List<BodyWeightLog>> getBodyWeightLogs();
 }

@@ -25,6 +25,7 @@ mixin _$WorkoutSession {
   int? get endTimestamp => throw _privateConstructorUsedError;
   int? get routineId => throw _privateConstructorUsedError;
   String get routineNameSnapshot => throw _privateConstructorUsedError;
+  String? get notes => throw _privateConstructorUsedError;
 
   /// Serializes this WorkoutSession to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -47,7 +48,8 @@ abstract class $WorkoutSessionCopyWith<$Res> {
       int startTimestamp,
       int? endTimestamp,
       int? routineId,
-      String routineNameSnapshot});
+      String routineNameSnapshot,
+      String? notes});
 }
 
 /// @nodoc
@@ -70,6 +72,7 @@ class _$WorkoutSessionCopyWithImpl<$Res, $Val extends WorkoutSession>
     Object? endTimestamp = freezed,
     Object? routineId = freezed,
     Object? routineNameSnapshot = null,
+    Object? notes = freezed,
   }) {
     return _then(_value.copyWith(
       id: freezed == id
@@ -92,6 +95,10 @@ class _$WorkoutSessionCopyWithImpl<$Res, $Val extends WorkoutSession>
           ? _value.routineNameSnapshot
           : routineNameSnapshot // ignore: cast_nullable_to_non_nullable
               as String,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -109,7 +116,8 @@ abstract class _$$WorkoutSessionImplCopyWith<$Res>
       int startTimestamp,
       int? endTimestamp,
       int? routineId,
-      String routineNameSnapshot});
+      String routineNameSnapshot,
+      String? notes});
 }
 
 /// @nodoc
@@ -130,6 +138,7 @@ class __$$WorkoutSessionImplCopyWithImpl<$Res>
     Object? endTimestamp = freezed,
     Object? routineId = freezed,
     Object? routineNameSnapshot = null,
+    Object? notes = freezed,
   }) {
     return _then(_$WorkoutSessionImpl(
       id: freezed == id
@@ -152,6 +161,10 @@ class __$$WorkoutSessionImplCopyWithImpl<$Res>
           ? _value.routineNameSnapshot
           : routineNameSnapshot // ignore: cast_nullable_to_non_nullable
               as String,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -164,7 +177,8 @@ class _$WorkoutSessionImpl implements _WorkoutSession {
       required this.startTimestamp,
       this.endTimestamp,
       this.routineId,
-      required this.routineNameSnapshot});
+      required this.routineNameSnapshot,
+      this.notes});
 
   factory _$WorkoutSessionImpl.fromJson(Map<String, dynamic> json) =>
       _$$WorkoutSessionImplFromJson(json);
@@ -179,10 +193,12 @@ class _$WorkoutSessionImpl implements _WorkoutSession {
   final int? routineId;
   @override
   final String routineNameSnapshot;
+  @override
+  final String? notes;
 
   @override
   String toString() {
-    return 'WorkoutSession(id: $id, startTimestamp: $startTimestamp, endTimestamp: $endTimestamp, routineId: $routineId, routineNameSnapshot: $routineNameSnapshot)';
+    return 'WorkoutSession(id: $id, startTimestamp: $startTimestamp, endTimestamp: $endTimestamp, routineId: $routineId, routineNameSnapshot: $routineNameSnapshot, notes: $notes)';
   }
 
   @override
@@ -198,13 +214,14 @@ class _$WorkoutSessionImpl implements _WorkoutSession {
             (identical(other.routineId, routineId) ||
                 other.routineId == routineId) &&
             (identical(other.routineNameSnapshot, routineNameSnapshot) ||
-                other.routineNameSnapshot == routineNameSnapshot));
+                other.routineNameSnapshot == routineNameSnapshot) &&
+            (identical(other.notes, notes) || other.notes == notes));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, startTimestamp, endTimestamp,
-      routineId, routineNameSnapshot);
+      routineId, routineNameSnapshot, notes);
 
   /// Create a copy of WorkoutSession
   /// with the given fields replaced by the non-null parameter values.
@@ -229,7 +246,8 @@ abstract class _WorkoutSession implements WorkoutSession {
       required final int startTimestamp,
       final int? endTimestamp,
       final int? routineId,
-      required final String routineNameSnapshot}) = _$WorkoutSessionImpl;
+      required final String routineNameSnapshot,
+      final String? notes}) = _$WorkoutSessionImpl;
 
   factory _WorkoutSession.fromJson(Map<String, dynamic> json) =
       _$WorkoutSessionImpl.fromJson;
@@ -244,6 +262,8 @@ abstract class _WorkoutSession implements WorkoutSession {
   int? get routineId;
   @override
   String get routineNameSnapshot;
+  @override
+  String? get notes;
 
   /// Create a copy of WorkoutSession
   /// with the given fields replaced by the non-null parameter values.

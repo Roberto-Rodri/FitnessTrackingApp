@@ -8,6 +8,7 @@ import '../../domain/entities/routine_exercise_detail.dart';
 import '../../domain/entities/workout_session_summary.dart';
 import '../../domain/entities/weekly_stats.dart';
 import '../../domain/exceptions/workout_exceptions.dart';
+import '../../domain/entities/body_weight_log.dart';
 
 abstract class WorkoutLocalDataSource {
   Future<List<Exercise>> getExercises();
@@ -16,6 +17,7 @@ abstract class WorkoutLocalDataSource {
   Future<int> logSet(WorkoutSet set);
   Future<void> endSession(int sessionId);
   Future<void> deleteSession(int sessionId);
+  Future<void> updateSessionNotes(String sessionId, String notes);
   Future<List<RoutineExerciseDetail>> getExercisesForRoutine(int routineId);
   Future<List<WorkoutSessionSummary>> getCompletedSessions();
   Future<List<WorkoutSet>> getSetsForSession(int sessionId);
@@ -61,6 +63,11 @@ abstract class WorkoutLocalDataSource {
   // PR Methods
   Future<bool> isPersonalRecord(int exerciseId, double weight, int reps, int currentSetId);
   Future<int> countPRsInSession(int sessionId);
+
+  // Body Weight Methods
+  Future<void> saveBodyWeightLog(BodyWeightLog log);
+  Future<void> deleteBodyWeightLog(String id);
+  Future<List<BodyWeightLog>> getBodyWeightLogs();
 }
 
 class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
@@ -169,6 +176,21 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
       );
     } catch (e) {
       throw DatabaseOperationException('Failed to delete workout session: $e');
+    }
+  }
+
+  @override
+  Future<void> updateSessionNotes(String sessionId, String notes) async {
+    try {
+      final db = await dbHelper.database;
+      await db.update(
+        'workout_sessions',
+        {'notes': notes},
+        where: 'id = ?',
+        whereArgs: [sessionId],
+      );
+    } catch (e) {
+      throw DatabaseOperationException('Failed to update session notes: $e');
     }
   }
 
@@ -714,5 +736,47 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
     } catch (e) {
       throw DatabaseOperationException('Failed to count PRs in session: $e');
     }
+  }
+
+  @override
+  Future<void> saveBodyWeightLog(BodyWeightLog log) async {
+    try {
+      final db = await dbHelper.database;
+      await db.insert('body_weight_logs', {
+        'id': log.id,
+        'timestamp': log.date.millisecondsSinceEpoch,
+        'weight': log.weight,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    } catch (e) {
+      throw DatabaseOperationException('Failed to save body weight log: $e');
+    }
+  }
+
+  @override
+  Future<void> deleteBodyWeightLog(String id) async {
+    try {
+      final db = await dbHelper.database;
+      await db.delete(
+        'body_weight_logs',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    } catch (e) {
+      throw DatabaseOperationException('Failed to delete body weight log: $e');
+    }
+  }
+
+  @override
+  Future<List<BodyWeightLog>> getBodyWeightLogs() async {
+    final db = await dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'body_weight_logs',
+      orderBy: 'timestamp DESC',
+    );
+    return maps.map((map) => BodyWeightLog(
+      id: map['id'] as String,
+      date: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] as int),
+      weight: map['weight'] as double,
+    )).toList();
   }
 }

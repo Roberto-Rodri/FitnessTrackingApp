@@ -7,6 +7,7 @@ import '../../domain/entities/routine_exercise_detail.dart';
 import '../../domain/entities/workout_session_summary.dart';
 import '../../domain/entities/routine_summary.dart';
 import '../../domain/entities/weekly_stats.dart';
+import '../../domain/entities/body_weight_log.dart';
 
 class WorkoutRepositoryImpl implements WorkoutRepository {
   final WorkoutLocalDataSource localDataSource;
@@ -41,6 +42,11 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   @override
   Future<void> deleteSession(int sessionId) {
     return localDataSource.deleteSession(sessionId);
+  }
+
+  @override
+  Future<void> updateSessionNotes(String sessionId, String notes) {
+    return localDataSource.updateSessionNotes(sessionId, notes);
   }
 
   @override
@@ -219,5 +225,20 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   @override
   Future<int> countPRsInSession(int sessionId) {
     return localDataSource.countPRsInSession(sessionId);
+  }
+
+  @override
+  Future<void> saveBodyWeightLog(BodyWeightLog log) {
+    return localDataSource.saveBodyWeightLog(log);
+  }
+
+  @override
+  Future<void> deleteBodyWeightLog(String id) {
+    return localDataSource.deleteBodyWeightLog(id);
+  }
+
+  @override
+  Future<List<BodyWeightLog>> getBodyWeightLogs() {
+    return localDataSource.getBodyWeightLogs();
   }
 }
