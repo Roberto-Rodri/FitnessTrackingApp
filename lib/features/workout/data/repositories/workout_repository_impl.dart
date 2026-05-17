@@ -45,7 +45,7 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   }
 
   @override
-  Future<void> updateSessionNotes(String sessionId, String notes) {
+  Future<void> updateSessionNotes(int sessionId, String notes) {
     return localDataSource.updateSessionNotes(sessionId, notes);
   }
 

@@ -17,7 +17,7 @@ abstract class WorkoutLocalDataSource {
   Future<int> logSet(WorkoutSet set);
   Future<void> endSession(int sessionId);
   Future<void> deleteSession(int sessionId);
-  Future<void> updateSessionNotes(String sessionId, String notes);
+  Future<void> updateSessionNotes(int sessionId, String notes);
   Future<List<RoutineExerciseDetail>> getExercisesForRoutine(int routineId);
   Future<List<WorkoutSessionSummary>> getCompletedSessions();
   Future<List<WorkoutSet>> getSetsForSession(int sessionId);
@@ -180,7 +180,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
   }
 
   @override
-  Future<void> updateSessionNotes(String sessionId, String notes) async {
+  Future<void> updateSessionNotes(int sessionId, String notes) async {
     try {
       final db = await dbHelper.database;
       await db.update(

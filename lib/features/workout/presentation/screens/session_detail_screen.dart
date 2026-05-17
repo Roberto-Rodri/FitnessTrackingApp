@@ -143,6 +143,28 @@ class SessionDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 32),
 
+              if (summary.session.notes != null && summary.session.notes!.isNotEmpty) ...[
+                Text(
+                  'SESSION NOTES',
+                  style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2, letterSpacing: 0.06),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.bg1,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppTheme.bg3),
+                  ),
+                  child: Text(
+                    summary.session.notes!,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.txt1, height: 1.4),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
+
               // Volume Chart
               Text(
                 'VOLUME PER EXERCISE',

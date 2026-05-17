@@ -78,14 +78,14 @@ void main() {
     });
 
     test('updateSessionNotes should correctly issue an update to workout_sessions', () async {
-      await dataSource.updateSessionNotes('session123', 'Felt strong today.');
+      await dataSource.updateSessionNotes(123, 'Felt strong today.');
 
       final updates = fakeDbHelper.fakeDb.updatedRecords;
       expect(updates.length, 1);
       expect(updates.first['table'], 'workout_sessions');
       expect(updates.first['values'], {'notes': 'Felt strong today.'});
       expect(updates.first['where'], 'id = ?');
-      expect(updates.first['whereArgs'], ['session123']);
+      expect(updates.first['whereArgs'], [123]);
     });
   });
 }

@@ -7,6 +7,8 @@ import '../controllers/workout_providers.dart';
 import '../widgets/active_exercise_card.dart';
 import '../widgets/workout_status_bar.dart';
 import '../widgets/rest_timer_panel.dart';
+import '../widgets/session_notes_field.dart';
+import '../widgets/carry_forward_notes_card.dart';
 import '../../../../core/theme/theme.dart';
 
 class ActiveWorkoutScreen extends ConsumerStatefulWidget {
@@ -216,9 +218,20 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                   child: Stack(
                     children: [
                       ListView.builder(
-                        itemCount: exercises.length,
+                        itemCount: exercises.length + 1,
                         padding: const EdgeInsets.only(bottom: 100), // padding for timer
                         itemBuilder: (context, index) {
+                          if (index == exercises.length) {
+                            return Column(
+                              children: [
+                                if (activeState.previousSessionNotes != null && activeState.previousSessionNotes!.isNotEmpty)
+                                  CarryForwardNotesCard(notes: activeState.previousSessionNotes!),
+                                const SessionNotesField(),
+                                const SizedBox(height: 16),
+                              ],
+                            );
+                          }
+
                           final ex = exercises[index];
                           return ActiveExerciseCard(
                             exerciseId: ex.exerciseId,
