@@ -12,6 +12,7 @@ abstract class WorkoutRepository {
   Future<List<Routine>> getRoutines();
   Future<int> startSession(int routineId, String routineName);
   Future<int> logSet(WorkoutSet set);
+  Future<void> toggleSetWarmup(int setId, bool isWarmup);
   Future<void> endSession(int sessionId);
   Future<void> deleteSession(int sessionId);
   Future<void> updateSessionNotes(int sessionId, String notes);

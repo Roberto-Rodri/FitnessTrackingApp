@@ -131,6 +131,7 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
   final FocusNode _weightFocus = FocusNode();
   final FocusNode _repsFocus = FocusNode();
   bool _showExtraSetInput = false;
+  bool _isWarmupActive = false;
 
   @override
   void dispose() {
@@ -171,6 +172,7 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
       weight: weight,
       reps: reps,
       customWeight: customWeight,
+      isWarmup: _isWarmupActive,
     );
 
     try {
@@ -182,6 +184,7 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
         _weightFocus.requestFocus();
         setState(() {
           _showExtraSetInput = false;
+          _isWarmupActive = false;
         });
       }
     } catch (_) {}
@@ -359,7 +362,7 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
             final isPR = set.id != null && set.id == activeState?.lastPRSetId;
 
             return _AnimatedSetRow(
-              child: _buildSetRow(theme, idx.toString(), weightText, set.reps.toString(), isCompleted: true, showPRBadge: isPR),
+              child: _buildSetRow(theme, idx.toString(), weightText, set.reps.toString(), isCompleted: true, showPRBadge: isPR, set: set),
             );
           }),
 
@@ -422,17 +425,30 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
     );
   }
 
-  Widget _buildSetRow(ThemeData theme, String setNum, String weight, String reps, {bool isCompleted = false, bool showPRBadge = false}) {
+  Widget _buildSetRow(ThemeData theme, String setNum, String weight, String reps, {bool isCompleted = false, bool showPRBadge = false, WorkoutSet? set}) {
+    final isWarmup = set?.isWarmup ?? false;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Row(
         children: [
-          SizedBox(
-            width: 32,
-            child: Center(
-              child: Text(
-                setNum,
-                style: AppTheme.monoLarge(color: isCompleted ? AppTheme.txt2 : theme.colorScheme.onSurface).copyWith(fontSize: 16),
+          InkWell(
+            onTap: set != null && set.id != null ? () {
+              ref.read(workoutSessionNotifierProvider.notifier).toggleWarmup(set.id!);
+            } : null,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: isWarmup ? AppTheme.amber : AppTheme.bg2,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  isWarmup ? 'W' : setNum,
+                  style: AppTheme.monoLarge(color: isWarmup ? AppTheme.bg0 : AppTheme.txt1).copyWith(fontSize: 16),
+                ),
               ),
             ),
           ),
@@ -513,12 +529,25 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Row(
         children: [
-          SizedBox(
-            width: 32,
-            child: Center(
-              child: Text(
-                setNum,
-                style: AppTheme.monoLarge(color: theme.colorScheme.onSurface).copyWith(fontSize: 16),
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isWarmupActive = !_isWarmupActive;
+              });
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: _isWarmupActive ? AppTheme.amber : AppTheme.bg2,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  _isWarmupActive ? 'W' : setNum,
+                  style: AppTheme.monoLarge(color: _isWarmupActive ? AppTheme.bg0 : AppTheme.txt1).copyWith(fontSize: 16),
+                ),
               ),
             ),
           ),

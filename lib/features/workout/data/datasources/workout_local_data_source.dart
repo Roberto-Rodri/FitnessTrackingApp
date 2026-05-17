@@ -15,6 +15,7 @@ abstract class WorkoutLocalDataSource {
   Future<List<Routine>> getRoutines();
   Future<int> startSession(int routineId, String routineName);
   Future<int> logSet(WorkoutSet set);
+  Future<void> toggleSetWarmup(int setId, bool isWarmup);
   Future<void> endSession(int sessionId);
   Future<void> deleteSession(int sessionId);
   Future<void> updateSessionNotes(int sessionId, String notes);
@@ -115,6 +116,21 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
   }
 
   @override
+  Future<void> toggleSetWarmup(int setId, bool isWarmup) async {
+    try {
+      final db = await dbHelper.database;
+      await db.update(
+        'workout_sets',
+        {'isWarmup': isWarmup ? 1 : 0},
+        where: 'id = ?',
+        whereArgs: [setId],
+      );
+    } catch (e) {
+      throw DatabaseOperationException('Failed to toggle set warmup: $e');
+    }
+  }
+
+  @override
   Future<void> endSession(int sessionId) async {
     try {
       final db = await dbHelper.database;
@@ -147,7 +163,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
       SELECT ws.*, COUNT(s.id) as totalSets, 
-             SUM(CASE WHEN e.weightUnit IN ('kg', 'lbs') THEN s.weight * s.reps ELSE 0 END) as totalVolume
+             SUM(CASE WHEN e.weightUnit IN ('kg', 'lbs') AND coalesce(s.isWarmup, 0) = 0 THEN s.weight * s.reps ELSE 0 END) as totalVolume
       FROM workout_sessions ws
       LEFT JOIN workout_sets s ON ws.id = s.sessionId
       LEFT JOIN exercises e ON s.exerciseId = e.id
@@ -235,6 +251,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
       INNER JOIN workout_sessions s ON ws.sessionId = s.id
       WHERE ws.exerciseId IN ($placeholders)
       AND s.endTimestamp IS NOT NULL
+      AND coalesce(ws.isWarmup, 0) = 0
       ORDER BY ws.exerciseId, ws.weight DESC, ws.reps DESC
     ''', exerciseIds);
 
@@ -544,7 +561,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
       SELECT ws.*, COUNT(s.id) as totalSets, 
-             SUM(CASE WHEN e.weightUnit IN ('kg', 'lbs') THEN s.weight * s.reps ELSE 0 END) as totalVolume
+             SUM(CASE WHEN e.weightUnit IN ('kg', 'lbs') AND coalesce(s.isWarmup, 0) = 0 THEN s.weight * s.reps ELSE 0 END) as totalVolume
       FROM workout_sessions ws
       LEFT JOIN workout_sets s ON ws.id = s.sessionId
       LEFT JOIN exercises e ON s.exerciseId = e.id
@@ -704,6 +721,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
         AND ws.reps >= ?
         AND ws.id < ?
         AND s.endTimestamp IS NOT NULL
+        AND coalesce(ws.isWarmup, 0) = 0
       ''', [exerciseId, weight, reps, currentSetId]);
       
       final count = result.first['count'] as int;
@@ -721,6 +739,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
         SELECT COUNT(*) as count FROM workout_sets ws1
         WHERE ws1.sessionId = ?
         AND ws1.weight > 0
+        AND coalesce(ws1.isWarmup, 0) = 0
         AND NOT EXISTS (
           SELECT 1 FROM workout_sets ws2
           INNER JOIN workout_sessions s2 ON ws2.sessionId = s2.id
@@ -729,6 +748,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
           AND ws2.reps >= ws1.reps
           AND ws2.id < ws1.id
           AND s2.endTimestamp IS NOT NULL
+          AND coalesce(ws2.isWarmup, 0) = 0
         )
       ''', [sessionId]);
       

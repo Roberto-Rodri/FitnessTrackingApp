@@ -399,14 +399,20 @@ class SessionDetailScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(vertical: 6.0),
                       child: Row(
                         children: [
-                          SizedBox(
-                            width: 32,
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: s.isWarmup ? AppTheme.amber : Colors.transparent,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            alignment: Alignment.centerLeft,
                             child: Text(
-                              '$setNum',
-                              style: AppTheme.monoLarge(color: theme.colorScheme.onSurface).copyWith(fontSize: 16),
+                              s.isWarmup ? 'W' : '$setNum',
+                              style: AppTheme.monoLarge(color: s.isWarmup ? AppTheme.amber : theme.colorScheme.onSurface).copyWith(fontSize: 16),
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: 20),
                           Expanded(
                             child: Text(
                               weightText,

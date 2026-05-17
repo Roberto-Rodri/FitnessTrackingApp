@@ -337,6 +337,29 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
     }
   }
 
+  Future<void> toggleWarmup(int setId) async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final setIndex = currentState.sets.indexWhere((s) => s.id == setId);
+    if (setIndex == -1) return;
+
+    final targetSet = currentState.sets[setIndex];
+    final newIsWarmup = !targetSet.isWarmup;
+
+    try {
+      final repository = ref.read(workoutRepositoryProvider);
+      await repository.toggleSetWarmup(setId, newIsWarmup);
+
+      final updatedSets = List<WorkoutSet>.from(currentState.sets);
+      updatedSets[setIndex] = targetSet.copyWith(isWarmup: newIsWarmup);
+
+      state = AsyncData(currentState.copyWith(sets: updatedSets));
+    } catch (e) {
+      // Do nothing on failure, maybe log
+    }
+  }
+
   void updateNotes(String text) {
     final currentState = state.value;
     if (currentState == null) return;

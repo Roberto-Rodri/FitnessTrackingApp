@@ -35,6 +35,11 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   }
 
   @override
+  Future<void> toggleSetWarmup(int setId, bool isWarmup) {
+    return localDataSource.toggleSetWarmup(setId, isWarmup);
+  }
+
+  @override
   Future<void> endSession(int sessionId) {
     return localDataSource.endSession(sessionId);
   }
