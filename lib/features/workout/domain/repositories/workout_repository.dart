@@ -23,6 +23,7 @@ abstract class WorkoutRepository {
   Future<Map<int, Map<String, dynamic>>> getBestSetsForExercises(List<int> exerciseIds);
   Future<Map<int, Map<String, dynamic>>> getLatestSetsForExercises(List<int> exerciseIds);
   Future<Map<int, Map<String, dynamic>>> getLatestSetsForExercisesInRoutine(List<int> exerciseIds, int routineId);
+  Future<List<WorkoutSet>> getPreviousSetsForRoutine(int routineId);
 
   // Routine Management Methods
   Future<List<RoutineSummary>> getRoutinesWithInfo();

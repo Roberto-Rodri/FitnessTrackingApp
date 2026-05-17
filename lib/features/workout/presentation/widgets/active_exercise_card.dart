@@ -360,9 +360,10 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
             
             final activeState = ref.watch(workoutSessionNotifierProvider).valueOrNull;
             final isPR = set.id != null && set.id == activeState?.lastPRSetId;
+            final prevSet = activeState?.previousSetsByExercise[widget.exerciseId]?.elementAtOrNull(idx);
 
             return _AnimatedSetRow(
-              child: _buildSetRow(theme, idx.toString(), weightText, set.reps.toString(), isCompleted: true, showPRBadge: isPR, set: set),
+              child: _buildSetRow(theme, idx.toString(), weightText, set.reps.toString(), isCompleted: true, showPRBadge: isPR, set: set, previousSet: prevSet),
             );
           }),
 
@@ -370,7 +371,11 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
           if (widget.completedSets.length >= targetSets && !_showExtraSetInput)
             _buildAllSetsComplete(theme)
           else
-            _buildActiveRow(theme, currentSetNum.toString()),
+            _buildActiveRow(
+              theme, 
+              currentSetNum.toString(), 
+              ref.watch(workoutSessionNotifierProvider).valueOrNull?.previousSetsByExercise[widget.exerciseId]?.elementAtOrNull(widget.completedSets.length),
+            ),
           const SizedBox(height: 16),
         ],
       ),
@@ -425,13 +430,16 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
     );
   }
 
-  Widget _buildSetRow(ThemeData theme, String setNum, String weight, String reps, {bool isCompleted = false, bool showPRBadge = false, WorkoutSet? set}) {
+  Widget _buildSetRow(ThemeData theme, String setNum, String weight, String reps, {bool isCompleted = false, bool showPRBadge = false, WorkoutSet? set, WorkoutSet? previousSet}) {
     final isWarmup = set?.isWarmup ?? false;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
           InkWell(
             onTap: set != null && set.id != null ? () {
               ref.read(workoutSessionNotifierProvider.notifier).toggleWarmup(set.id!);
@@ -521,14 +529,27 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
           ),
         ],
       ),
+          if (previousSet != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 48, top: 4),
+              child: Text(
+                'Prev: ${_formatWeight(previousSet.toJson())} × ${previousSet.reps}${previousSet.isWarmup ? ' (W)' : ''}',
+                style: AppTheme.monoSmall(color: AppTheme.txt3).copyWith(fontSize: 12),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
-  Widget _buildActiveRow(ThemeData theme, String setNum) {
+  Widget _buildActiveRow(ThemeData theme, String setNum, WorkoutSet? previousSet) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
           InkWell(
             onTap: () {
               setState(() {
@@ -569,6 +590,16 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
               ),
             ),
           ),
+        ],
+      ),
+          if (previousSet != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 48, top: 4),
+              child: Text(
+                'Prev: ${_formatWeight(previousSet.toJson())} × ${previousSet.reps}${previousSet.isWarmup ? ' (W)' : ''}',
+                style: AppTheme.monoSmall(color: AppTheme.txt3).copyWith(fontSize: 12),
+              ),
+            ),
         ],
       ),
     );

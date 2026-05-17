@@ -26,6 +26,7 @@ abstract class WorkoutLocalDataSource {
   Future<Map<int, Map<String, dynamic>>> getBestSetsForExercises(List<int> exerciseIds);
   Future<Map<int, Map<String, dynamic>>> getLatestSetsForExercises(List<int> exerciseIds);
   Future<Map<int, Map<String, dynamic>>> getLatestSetsForExercisesInRoutine(List<int> exerciseIds, int routineId);
+  Future<List<WorkoutSet>> getPreviousSetsForRoutine(int routineId);
   
   Future<int> createRoutine(String name);
   Future<void> updateRoutineName(int routineId, String name);
@@ -316,6 +317,28 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
       }
     }
     return results;
+  }
+
+  @override
+  Future<List<WorkoutSet>> getPreviousSetsForRoutine(int routineId) async {
+    final db = await dbHelper.database;
+    final sessions = await db.rawQuery('''
+      SELECT id FROM workout_sessions
+      WHERE routineId = ? AND endTimestamp IS NOT NULL
+      ORDER BY endTimestamp DESC
+      LIMIT 1
+    ''', [routineId]);
+    
+    if (sessions.isEmpty) return [];
+    
+    final sessionId = sessions.first['id'] as int;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'workout_sets',
+      where: 'sessionId = ?',
+      whereArgs: [sessionId],
+      orderBy: 'id ASC',
+    );
+    return maps.map((e) => WorkoutSet.fromJson(e)).toList();
   }
 
   @override

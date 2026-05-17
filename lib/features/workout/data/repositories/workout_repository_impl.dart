@@ -90,6 +90,11 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   }
 
   @override
+  Future<List<WorkoutSet>> getPreviousSetsForRoutine(int routineId) {
+    return localDataSource.getPreviousSetsForRoutine(routineId);
+  }
+
+  @override
   Future<List<RoutineSummary>> getRoutinesWithInfo() async {
     final maps = await localDataSource.getRoutinesWithExerciseInfo();
     return maps.map((map) => RoutineSummary.fromJson(map)).toList();

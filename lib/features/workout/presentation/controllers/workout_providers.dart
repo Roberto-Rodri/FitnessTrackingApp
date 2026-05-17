@@ -32,6 +32,7 @@ class ActiveWorkoutState {
   final bool isOverride;
   final String notes;
   final String? previousSessionNotes;
+  final Map<int, List<WorkoutSet>> previousSetsByExercise;
 
   const ActiveWorkoutState({
     this.sessionId,
@@ -51,6 +52,7 @@ class ActiveWorkoutState {
     this.isOverride = false,
     this.notes = '',
     this.previousSessionNotes,
+    this.previousSetsByExercise = const {},
   });
 
   ActiveWorkoutState copyWith({
@@ -71,6 +73,7 @@ class ActiveWorkoutState {
     bool? isOverride,
     String? notes,
     String? previousSessionNotes,
+    Map<int, List<WorkoutSet>>? previousSetsByExercise,
   }) {
     return ActiveWorkoutState(
       sessionId: sessionId ?? this.sessionId,
@@ -90,6 +93,7 @@ class ActiveWorkoutState {
       isOverride: isOverride ?? this.isOverride,
       notes: notes ?? this.notes,
       previousSessionNotes: previousSessionNotes ?? this.previousSessionNotes,
+      previousSetsByExercise: previousSetsByExercise ?? this.previousSetsByExercise,
     );
   }
 }
@@ -245,6 +249,12 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
         orElse: () => null,
       );
       final previousSessionNotes = previousSession?.session.notes;
+      
+      final previousSetsRaw = await repository.getPreviousSetsForRoutine(routineId);
+      final Map<int, List<WorkoutSet>> previousSetsByExercise = {};
+      for (final s in previousSetsRaw) {
+        previousSetsByExercise.putIfAbsent(s.exerciseId, () => []).add(s);
+      }
 
       // Step 3: Set state with EVERYTHING ready
       state = AsyncData(ActiveWorkoutState(
@@ -261,6 +271,7 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
         programDayIndex: programDayIndex,
         isOverride: isOverride,
         previousSessionNotes: previousSessionNotes,
+        previousSetsByExercise: previousSetsByExercise,
       ));
     } catch (e, st) {
       state = AsyncError(e, st);
