@@ -11,6 +11,7 @@ _$ExerciseImpl _$$ExerciseImplFromJson(Map<String, dynamic> json) =>
       id: (json['id'] as num?)?.toInt(),
       name: json['name'] as String,
       bodyPart: json['bodyPart'] as String,
+      weightUnit: json['weightUnit'] as String? ?? 'kg',
     );
 
 Map<String, dynamic> _$$ExerciseImplToJson(_$ExerciseImpl instance) =>
@@ -18,4 +19,5 @@ Map<String, dynamic> _$$ExerciseImplToJson(_$ExerciseImpl instance) =>
       'id': instance.id,
       'name': instance.name,
       'bodyPart': instance.bodyPart,
+      'weightUnit': instance.weightUnit,
     };

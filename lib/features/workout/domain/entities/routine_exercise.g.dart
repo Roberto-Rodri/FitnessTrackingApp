@@ -14,6 +14,7 @@ _$RoutineExerciseImpl _$$RoutineExerciseImplFromJson(
       sequenceOrder: (json['sequenceOrder'] as num).toInt(),
       targetSets: (json['targetSets'] as num).toInt(),
       targetReps: json['targetReps'] as String,
+      restSeconds: (json['restSeconds'] as num?)?.toInt() ?? 90,
     );
 
 Map<String, dynamic> _$$RoutineExerciseImplToJson(
@@ -24,4 +25,5 @@ Map<String, dynamic> _$$RoutineExerciseImplToJson(
       'sequenceOrder': instance.sequenceOrder,
       'targetSets': instance.targetSets,
       'targetReps': instance.targetReps,
+      'restSeconds': instance.restSeconds,
     };

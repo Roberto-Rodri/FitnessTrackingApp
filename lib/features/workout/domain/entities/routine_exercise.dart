@@ -11,6 +11,7 @@ class RoutineExercise with _$RoutineExercise {
     required int sequenceOrder,
     required int targetSets,
     required String targetReps,
+    @Default(90) int restSeconds,
   }) = _RoutineExercise;
 
   factory RoutineExercise.fromJson(Map<String, dynamic> json) => _$RoutineExerciseFromJson(json);

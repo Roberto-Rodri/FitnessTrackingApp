@@ -26,6 +26,7 @@ mixin _$WorkoutSet {
   double get weight => throw _privateConstructorUsedError;
   int get reps => throw _privateConstructorUsedError;
   int? get rpe => throw _privateConstructorUsedError;
+  String? get customWeight => throw _privateConstructorUsedError;
 
   /// Serializes this WorkoutSet to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -49,7 +50,8 @@ abstract class $WorkoutSetCopyWith<$Res> {
       int exerciseId,
       double weight,
       int reps,
-      int? rpe});
+      int? rpe,
+      String? customWeight});
 }
 
 /// @nodoc
@@ -73,6 +75,7 @@ class _$WorkoutSetCopyWithImpl<$Res, $Val extends WorkoutSet>
     Object? weight = null,
     Object? reps = null,
     Object? rpe = freezed,
+    Object? customWeight = freezed,
   }) {
     return _then(_value.copyWith(
       id: freezed == id
@@ -99,6 +102,10 @@ class _$WorkoutSetCopyWithImpl<$Res, $Val extends WorkoutSet>
           ? _value.rpe
           : rpe // ignore: cast_nullable_to_non_nullable
               as int?,
+      customWeight: freezed == customWeight
+          ? _value.customWeight
+          : customWeight // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -117,7 +124,8 @@ abstract class _$$WorkoutSetImplCopyWith<$Res>
       int exerciseId,
       double weight,
       int reps,
-      int? rpe});
+      int? rpe,
+      String? customWeight});
 }
 
 /// @nodoc
@@ -139,6 +147,7 @@ class __$$WorkoutSetImplCopyWithImpl<$Res>
     Object? weight = null,
     Object? reps = null,
     Object? rpe = freezed,
+    Object? customWeight = freezed,
   }) {
     return _then(_$WorkoutSetImpl(
       id: freezed == id
@@ -165,6 +174,10 @@ class __$$WorkoutSetImplCopyWithImpl<$Res>
           ? _value.rpe
           : rpe // ignore: cast_nullable_to_non_nullable
               as int?,
+      customWeight: freezed == customWeight
+          ? _value.customWeight
+          : customWeight // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -178,7 +191,8 @@ class _$WorkoutSetImpl implements _WorkoutSet {
       required this.exerciseId,
       required this.weight,
       required this.reps,
-      this.rpe});
+      this.rpe,
+      this.customWeight});
 
   factory _$WorkoutSetImpl.fromJson(Map<String, dynamic> json) =>
       _$$WorkoutSetImplFromJson(json);
@@ -195,10 +209,12 @@ class _$WorkoutSetImpl implements _WorkoutSet {
   final int reps;
   @override
   final int? rpe;
+  @override
+  final String? customWeight;
 
   @override
   String toString() {
-    return 'WorkoutSet(id: $id, sessionId: $sessionId, exerciseId: $exerciseId, weight: $weight, reps: $reps, rpe: $rpe)';
+    return 'WorkoutSet(id: $id, sessionId: $sessionId, exerciseId: $exerciseId, weight: $weight, reps: $reps, rpe: $rpe, customWeight: $customWeight)';
   }
 
   @override
@@ -213,13 +229,15 @@ class _$WorkoutSetImpl implements _WorkoutSet {
                 other.exerciseId == exerciseId) &&
             (identical(other.weight, weight) || other.weight == weight) &&
             (identical(other.reps, reps) || other.reps == reps) &&
-            (identical(other.rpe, rpe) || other.rpe == rpe));
+            (identical(other.rpe, rpe) || other.rpe == rpe) &&
+            (identical(other.customWeight, customWeight) ||
+                other.customWeight == customWeight));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, sessionId, exerciseId, weight, reps, rpe);
+  int get hashCode => Object.hash(
+      runtimeType, id, sessionId, exerciseId, weight, reps, rpe, customWeight);
 
   /// Create a copy of WorkoutSet
   /// with the given fields replaced by the non-null parameter values.
@@ -244,7 +262,8 @@ abstract class _WorkoutSet implements WorkoutSet {
       required final int exerciseId,
       required final double weight,
       required final int reps,
-      final int? rpe}) = _$WorkoutSetImpl;
+      final int? rpe,
+      final String? customWeight}) = _$WorkoutSetImpl;
 
   factory _WorkoutSet.fromJson(Map<String, dynamic> json) =
       _$WorkoutSetImpl.fromJson;
@@ -261,6 +280,8 @@ abstract class _WorkoutSet implements WorkoutSet {
   int get reps;
   @override
   int? get rpe;
+  @override
+  String? get customWeight;
 
   /// Create a copy of WorkoutSet
   /// with the given fields replaced by the non-null parameter values.

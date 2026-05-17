@@ -1,0 +1,18 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer flame -->
+  <path d="M100 20 C100 20 128 52 128 80 C128 96 118 106 108 110 C116 98 114 84 106 76 C106 76 110 94 100 100 C90 94 94 76 94 76 C86 84 84 98 92 110 C82 106 72 96 72 80 C72 52 100 20 100 20Z" fill="#E8A83E"/>
+  
+  <!-- Inner flame -->
+  <path d="M100 48 C100 48 116 66 116 82 C116 92 110 100 104 104 C108 96 106 86 100 80 C94 86 92 96 96 104 C90 100 84 92 84 82 C84 66 100 48 100 48Z" fill="#F5C96A" opacity="0.9"/>
+  
+  <!-- Flame tip highlight -->
+  <ellipse cx="100" cy="54" rx="4" ry="8" fill="#FFF5D6" opacity="0.6"/>
+  
+  <!-- Barbell -->
+  <rect x="2" y="110" width="12" height="40" rx="4" fill="#E8A83E"/>
+  <rect x="12" y="116" width="22" height="28" rx="5" fill="#C8901A"/>
+  <rect x="24" y="126" width="152" height="8" rx="4" fill="#B07B22"/>
+  <rect x="24" y="126" width="152" height="3" rx="1.5" fill="#E8A83E" opacity="0.5"/>
+  <rect x="166" y="116" width="22" height="28" rx="5" fill="#C8901A"/>
+  <rect x="186" y="110" width="12" height="40" rx="4" fill="#E8A83E"/>
+</svg>

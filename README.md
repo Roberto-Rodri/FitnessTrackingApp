@@ -1,17 +1,12 @@
-# iron_log
+# IronLog
 
-A new Flutter project.
+IronLog is an offline-first fitness tracking application built with Flutter.
 
-## Getting Started
+## Tech Stack
+- **Framework:** Flutter
+- **Architecture:** Clean Architecture (Presentation, Domain, Data layers)
+- **State Management:** Riverpod
+- **Local Storage:** SQLite (sqflite)
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Theme
+The application utilizes the custom "Ember" dark theme palette, ensuring a sleek and high-performance UI suitable for gym environments.

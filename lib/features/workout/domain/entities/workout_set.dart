@@ -12,6 +12,7 @@ class WorkoutSet with _$WorkoutSet {
     required double weight,
     required int reps,
     int? rpe,
+    String? customWeight,
   }) = _WorkoutSet;
 
   factory WorkoutSet.fromJson(Map<String, dynamic> json) => _$WorkoutSetFromJson(json);

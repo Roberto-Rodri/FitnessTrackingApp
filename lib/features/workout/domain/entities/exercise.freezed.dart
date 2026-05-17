@@ -23,6 +23,7 @@ mixin _$Exercise {
   int? get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String get bodyPart => throw _privateConstructorUsedError;
+  String get weightUnit => throw _privateConstructorUsedError;
 
   /// Serializes this Exercise to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -39,7 +40,7 @@ abstract class $ExerciseCopyWith<$Res> {
   factory $ExerciseCopyWith(Exercise value, $Res Function(Exercise) then) =
       _$ExerciseCopyWithImpl<$Res, Exercise>;
   @useResult
-  $Res call({int? id, String name, String bodyPart});
+  $Res call({int? id, String name, String bodyPart, String weightUnit});
 }
 
 /// @nodoc
@@ -60,6 +61,7 @@ class _$ExerciseCopyWithImpl<$Res, $Val extends Exercise>
     Object? id = freezed,
     Object? name = null,
     Object? bodyPart = null,
+    Object? weightUnit = null,
   }) {
     return _then(_value.copyWith(
       id: freezed == id
@@ -74,6 +76,10 @@ class _$ExerciseCopyWithImpl<$Res, $Val extends Exercise>
           ? _value.bodyPart
           : bodyPart // ignore: cast_nullable_to_non_nullable
               as String,
+      weightUnit: null == weightUnit
+          ? _value.weightUnit
+          : weightUnit // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 }
@@ -86,7 +92,7 @@ abstract class _$$ExerciseImplCopyWith<$Res>
       __$$ExerciseImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int? id, String name, String bodyPart});
+  $Res call({int? id, String name, String bodyPart, String weightUnit});
 }
 
 /// @nodoc
@@ -105,6 +111,7 @@ class __$$ExerciseImplCopyWithImpl<$Res>
     Object? id = freezed,
     Object? name = null,
     Object? bodyPart = null,
+    Object? weightUnit = null,
   }) {
     return _then(_$ExerciseImpl(
       id: freezed == id
@@ -119,6 +126,10 @@ class __$$ExerciseImplCopyWithImpl<$Res>
           ? _value.bodyPart
           : bodyPart // ignore: cast_nullable_to_non_nullable
               as String,
+      weightUnit: null == weightUnit
+          ? _value.weightUnit
+          : weightUnit // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -126,7 +137,11 @@ class __$$ExerciseImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$ExerciseImpl implements _Exercise {
-  const _$ExerciseImpl({this.id, required this.name, required this.bodyPart});
+  const _$ExerciseImpl(
+      {this.id,
+      required this.name,
+      required this.bodyPart,
+      this.weightUnit = 'kg'});
 
   factory _$ExerciseImpl.fromJson(Map<String, dynamic> json) =>
       _$$ExerciseImplFromJson(json);
@@ -137,10 +152,13 @@ class _$ExerciseImpl implements _Exercise {
   final String name;
   @override
   final String bodyPart;
+  @override
+  @JsonKey()
+  final String weightUnit;
 
   @override
   String toString() {
-    return 'Exercise(id: $id, name: $name, bodyPart: $bodyPart)';
+    return 'Exercise(id: $id, name: $name, bodyPart: $bodyPart, weightUnit: $weightUnit)';
   }
 
   @override
@@ -151,12 +169,14 @@ class _$ExerciseImpl implements _Exercise {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.bodyPart, bodyPart) ||
-                other.bodyPart == bodyPart));
+                other.bodyPart == bodyPart) &&
+            (identical(other.weightUnit, weightUnit) ||
+                other.weightUnit == weightUnit));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, bodyPart);
+  int get hashCode => Object.hash(runtimeType, id, name, bodyPart, weightUnit);
 
   /// Create a copy of Exercise
   /// with the given fields replaced by the non-null parameter values.
@@ -178,7 +198,8 @@ abstract class _Exercise implements Exercise {
   const factory _Exercise(
       {final int? id,
       required final String name,
-      required final String bodyPart}) = _$ExerciseImpl;
+      required final String bodyPart,
+      final String weightUnit}) = _$ExerciseImpl;
 
   factory _Exercise.fromJson(Map<String, dynamic> json) =
       _$ExerciseImpl.fromJson;
@@ -189,6 +210,8 @@ abstract class _Exercise implements Exercise {
   String get name;
   @override
   String get bodyPart;
+  @override
+  String get weightUnit;
 
   /// Create a copy of Exercise
   /// with the given fields replaced by the non-null parameter values.

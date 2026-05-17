@@ -48,3 +48,11 @@ pubspec.lock
 *.pyc
 *.class
 *.jar
+
+# Windows
+windows/flutter/ephemeral/
+windows/flutter/generated_plugin_registrant.cc
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
