@@ -14,6 +14,7 @@ import '../widgets/session_history_card.dart';
 import '../widgets/skeleton_loading.dart';
 import '../widgets/error_state.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/body_weight_card.dart';
 import '../../../program/presentation/controllers/program_providers.dart';
 import '../../../program/presentation/widgets/next_workout_card.dart';
 import '../../../program/presentation/widgets/cycle_progress_strip.dart';
@@ -297,6 +298,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 32),
+
+              // BODY WEIGHT
+              const BodyWeightCard(),
               const SizedBox(height: 32),
 
               // RECENT WORKOUTS
