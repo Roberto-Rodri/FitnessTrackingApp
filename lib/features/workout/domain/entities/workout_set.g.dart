@@ -15,6 +15,9 @@ _$WorkoutSetImpl _$$WorkoutSetImplFromJson(Map<String, dynamic> json) =>
       reps: (json['reps'] as num).toInt(),
       rpe: (json['rpe'] as num?)?.toInt(),
       customWeight: json['customWeight'] as String?,
+      isWarmup: json['isWarmup'] == null
+          ? false
+          : _boolFromInt((json['isWarmup'] as num?)?.toInt()),
     );
 
 Map<String, dynamic> _$$WorkoutSetImplToJson(_$WorkoutSetImpl instance) =>
@@ -26,4 +29,5 @@ Map<String, dynamic> _$$WorkoutSetImplToJson(_$WorkoutSetImpl instance) =>
       'reps': instance.reps,
       'rpe': instance.rpe,
       'customWeight': instance.customWeight,
+      'isWarmup': _boolToInt(instance.isWarmup),
     };
