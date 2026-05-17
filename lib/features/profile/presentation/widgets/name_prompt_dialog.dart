@@ -115,7 +115,7 @@ class _NamePromptDialogState extends ConsumerState<NamePromptDialog> {
     final name = _controller.text.trim();
     if (name.isNotEmpty) {
       HapticFeedback.mediumImpact();
-      ref.read(userNameProvider.notifier).saveName(name);
+      ref.read(userProfileControllerProvider.notifier).saveName(name);
       Navigator.of(context).pop();
     }
   }

@@ -8,6 +8,7 @@ import '../../../../core/routing/router.dart';
 import '../controllers/workout_providers.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../profile/presentation/controllers/profile_providers.dart';
+import '../../../profile/domain/entities/user_profile.dart';
 import '../../../profile/presentation/widgets/name_prompt_dialog.dart';
 import '../widgets/session_history_card.dart';
 import '../widgets/skeleton_loading.dart';
@@ -36,8 +37,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _checkNamePrompt() async {
-    final name = await ref.read(userNameProvider.future);
-    if (name == null && mounted) {
+    final profile = await ref.read(userProfileControllerProvider.future);
+    if (profile.name == null && mounted) {
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -126,7 +127,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final userNameAsync = ref.watch(userNameProvider);
+    final userProfileAsync = ref.watch(userProfileControllerProvider);
     final weeklyStatsAsync = ref.watch(weeklyStatsProvider);
     final chartAsync = ref.watch(weeklyVolumeChartProvider);
     final recentAsync = ref.watch(recentSessionsProvider);
@@ -155,28 +156,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${_getGreeting()}, ${userNameAsync.value ?? 'Athlete'}.',
+                        '${_getGreeting()}, ${userProfileAsync.value?.name ?? 'Athlete'}.',
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontSize: 25,
                           letterSpacing: -0.4,
                         ),
                       ),
+                      if (userProfileAsync.value?.phase != null && userProfileAsync.value!.phase != TrainingPhase.none) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            userProfileAsync.value!.phase.name.toUpperCase(),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHigh,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        (userNameAsync.value?.isNotEmpty ?? false) 
-                            ? userNameAsync.value![0].toUpperCase() 
-                            : 'A',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: theme.colorScheme.primary,
+                  GestureDetector(
+                    onTap: () {
+                      context.pushNamed(RouteNames.profileSettings);
+                    },
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHigh,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: (userProfileAsync.value?.phase != null && userProfileAsync.value!.phase != TrainingPhase.none)
+                              ? theme.colorScheme.primary.withValues(alpha: 0.4)
+                              : AppTheme.bg3,
+                          width: 2,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          (userProfileAsync.value?.name?.isNotEmpty ?? false) 
+                              ? userProfileAsync.value!.name![0].toUpperCase() 
+                              : 'A',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
                       ),
                     ),
