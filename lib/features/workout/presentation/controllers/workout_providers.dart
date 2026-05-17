@@ -317,9 +317,9 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
     }
   }
 
-  Future<void> endSession() async {
+  Future<int?> endSession() async {
     final currentState = state.value;
-    if (currentState == null || currentState.sessionId == null) return;
+    if (currentState == null || currentState.sessionId == null) return null;
 
     try {
       final repository = ref.read(workoutRepositoryProvider);
@@ -342,9 +342,11 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
         ref.invalidate(activeProgramProvider);
         ref.invalidate(currentProgramDayProvider);
       }
+      return currentState.sessionId;
     } catch (e) {
       // Revert to current state on failure
       state = AsyncData(currentState);
+      return null;
     }
   }
 

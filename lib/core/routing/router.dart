@@ -12,6 +12,7 @@ import '../../features/program/presentation/screens/program_edit_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import '../../features/profile/presentation/screens/profile_settings_screen.dart';
 import '../../features/workout/presentation/screens/body_weight_history_screen.dart';
+import '../../features/workout/presentation/screens/workout_summary_screen.dart';
 
 abstract class RouteNames {
   static const splash = 'splash';
@@ -28,6 +29,7 @@ abstract class RouteNames {
   static const programEdit = 'program_edit';
   static const profileSettings = 'profile_settings';
   static const bodyWeightHistory = 'body_weight_history';
+  static const workoutSummary = 'workout_summary';
 }
 
 final goRouter = GoRouter(
@@ -141,6 +143,14 @@ final goRouter = GoRouter(
       path: '/body-weight-history',
       name: RouteNames.bodyWeightHistory,
       builder: (context, state) => const BodyWeightHistoryScreen(),
+    ),
+    GoRoute(
+      path: '/workout-summary/:sessionId',
+      name: RouteNames.workoutSummary,
+      builder: (context, state) {
+        final sessionId = int.parse(state.pathParameters['sessionId']!);
+        return WorkoutSummaryScreen(sessionId: sessionId);
+      },
     ),
   ],
 );

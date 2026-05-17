@@ -10,6 +10,7 @@ import '../widgets/rest_timer_panel.dart';
 import '../widgets/session_notes_field.dart';
 import '../widgets/carry_forward_notes_card.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/routing/router.dart';
 
 class ActiveWorkoutScreen extends ConsumerStatefulWidget {
   const ActiveWorkoutScreen({super.key});
@@ -94,13 +95,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       Future.delayed(const Duration(milliseconds: 100), () {
         HapticFeedback.lightImpact();
       });
-      await ref.read(workoutSessionNotifierProvider.notifier).endSession();
-      if (mounted) {
+      final sessionId = await ref.read(workoutSessionNotifierProvider.notifier).endSession();
+      if (mounted && sessionId != null) {
         ref.read(showConfettiProvider.notifier).state = true;
         Future.delayed(const Duration(seconds: 4), () {
           ref.read(showConfettiProvider.notifier).state = false;
         });
-        context.go('/');
+        context.goNamed(RouteNames.workoutSummary, pathParameters: {'sessionId': sessionId.toString()});
       }
     }
   }
