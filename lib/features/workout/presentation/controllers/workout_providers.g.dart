@@ -850,7 +850,7 @@ final lastRoutineProvider = AutoDisposeFutureProvider<RoutineSummary?>.internal(
 // ignore: unused_element
 typedef LastRoutineRef = AutoDisposeFutureProviderRef<RoutineSummary?>;
 String _$workoutSessionNotifierHash() =>
-    r'ddf48471cc10b38dcb24555144f12519b91ecc92';
+    r'814066e27f60ecbbbfc807d20651246eb18ca5b2';
 
 /// See also [WorkoutSessionNotifier].
 @ProviderFor(WorkoutSessionNotifier)

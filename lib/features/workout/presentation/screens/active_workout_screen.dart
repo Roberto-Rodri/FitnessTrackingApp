@@ -7,7 +7,10 @@ import '../controllers/workout_providers.dart';
 import '../widgets/active_exercise_card.dart';
 import '../widgets/workout_status_bar.dart';
 import '../widgets/rest_timer_panel.dart';
+import '../widgets/session_notes_field.dart';
+import '../widgets/carry_forward_notes_card.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/routing/router.dart';
 
 class ActiveWorkoutScreen extends ConsumerStatefulWidget {
   const ActiveWorkoutScreen({super.key});
@@ -92,13 +95,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       Future.delayed(const Duration(milliseconds: 100), () {
         HapticFeedback.lightImpact();
       });
-      await ref.read(workoutSessionNotifierProvider.notifier).endSession();
-      if (mounted) {
+      final sessionId = await ref.read(workoutSessionNotifierProvider.notifier).endSession();
+      if (mounted && sessionId != null) {
         ref.read(showConfettiProvider.notifier).state = true;
         Future.delayed(const Duration(seconds: 4), () {
           ref.read(showConfettiProvider.notifier).state = false;
         });
-        context.go('/');
+        context.goNamed(RouteNames.workoutSummary, pathParameters: {'sessionId': sessionId.toString()});
       }
     }
   }
@@ -216,9 +219,20 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                   child: Stack(
                     children: [
                       ListView.builder(
-                        itemCount: exercises.length,
+                        itemCount: exercises.length + 1,
                         padding: const EdgeInsets.only(bottom: 100), // padding for timer
                         itemBuilder: (context, index) {
+                          if (index == exercises.length) {
+                            return Column(
+                              children: [
+                                if (activeState.previousSessionNotes != null && activeState.previousSessionNotes!.isNotEmpty)
+                                  CarryForwardNotesCard(notes: activeState.previousSessionNotes!),
+                                const SessionNotesField(),
+                                const SizedBox(height: 16),
+                              ],
+                            );
+                          }
+
                           final ex = exercises[index];
                           return ActiveExerciseCard(
                             exerciseId: ex.exerciseId,

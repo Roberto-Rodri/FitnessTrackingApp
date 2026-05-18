@@ -30,6 +30,9 @@ class ActiveWorkoutState {
   final int? programId;
   final int? programDayIndex;
   final bool isOverride;
+  final String notes;
+  final String? previousSessionNotes;
+  final Map<int, List<WorkoutSet>> previousSetsByExercise;
 
   const ActiveWorkoutState({
     this.sessionId,
@@ -47,6 +50,9 @@ class ActiveWorkoutState {
     this.programId,
     this.programDayIndex,
     this.isOverride = false,
+    this.notes = '',
+    this.previousSessionNotes,
+    this.previousSetsByExercise = const {},
   });
 
   ActiveWorkoutState copyWith({
@@ -65,6 +71,9 @@ class ActiveWorkoutState {
     int? programId,
     int? programDayIndex,
     bool? isOverride,
+    String? notes,
+    String? previousSessionNotes,
+    Map<int, List<WorkoutSet>>? previousSetsByExercise,
   }) {
     return ActiveWorkoutState(
       sessionId: sessionId ?? this.sessionId,
@@ -82,6 +91,9 @@ class ActiveWorkoutState {
       programId: programId ?? this.programId,
       programDayIndex: programDayIndex ?? this.programDayIndex,
       isOverride: isOverride ?? this.isOverride,
+      notes: notes ?? this.notes,
+      previousSessionNotes: previousSessionNotes ?? this.previousSessionNotes,
+      previousSetsByExercise: previousSetsByExercise ?? this.previousSetsByExercise,
     );
   }
 }
@@ -231,6 +243,19 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
       final latestSetsRoutine = await repository.getLatestSetsForExercisesInRoutine(exerciseIds, routineId);
       final alternatives = await repository.getAlternativesForExercises(exerciseIds);
       
+      final completedSessions = await repository.getCompletedSessions();
+      final previousSession = completedSessions.cast<WorkoutSessionSummary?>().firstWhere(
+        (s) => s?.session.routineId == routineId,
+        orElse: () => null,
+      );
+      final previousSessionNotes = previousSession?.session.notes;
+      
+      final previousSetsRaw = await repository.getPreviousSetsForRoutine(routineId);
+      final Map<int, List<WorkoutSet>> previousSetsByExercise = {};
+      for (final s in previousSetsRaw) {
+        previousSetsByExercise.putIfAbsent(s.exerciseId, () => []).add(s);
+      }
+
       // Step 3: Set state with EVERYTHING ready
       state = AsyncData(ActiveWorkoutState(
         sessionId: sessionId,
@@ -245,6 +270,8 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
         programId: programId,
         programDayIndex: programDayIndex,
         isOverride: isOverride,
+        previousSessionNotes: previousSessionNotes,
+        previousSetsByExercise: previousSetsByExercise,
       ));
     } catch (e, st) {
       state = AsyncError(e, st);
@@ -290,12 +317,15 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
     }
   }
 
-  Future<void> endSession() async {
+  Future<int?> endSession() async {
     final currentState = state.value;
-    if (currentState == null || currentState.sessionId == null) return;
+    if (currentState == null || currentState.sessionId == null) return null;
 
     try {
       final repository = ref.read(workoutRepositoryProvider);
+      if (currentState.notes.isNotEmpty) {
+        await repository.updateSessionNotes(currentState.sessionId!, currentState.notes);
+      }
       await repository.endSession(currentState.sessionId!);
       state = const AsyncData(ActiveWorkoutState());
       
@@ -312,10 +342,41 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
         ref.invalidate(activeProgramProvider);
         ref.invalidate(currentProgramDayProvider);
       }
+      return currentState.sessionId;
     } catch (e) {
       // Revert to current state on failure
       state = AsyncData(currentState);
+      return null;
     }
+  }
+
+  Future<void> toggleWarmup(int setId) async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final setIndex = currentState.sets.indexWhere((s) => s.id == setId);
+    if (setIndex == -1) return;
+
+    final targetSet = currentState.sets[setIndex];
+    final newIsWarmup = !targetSet.isWarmup;
+
+    try {
+      final repository = ref.read(workoutRepositoryProvider);
+      await repository.toggleSetWarmup(setId, newIsWarmup);
+
+      final updatedSets = List<WorkoutSet>.from(currentState.sets);
+      updatedSets[setIndex] = targetSet.copyWith(isWarmup: newIsWarmup);
+
+      state = AsyncData(currentState.copyWith(sets: updatedSets));
+    } catch (e) {
+      // Do nothing on failure, maybe log
+    }
+  }
+
+  void updateNotes(String text) {
+    final currentState = state.value;
+    if (currentState == null) return;
+    state = AsyncData(currentState.copyWith(notes: text));
   }
 
   Future<void> swapExercise(int originalExerciseId, Exercise newExercise) async {
