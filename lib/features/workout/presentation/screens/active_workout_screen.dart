@@ -7,8 +7,7 @@ import '../controllers/workout_providers.dart';
 import '../widgets/active_exercise_card.dart';
 import '../widgets/workout_status_bar.dart';
 import '../widgets/rest_timer_panel.dart';
-import '../widgets/session_notes_field.dart';
-import '../widgets/carry_forward_notes_card.dart';
+import '../widgets/session_notes_sheet.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/routing/router.dart';
 
@@ -150,8 +149,15 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 1.2),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.more_vert),
-                        onPressed: () {},
+                        icon: const Icon(Icons.notes),
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => const SessionNotesSheet(),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -223,14 +229,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                         padding: const EdgeInsets.only(bottom: 100), // padding for timer
                         itemBuilder: (context, index) {
                           if (index == exercises.length) {
-                            return Column(
-                              children: [
-                                if (activeState.previousSessionNotes != null && activeState.previousSessionNotes!.isNotEmpty)
-                                  CarryForwardNotesCard(notes: activeState.previousSessionNotes!),
-                                const SessionNotesField(),
-                                const SizedBox(height: 16),
-                              ],
-                            );
+                            return const SizedBox(height: 16);
                           }
 
                           final ex = exercises[index];
