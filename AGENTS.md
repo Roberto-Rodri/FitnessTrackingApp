@@ -22,7 +22,7 @@
 | Architecture       | Clean Architecture (Presentation → Domain → Data)  |
 | State Management   | Riverpod 2.x (`riverpod_annotation`, `AsyncNotifier`) |
 | Routing            | `go_router` with `StatefulShellRoute`              |
-| Database           | `sqflite` (SQLite), version 7                      |
+| Database           | `sqflite` (SQLite), version 8                      |
 | Models             | `freezed` + `json_serializable`                    |
 | Code Generation    | `build_runner`, `riverpod_generator`, `freezed`    |
 | Typography         | `google_fonts` (DM Sans + DM Mono)                 |
@@ -55,7 +55,7 @@ lib/
 │   │   ├── data/repositories/user_prefs_repository_impl.dart
 │   │   ├── domain/repositories/user_prefs_repository.dart
 │   │   └── presentation/
-│   │       ├── controllers/profile_providers.dart  # UserProfileController (name + phase)
+│   │       ├── controllers/profile_providers.dart
 │   │       ├── screens/profile_settings_screen.dart
 │   │       └── widgets/name_prompt_dialog.dart
 │   │
@@ -162,7 +162,7 @@ Infrastructure providers live in `lib/core/di/injection.dart`. This is the ONLY 
 
 ## 5. DATABASE SCHEMA
 
-SQLite via `sqflite`. Database version: **7**. Foreign keys enabled.
+SQLite via `sqflite`. Database version: **8**. Foreign keys enabled.
 
 ### Tables (9 total)
 
@@ -174,7 +174,7 @@ SQLite via `sqflite`. Database version: **7**. Foreign keys enabled.
 
 **workout_sessions** — id, startTimestamp, endTimestamp, routineId, routineNameSnapshot, notes (TEXT, nullable)
 
-**workout_sets** — id, sessionId (FK CASCADE), exerciseId (FK CASCADE), weight, reps, rpe, customWeight
+**workout_sets** — id, sessionId (FK CASCADE), exerciseId (FK CASCADE), weight, reps, rpe, customWeight, isWarmup (INTEGER DEFAULT 0)
 
 **exercise_alternatives** — exerciseId1, exerciseId2 (both FK CASCADE, PK composite, stored with id1 < id2)
 
@@ -187,6 +187,7 @@ SQLite via `sqflite`. Database version: **7**. Foreign keys enabled.
 ### Schema Rules
 - Always increment `_databaseVersion` and add `onUpgrade` handler.
 - New tables use `ON DELETE CASCADE` (or `SET NULL` for program_days.routineId).
+- Warm-up sets (`isWarmup = 1`) are excluded from PR calculations, volume totals, and target set counts.
 
 ---
 
@@ -198,8 +199,6 @@ SQLite via `sqflite`. Database version: **7**. Foreign keys enabled.
 - After mutations, invalidate affected providers.
 - `WorkoutSessionNotifier` uses `_isStarting` flag (not `state.isLoading`) for double-click prevention.
 - `startSession()` fetches exercises, best/latest sets, alternatives, and previous session notes internally before completing.
-- `UserProfileController` manages both userName and trainingPhase.
-- `BodyWeightLogsNotifier` calls `ref.invalidateSelf()` after mutations.
 
 ### Provider Invalidation Map
 
@@ -248,9 +247,10 @@ Full-screen overlays: `/workout`, `/exercises`, `/splash`, `/settings`, `/body-w
 - Use `Theme.of(context).colorScheme.*` and `AppTheme.*` — never hardcode hex
 - PR badges use amber tint styling
 - Cards use `PressableCard` wrapper for tap animation
-- All tappable cards: scale 0.975 on press, 120ms
 - Confetti overlay on workout finish via `showConfettiProvider`
 - Training phase badge on HomeScreen avatar (green=gaining, coral=cutting, amber=maintaining)
+- Warm-up sets display muted with "W" badge, excluded from PR/volume/target counts
+- Set-by-set comparison uses training phase colors (green=improved, amber=same, red/amber=declined based on phase)
 
 ---
 
@@ -268,9 +268,7 @@ Full-screen overlays: `/workout`, `/exercises`, `/splash`, `/settings`, `/body-w
 
 ## 11. KNOWN ISSUES
 
-| # | Issue | Status |
-|---|-------|--------|
-| 1 | Live duration timer in workout_status_bar.dart is static ('00:00' hardcoded) | 🔴 Needs fix |
+No known issues at this time.
 
 ---
 
@@ -296,4 +294,4 @@ Full-screen overlays: `/workout`, `/exercises`, `/splash`, `/settings`, `/body-w
 
 ---
 
-*End of AGENTS.md — v8.0*
+*End of AGENTS.md — v9.0*
