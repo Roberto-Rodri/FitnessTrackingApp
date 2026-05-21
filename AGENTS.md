@@ -22,11 +22,11 @@
 | Architecture       | Clean Architecture (Presentation → Domain → Data)  |
 | State Management   | Riverpod 2.x (`riverpod_annotation`, `AsyncNotifier`) |
 | Routing            | `go_router` with `StatefulShellRoute`              |
-| Database           | `sqflite` (SQLite), version 6                      |
+| Database           | `sqflite` (SQLite), version 7                      |
 | Models             | `freezed` + `json_serializable`                    |
 | Code Generation    | `build_runner`, `riverpod_generator`, `freezed`    |
 | Typography         | `google_fonts` (DM Sans + DM Mono)                 |
-| Local Prefs        | `shared_preferences` (user name storage)           |
+| Local Prefs        | `shared_preferences` (user name, training phase)   |
 | UI/UX              | Material Design 3 (Ember dark theme)               |
 | Icons              | `flutter_launcher_icons` (dev dependency)          |
 
@@ -55,7 +55,8 @@ lib/
 │   │   ├── data/repositories/user_prefs_repository_impl.dart
 │   │   ├── domain/repositories/user_prefs_repository.dart
 │   │   └── presentation/
-│   │       ├── controllers/profile_providers.dart
+│   │       ├── controllers/profile_providers.dart  # UserProfileController (name + phase)
+│   │       ├── screens/profile_settings_screen.dart
 │   │       └── widgets/name_prompt_dialog.dart
 │   │
 │   ├── program/
@@ -84,6 +85,7 @@ lib/
 │       ├── data/repositories/workout_repository_impl.dart
 │       ├── domain/
 │       │   ├── entities/
+│       │   │   ├── body_weight_log.dart
 │       │   │   ├── exercise.dart
 │       │   │   ├── routine.dart
 │       │   │   ├── routine_exercise.dart
@@ -105,15 +107,19 @@ lib/
 │           │   ├── routine_list_screen.dart
 │           │   ├── routine_edit_screen.dart
 │           │   ├── exercise_selection_screen.dart
-│           │   └── exercise_library_screen.dart
+│           │   ├── exercise_library_screen.dart
+│           │   └── body_weight_history_screen.dart
 │           └── widgets/
 │               ├── active_exercise_card.dart
 │               ├── body_part_tag.dart
+│               ├── body_weight_card.dart
+│               ├── carry_forward_notes_card.dart
 │               ├── edit_targets_dialog.dart
 │               ├── empty_state.dart
 │               ├── error_state.dart
 │               ├── exercise_form_dialog.dart
 │               ├── exercise_swap_sheet.dart
+│               ├── log_weight_sheet.dart
 │               ├── pr_badge.dart
 │               ├── quick_swap_sheet.dart
 │               ├── alternative_picker_sheet.dart
@@ -121,6 +127,7 @@ lib/
 │               ├── routine_card.dart
 │               ├── routine_exercise_tile.dart
 │               ├── session_history_card.dart
+│               ├── session_notes_field.dart
 │               ├── skeleton_loading.dart
 │               └── workout_status_bar.dart
 │
@@ -155,9 +162,9 @@ Infrastructure providers live in `lib/core/di/injection.dart`. This is the ONLY 
 
 ## 5. DATABASE SCHEMA
 
-SQLite via `sqflite`. Database version: **6**. Foreign keys enabled.
+SQLite via `sqflite`. Database version: **7**. Foreign keys enabled.
 
-### Tables (7 total)
+### Tables (9 total)
 
 **exercises** — id, name, bodyPart, weightUnit (default 'kg')
 
@@ -165,7 +172,7 @@ SQLite via `sqflite`. Database version: **6**. Foreign keys enabled.
 
 **routine_exercise_cross_ref** — routineId (FK CASCADE), exerciseId (FK CASCADE), sequenceOrder, targetSets, targetReps, restSeconds (default 90)
 
-**workout_sessions** — id, startTimestamp, endTimestamp, routineId, routineNameSnapshot
+**workout_sessions** — id, startTimestamp, endTimestamp, routineId, routineNameSnapshot, notes (TEXT, nullable)
 
 **workout_sets** — id, sessionId (FK CASCADE), exerciseId (FK CASCADE), weight, reps, rpe, customWeight
 
@@ -174,6 +181,8 @@ SQLite via `sqflite`. Database version: **6**. Foreign keys enabled.
 **programs** — id, name, cycleLengthDays, isActive (0/1), currentDayIndex
 
 **program_days** — id, programId (FK CASCADE), dayIndex, routineId (FK SET NULL), label
+
+**body_weight_logs** — id (TEXT PK), timestamp (INTEGER), weight (REAL)
 
 ### Schema Rules
 - Always increment `_databaseVersion` and add `onUpgrade` handler.
@@ -188,7 +197,9 @@ SQLite via `sqflite`. Database version: **6**. Foreign keys enabled.
 - Never use `ref.read` in `build()`. Use `ref.watch`.
 - After mutations, invalidate affected providers.
 - `WorkoutSessionNotifier` uses `_isStarting` flag (not `state.isLoading`) for double-click prevention.
-- `startSession()` fetches exercises, best/latest sets, and alternatives internally before completing.
+- `startSession()` fetches exercises, best/latest sets, alternatives, and previous session notes internally before completing.
+- `UserProfileController` manages both userName and trainingPhase.
+- `BodyWeightLogsNotifier` calls `ref.invalidateSelf()` after mutations.
 
 ### Provider Invalidation Map
 
@@ -202,6 +213,7 @@ SQLite via `sqflite`. Database version: **6**. Foreign keys enabled.
 | Delete program | Same as set active |
 | Delete session | `completedSessionsProvider`, `weeklyStatsProvider`, `weeklyVolumeChartProvider`, `recentSessionsProvider` |
 | Set user name | `userNameProvider` |
+| Body weight mutation | `ref.invalidateSelf()` on `BodyWeightLogsNotifier` |
 
 ---
 
@@ -215,7 +227,7 @@ SQLite via `sqflite`. Database version: **6**. Foreign keys enabled.
 | Routines | `/routines` | `edit/:routineId`, `new`, `:routineId/add-exercise`, `programs/new`, `programs/:programId` |
 | History | `/history` | `:sessionId` |
 
-Full-screen overlays: `/workout`, `/exercises`, `/splash`
+Full-screen overlays: `/workout`, `/exercises`, `/splash`, `/settings`, `/body-weight`
 
 ---
 
@@ -238,6 +250,7 @@ Full-screen overlays: `/workout`, `/exercises`, `/splash`
 - Cards use `PressableCard` wrapper for tap animation
 - All tappable cards: scale 0.975 on press, 120ms
 - Confetti overlay on workout finish via `showConfettiProvider`
+- Training phase badge on HomeScreen avatar (green=gaining, coral=cutting, amber=maintaining)
 
 ---
 
@@ -255,7 +268,9 @@ Full-screen overlays: `/workout`, `/exercises`, `/splash`
 
 ## 11. KNOWN ISSUES
 
-No known issues at this time.
+| # | Issue | Status |
+|---|-------|--------|
+| 1 | Live duration timer in workout_status_bar.dart is static ('00:00' hardcoded) | 🔴 Needs fix |
 
 ---
 
@@ -281,4 +296,4 @@ No known issues at this time.
 
 ---
 
-*End of AGENTS.md — v7.0*
+*End of AGENTS.md — v8.0*

@@ -5,6 +5,8 @@ import '../../../../core/theme/theme.dart';
 import '../../domain/entities/user_profile.dart';
 import '../controllers/profile_providers.dart';
 import '../widgets/name_prompt_dialog.dart';
+import '../../../../core/routing/router.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileSettingsScreen extends ConsumerWidget {
   const ProfileSettingsScreen({super.key});
@@ -45,6 +47,15 @@ class ProfileSettingsScreen extends ConsumerWidget {
                       context: context,
                       builder: (context) => const NamePromptDialog(),
                     );
+                  },
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text('Body Weight Logs', style: theme.textTheme.titleMedium),
+                  trailing: Icon(Icons.chevron_right, color: theme.colorScheme.primary),
+                  onTap: () {
+                    context.pushNamed(RouteNames.bodyWeightHistory);
                   },
                 ),
                 const SizedBox(height: 32),

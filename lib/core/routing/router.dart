@@ -11,7 +11,7 @@ import '../../features/workout/presentation/screens/exercise_library_screen.dart
 import '../../features/program/presentation/screens/program_edit_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import '../../features/profile/presentation/screens/profile_settings_screen.dart';
-import '../../features/workout/presentation/screens/body_weight_history_screen.dart';
+import '../../features/profile/presentation/screens/body_weight_screen.dart';
 import '../../features/workout/presentation/screens/workout_summary_screen.dart';
 
 abstract class RouteNames {
@@ -142,7 +142,7 @@ final goRouter = GoRouter(
     GoRoute(
       path: '/body-weight-history',
       name: RouteNames.bodyWeightHistory,
-      builder: (context, state) => const BodyWeightHistoryScreen(),
+      builder: (context, state) => const BodyWeightScreen(),
     ),
     GoRoute(
       path: '/workout-summary/:sessionId',
