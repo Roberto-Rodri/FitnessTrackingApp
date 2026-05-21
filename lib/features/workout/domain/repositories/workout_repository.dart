@@ -3,6 +3,7 @@ import '../entities/routine.dart';
 import '../entities/workout_set.dart';
 import '../entities/routine_exercise_detail.dart';
 import '../entities/workout_session_summary.dart';
+import '../entities/workout_session.dart';
 import '../entities/routine_summary.dart';
 import '../entities/weekly_stats.dart';
 import '../entities/body_weight_log.dart';
@@ -24,6 +25,7 @@ abstract class WorkoutRepository {
   Future<Map<int, Map<String, dynamic>>> getLatestSetsForExercises(List<int> exerciseIds);
   Future<Map<int, Map<String, dynamic>>> getLatestSetsForExercisesInRoutine(List<int> exerciseIds, int routineId);
   Future<List<WorkoutSet>> getPreviousSetsForRoutine(int routineId);
+  Future<WorkoutSession?> getPreviousSession(int routineId, int currentSessionId);
 
   // Routine Management Methods
   Future<List<RoutineSummary>> getRoutinesWithInfo();

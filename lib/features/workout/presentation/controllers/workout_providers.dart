@@ -208,6 +208,29 @@ Future<RoutineSummary?> lastRoutine(LastRoutineRef ref) async {
 
 final showConfettiProvider = StateProvider<bool>((ref) => false);
 
+@riverpod
+Future<WorkoutSessionSummary?> previousSession(PreviousSessionRef ref, int routineId, int currentSessionId) async {
+  final repository = ref.watch(workoutRepositoryProvider);
+  final session = await repository.getPreviousSession(routineId, currentSessionId);
+  if (session == null) return null;
+  
+  final sets = await repository.getSetsForSession(session.id!);
+  
+  int totalSets = sets.length;
+  double totalVolume = 0.0;
+  for (final s in sets) {
+    if (!s.isWarmup) {
+      totalVolume += s.weight * s.reps;
+    }
+  }
+
+  return WorkoutSessionSummary(
+    session: session,
+    totalSets: totalSets,
+    totalVolume: totalVolume,
+  );
+}
+
 @Riverpod(keepAlive: true)
 class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
   bool _isStarting = false;
@@ -301,7 +324,7 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
       );
 
       bool isPR = false;
-      if (exerciseDetail.weightUnit == 'kg' || exerciseDetail.weightUnit == 'lbs') {
+      if (!setWithSession.isWarmup && (exerciseDetail.weightUnit == 'kg' || exerciseDetail.weightUnit == 'lbs')) {
         isPR = await repository.isPersonalRecord(setWithSession.exerciseId, setWithSession.weight, setWithSession.reps, id);
       }
 

@@ -27,6 +27,7 @@ abstract class WorkoutLocalDataSource {
   Future<Map<int, Map<String, dynamic>>> getLatestSetsForExercises(List<int> exerciseIds);
   Future<Map<int, Map<String, dynamic>>> getLatestSetsForExercisesInRoutine(List<int> exerciseIds, int routineId);
   Future<List<WorkoutSet>> getPreviousSetsForRoutine(int routineId);
+  Future<WorkoutSession?> getPreviousSession(int routineId, int currentSessionId);
   
   Future<int> createRoutine(String name);
   Future<void> updateRoutineName(int routineId, String name);
@@ -208,6 +209,24 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
       );
     } catch (e) {
       throw DatabaseOperationException('Failed to update session notes: $e');
+    }
+  }
+
+  @override
+  Future<WorkoutSession?> getPreviousSession(int routineId, int currentSessionId) async {
+    try {
+      final db = await dbHelper.database;
+      final List<Map<String, dynamic>> maps = await db.query(
+        'workout_sessions',
+        where: 'routineId = ? AND id != ? AND endTimestamp IS NOT NULL',
+        whereArgs: [routineId, currentSessionId],
+        orderBy: 'startTimestamp DESC',
+        limit: 1,
+      );
+      if (maps.isEmpty) return null;
+      return WorkoutSession.fromJson(maps.first);
+    } catch (e) {
+      throw DatabaseOperationException('Failed to get previous session: $e');
     }
   }
 

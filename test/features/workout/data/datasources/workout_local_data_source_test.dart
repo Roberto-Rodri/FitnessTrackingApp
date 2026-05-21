@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:iron_log/core/database/database_helper.dart';
 import 'package:iron_log/features/workout/data/datasources/workout_local_data_source.dart';
+import 'package:iron_log/features/workout/domain/entities/workout_set.dart';
 
 class FakeDatabase implements Database {
   final List<String> executedQueries = [];
@@ -18,6 +19,23 @@ class FakeDatabase implements Database {
   Future<int> update(String table, Map<String, Object?> values, {String? where, List<Object?>? whereArgs, ConflictAlgorithm? conflictAlgorithm}) async {
     updatedRecords.add({'table': table, 'values': values, 'where': where, 'whereArgs': whereArgs});
     return 1;
+  }
+
+  @override
+  Future<List<Map<String, Object?>>> query(String table, {bool? distinct, List<String>? columns, String? where, List<Object?>? whereArgs, String? groupBy, String? having, String? orderBy, int? limit, int? offset}) async {
+    if (table == 'workout_sessions' && where != null && where.contains('routineId = ?')) {
+      return [
+        {
+          'id': 2,
+          'startTimestamp': 1600000000,
+          'endTimestamp': 1600003600,
+          'routineId': whereArgs![0],
+          'routineNameSnapshot': 'My Routine',
+          'notes': 'Previous notes',
+        }
+      ];
+    }
+    return [];
   }
 
   @override
@@ -75,5 +93,37 @@ void main() {
     expect(sessions.length, 1);
     expect(sessions.first.session.id, 1);
     expect(sessions.first.session.notes, 'Great workout');
+  });
+
+  test('logSet persists isWarmup flag correctly', () async {
+    const normalSet = WorkoutSet(
+      sessionId: 1,
+      exerciseId: 10,
+      weight: 100,
+      reps: 10,
+      isWarmup: false,
+    );
+    await dataSource.logSet(normalSet);
+    expect(dbHelper.fakeDb.insertedRecords.last['table'], 'workout_sets');
+    expect(dbHelper.fakeDb.insertedRecords.last['values']['isWarmup'], 0);
+
+    const warmupSet = WorkoutSet(
+      sessionId: 1,
+      exerciseId: 10,
+      weight: 50,
+      reps: 15,
+      isWarmup: true,
+    );
+    await dataSource.logSet(warmupSet);
+    expect(dbHelper.fakeDb.insertedRecords.last['table'], 'workout_sets');
+    expect(dbHelper.fakeDb.insertedRecords.last['values']['isWarmup'], 1);
+  });
+
+  test('getPreviousSession returns correct session excluding current one', () async {
+    final session = await dataSource.getPreviousSession(10, 5);
+    expect(session, isNotNull);
+    expect(session!.id, 2);
+    expect(session.routineId, 10);
+    expect(session.notes, 'Previous notes');
   });
 }
