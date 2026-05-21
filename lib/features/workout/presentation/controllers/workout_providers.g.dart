@@ -849,8 +849,160 @@ final lastRoutineProvider = AutoDisposeFutureProvider<RoutineSummary?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef LastRoutineRef = AutoDisposeFutureProviderRef<RoutineSummary?>;
+String _$previousSessionHash() => r'dc2529dbf1af3f97dc6c728d2d84dc7ae541bd6c';
+
+/// See also [previousSession].
+@ProviderFor(previousSession)
+const previousSessionProvider = PreviousSessionFamily();
+
+/// See also [previousSession].
+class PreviousSessionFamily extends Family<AsyncValue<WorkoutSessionSummary?>> {
+  /// See also [previousSession].
+  const PreviousSessionFamily();
+
+  /// See also [previousSession].
+  PreviousSessionProvider call(
+    int routineId,
+    int currentSessionId,
+  ) {
+    return PreviousSessionProvider(
+      routineId,
+      currentSessionId,
+    );
+  }
+
+  @override
+  PreviousSessionProvider getProviderOverride(
+    covariant PreviousSessionProvider provider,
+  ) {
+    return call(
+      provider.routineId,
+      provider.currentSessionId,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'previousSessionProvider';
+}
+
+/// See also [previousSession].
+class PreviousSessionProvider
+    extends AutoDisposeFutureProvider<WorkoutSessionSummary?> {
+  /// See also [previousSession].
+  PreviousSessionProvider(
+    int routineId,
+    int currentSessionId,
+  ) : this._internal(
+          (ref) => previousSession(
+            ref as PreviousSessionRef,
+            routineId,
+            currentSessionId,
+          ),
+          from: previousSessionProvider,
+          name: r'previousSessionProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$previousSessionHash,
+          dependencies: PreviousSessionFamily._dependencies,
+          allTransitiveDependencies:
+              PreviousSessionFamily._allTransitiveDependencies,
+          routineId: routineId,
+          currentSessionId: currentSessionId,
+        );
+
+  PreviousSessionProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.routineId,
+    required this.currentSessionId,
+  }) : super.internal();
+
+  final int routineId;
+  final int currentSessionId;
+
+  @override
+  Override overrideWith(
+    FutureOr<WorkoutSessionSummary?> Function(PreviousSessionRef provider)
+        create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: PreviousSessionProvider._internal(
+        (ref) => create(ref as PreviousSessionRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        routineId: routineId,
+        currentSessionId: currentSessionId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<WorkoutSessionSummary?> createElement() {
+    return _PreviousSessionProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PreviousSessionProvider &&
+        other.routineId == routineId &&
+        other.currentSessionId == currentSessionId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, routineId.hashCode);
+    hash = _SystemHash.combine(hash, currentSessionId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin PreviousSessionRef
+    on AutoDisposeFutureProviderRef<WorkoutSessionSummary?> {
+  /// The parameter `routineId` of this provider.
+  int get routineId;
+
+  /// The parameter `currentSessionId` of this provider.
+  int get currentSessionId;
+}
+
+class _PreviousSessionProviderElement
+    extends AutoDisposeFutureProviderElement<WorkoutSessionSummary?>
+    with PreviousSessionRef {
+  _PreviousSessionProviderElement(super.provider);
+
+  @override
+  int get routineId => (origin as PreviousSessionProvider).routineId;
+  @override
+  int get currentSessionId =>
+      (origin as PreviousSessionProvider).currentSessionId;
+}
+
 String _$workoutSessionNotifierHash() =>
-    r'd8e19960ea51c1dcfa8182b00c4975a2f3596408';
+    r'58c76ef0e6241fd7adcf761e2ae207e1e7d51dfa';
 
 /// See also [WorkoutSessionNotifier].
 @ProviderFor(WorkoutSessionNotifier)

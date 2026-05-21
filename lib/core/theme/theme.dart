@@ -17,6 +17,7 @@ class AppTheme {
   
   static const Color green = Color(0xFF6B9E3A);
   static const Color greenDim = Color(0xFF243D12);
+  static const Color coral = Color(0xFFC75D3A);
   static const Color coralDim = Color(0xFF7A3520);
   static const Color amber = Color(0xFFE8A83E);
   static const Color amberDark = Color(0xFFC8901A);

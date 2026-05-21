@@ -5,6 +5,7 @@ import '../../domain/entities/workout_set.dart';
 import '../../domain/repositories/workout_repository.dart';
 import '../../domain/entities/routine_exercise_detail.dart';
 import '../../domain/entities/workout_session_summary.dart';
+import '../../domain/entities/workout_session.dart';
 import '../../domain/entities/routine_summary.dart';
 import '../../domain/entities/weekly_stats.dart';
 import '../../domain/entities/body_weight_log.dart';
@@ -92,6 +93,11 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   @override
   Future<List<WorkoutSet>> getPreviousSetsForRoutine(int routineId) {
     return localDataSource.getPreviousSetsForRoutine(routineId);
+  }
+
+  @override
+  Future<WorkoutSession?> getPreviousSession(int routineId, int currentSessionId) {
+    return localDataSource.getPreviousSession(routineId, currentSessionId);
   }
 
   @override

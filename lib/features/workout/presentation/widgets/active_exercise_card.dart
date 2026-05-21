@@ -9,6 +9,7 @@ import 'body_part_tag.dart';
 import '../../domain/entities/exercise.dart';
 import '../controllers/workout_providers.dart';
 import 'pr_badge.dart';
+import 'comparison_panel.dart';
 
 class _AnimatedSetRow extends StatefulWidget {
   final Widget child;
@@ -376,9 +377,25 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
               currentSetNum.toString(), 
               ref.watch(workoutSessionNotifierProvider).valueOrNull?.previousSetsByExercise[widget.exerciseId]?.elementAtOrNull(widget.completedSets.length),
             ),
+          const SizedBox(height: 8),
+          _buildComparisonPanel(),
           const SizedBox(height: 16),
         ],
       ),
+    );
+  }
+
+  Widget _buildComparisonPanel() {
+    final activeState = ref.watch(workoutSessionNotifierProvider).valueOrNull;
+    if (activeState == null || activeState.sessionId == null || activeState.routineId == null) {
+      return const SizedBox.shrink();
+    }
+    return ComparisonPanel(
+      routineId: activeState.routineId!,
+      currentSessionId: activeState.sessionId!,
+      exerciseId: widget.exerciseId,
+      currentSets: widget.completedSets,
+      weightUnit: widget.weightUnit,
     );
   }
 
@@ -433,13 +450,15 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
   Widget _buildSetRow(ThemeData theme, String setNum, String weight, String reps, {bool isCompleted = false, bool showPRBadge = false, WorkoutSet? set, WorkoutSet? previousSet}) {
     final isWarmup = set?.isWarmup ?? false;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
+    return Opacity(
+      opacity: isWarmup ? 0.6 : 1.0,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
           InkWell(
             onTap: set != null && set.id != null ? () {
               ref.read(workoutSessionNotifierProvider.notifier).toggleWarmup(set.id!);
@@ -471,7 +490,10 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
               alignment: Alignment.center,
               child: Text(
                 weight,
-                style: AppTheme.monoLarge(color: isCompleted ? AppTheme.txt2 : theme.colorScheme.onSurface).copyWith(fontSize: 18),
+                style: AppTheme.monoLarge(color: isCompleted ? AppTheme.txt2 : theme.colorScheme.onSurface).copyWith(
+                  fontSize: 18,
+                  fontStyle: isWarmup ? FontStyle.italic : null,
+                ),
               ),
             ),
           ),
@@ -486,7 +508,10 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
               alignment: Alignment.center,
               child: Text(
                 reps,
-                style: AppTheme.monoLarge(color: isCompleted ? AppTheme.txt2 : theme.colorScheme.onSurface).copyWith(fontSize: 18),
+                style: AppTheme.monoLarge(color: isCompleted ? AppTheme.txt2 : theme.colorScheme.onSurface).copyWith(
+                  fontSize: 18,
+                  fontStyle: isWarmup ? FontStyle.italic : null,
+                ),
               ),
             ),
           ),
@@ -538,6 +563,7 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
               ),
             ),
         ],
+      ),
       ),
     );
   }
