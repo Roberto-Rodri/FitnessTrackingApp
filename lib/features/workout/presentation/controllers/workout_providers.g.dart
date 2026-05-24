@@ -1135,7 +1135,7 @@ class _ExerciseHistoryProviderElement
   int get exerciseId => (origin as ExerciseHistoryProvider).exerciseId;
 }
 
-String _$workoutSummaryHash() => r'9aed44efc11bbd260cfc2a8a1204a0dbe428e393';
+String _$workoutSummaryHash() => r'507d0d65b1a9769299821391c14a5a4cfaaa91a8';
 
 /// See also [workoutSummary].
 @ProviderFor(workoutSummary)
