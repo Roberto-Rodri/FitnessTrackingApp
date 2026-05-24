@@ -9,6 +9,7 @@ import '../../domain/entities/workout_session_summary.dart';
 import '../../domain/entities/weekly_stats.dart';
 import '../../domain/exceptions/workout_exceptions.dart';
 import '../../domain/entities/body_weight_log.dart';
+import '../../domain/entities/exercise_history_summary.dart';
 
 abstract class WorkoutLocalDataSource {
   Future<List<Exercise>> getExercises();
@@ -50,6 +51,7 @@ abstract class WorkoutLocalDataSource {
   Future<int> getExerciseHistoryCount(int exerciseId);
   Future<List<String>> getDistinctBodyParts();
   Future<bool> exerciseNameExists(String name, {int? excludeId});
+  Future<ExerciseHistorySummary> getExerciseHistory(int exerciseId);
 
   // Alternatives Methods
   Future<void> linkAlternativeExercises(int exerciseId1, int exerciseId2);
@@ -840,5 +842,92 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
       date: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] as int),
       weight: map['weight'] as double,
     )).toList();
+  }
+
+  @override
+  Future<ExerciseHistorySummary> getExerciseHistory(int exerciseId) async {
+    final db = await dbHelper.database;
+    
+    final exerciseMaps = await db.query('exercises', where: 'id = ?', whereArgs: [exerciseId]);
+    if (exerciseMaps.isEmpty) throw DatabaseOperationException('Exercise not found');
+    final exercise = Exercise.fromJson(exerciseMaps.first);
+
+    final bestSetMaps = await db.rawQuery('''
+      SELECT * FROM workout_sets 
+      WHERE exerciseId = ? AND coalesce(isWarmup, 0) = 0
+      ORDER BY weight DESC, reps DESC 
+      LIMIT 1
+    ''', [exerciseId]);
+    WorkoutSet? allTimeBest = bestSetMaps.isNotEmpty ? WorkoutSet.fromJson(bestSetMaps.first) : null;
+
+    final sessionsWithSets = await db.rawQuery('''
+      SELECT s.* 
+      FROM workout_sessions s
+      JOIN workout_sets ws ON ws.sessionId = s.id
+      WHERE ws.exerciseId = ? AND s.endTimestamp IS NOT NULL
+      GROUP BY s.id
+      ORDER BY s.startTimestamp ASC
+    ''', [exerciseId]);
+
+    List<WorkoutSession> recentSessions = sessionsWithSets.map((m) => WorkoutSession.fromJson(m)).toList().reversed.toList();
+    
+    final setsMapList = await db.rawQuery('''
+      SELECT ws.*, s.startTimestamp
+      FROM workout_sets ws
+      JOIN workout_sessions s ON s.id = ws.sessionId
+      WHERE ws.exerciseId = ? AND coalesce(ws.isWarmup, 0) = 0 AND s.endTimestamp IS NOT NULL
+      ORDER BY s.startTimestamp ASC, ws.id ASC
+    ''', [exerciseId]);
+
+    double allTimeMaxWeight = -1;
+    int allTimeMaxReps = -1;
+    
+    Map<int, double> volumePerSession = {};
+    Map<int, bool> hasPRPerSession = {};
+    Map<int, int> timestampPerSession = {};
+
+    for (var row in setsMapList) {
+      int sessionId = row['sessionId'] as int;
+      int timestamp = row['startTimestamp'] as int;
+      double weight = (row['weight'] as num).toDouble();
+      int reps = row['reps'] as int;
+
+      timestampPerSession[sessionId] = timestamp;
+      
+      if (exercise.weightUnit == 'kg' || exercise.weightUnit == 'lbs') {
+        volumePerSession[sessionId] = (volumePerSession[sessionId] ?? 0.0) + (weight * reps);
+        
+        bool isPR = false;
+        if (weight > allTimeMaxWeight) {
+          isPR = true;
+          allTimeMaxWeight = weight;
+          allTimeMaxReps = reps;
+        } else if (weight == allTimeMaxWeight && reps > allTimeMaxReps) {
+          isPR = true;
+          allTimeMaxReps = reps;
+        }
+        
+        if (isPR) {
+          hasPRPerSession[sessionId] = true;
+        }
+      }
+    }
+
+    List<SessionVolume> volumeHistory = [];
+    for (var sessionId in timestampPerSession.keys) {
+      volumeHistory.add(SessionVolume(
+        sessionId: sessionId,
+        timestamp: timestampPerSession[sessionId]!,
+        volume: volumePerSession[sessionId] ?? 0.0,
+        hasPR: hasPRPerSession[sessionId] ?? false,
+      ));
+    }
+
+    return ExerciseHistorySummary(
+      exercise: exercise,
+      allTimeBest: allTimeBest,
+      volumeHistory: volumeHistory,
+      recentSessions: recentSessions,
+    );
   }
 }

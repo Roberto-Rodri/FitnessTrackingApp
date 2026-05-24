@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../controllers/workout_providers.dart';
+import '../../../../core/routing/router.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/workout_set.dart';
 import '../../domain/entities/workout_session_summary.dart';
@@ -191,7 +193,7 @@ class SessionDetailScreen extends ConsumerWidget {
                 final exerciseId = groupedSets.keys.elementAt(index);
                 final exerciseSets = groupedSets[exerciseId]!;
                 final exercise = info[exerciseId];
-                return _buildExerciseCard(theme, exercise, exerciseSets, index + 1);
+                return _buildExerciseCard(context, theme, exercise, exerciseSets, index + 1);
               },
               childCount: groupedSets.length,
             ),
@@ -316,7 +318,7 @@ class SessionDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildExerciseCard(ThemeData theme, Exercise? exercise, List<WorkoutSet> sets, int index) {
+  Widget _buildExerciseCard(BuildContext context, ThemeData theme, Exercise? exercise, List<WorkoutSet> sets, int index) {
     final exerciseName = exercise?.name ?? 'Unknown Exercise';
     final weightUnit = exercise?.weightUnit ?? 'kg';
     final bodyPart = exercise?.bodyPart ?? 'Unknown';
@@ -371,6 +373,13 @@ class SessionDetailScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (exercise != null)
+                IconButton(
+                  icon: const Icon(Icons.bar_chart, color: AppTheme.txt2, size: 20),
+                  onPressed: () {
+                    context.pushNamed(RouteNames.exerciseDetail, pathParameters: {'id': exercise.id.toString()});
+                  },
+                ),
             ],
           ),
           children: [

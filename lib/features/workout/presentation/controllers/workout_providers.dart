@@ -9,6 +9,7 @@ import '../../domain/entities/workout_session_summary.dart';
 import '../../domain/entities/routine_summary.dart';
 import '../../domain/entities/weekly_stats.dart';
 import '../../../program/presentation/controllers/program_providers.dart';
+import '../../domain/entities/exercise_history_summary.dart';
 
 part 'workout_providers.g.dart';
 
@@ -441,4 +442,10 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
       alternatives: updatedAlternatives,
     ));
   }
+}
+
+@riverpod
+Future<ExerciseHistorySummary> exerciseHistory(ExerciseHistoryRef ref, int exerciseId) async {
+  final repository = ref.watch(workoutRepositoryProvider);
+  return repository.getExerciseHistory(exerciseId);
 }

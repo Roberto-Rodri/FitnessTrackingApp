@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/routing/router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/workout_set.dart';
 import 'exercise_swap_sheet.dart';
@@ -284,7 +286,16 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                     ],
                   ),
                 ),
-                InkWell(
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.bar_chart, color: theme.colorScheme.onSurfaceVariant),
+                      onPressed: () {
+                        context.pushNamed(RouteNames.exerciseDetail, pathParameters: {'id': widget.exerciseId.toString()});
+                      },
+                    ),
+                    InkWell(
                   onTap: () async {
                     void showFullSwapSheet() {
                       showModalBottomSheet(
@@ -329,7 +340,9 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                     ),
                     child: const Icon(Icons.swap_horiz, color: AppTheme.txt2, size: 20),
                   ),
-                )
+                  ),
+                  ],
+                ),
               ],
             ),
           ),

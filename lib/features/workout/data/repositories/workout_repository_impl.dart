@@ -9,6 +9,7 @@ import '../../domain/entities/workout_session.dart';
 import '../../domain/entities/routine_summary.dart';
 import '../../domain/entities/weekly_stats.dart';
 import '../../domain/entities/body_weight_log.dart';
+import '../../domain/entities/exercise_history_summary.dart';
 
 class WorkoutRepositoryImpl implements WorkoutRepository {
   final WorkoutLocalDataSource localDataSource;
@@ -184,6 +185,11 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   @override
   Future<bool> exerciseNameExists(String name, {int? excludeId}) {
     return localDataSource.exerciseNameExists(name, excludeId: excludeId);
+  }
+
+  @override
+  Future<ExerciseHistorySummary> getExerciseHistory(int exerciseId) {
+    return localDataSource.getExerciseHistory(exerciseId);
   }
 
   @override
