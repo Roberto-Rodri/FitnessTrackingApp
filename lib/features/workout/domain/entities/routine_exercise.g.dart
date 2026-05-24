@@ -15,6 +15,7 @@ _$RoutineExerciseImpl _$$RoutineExerciseImplFromJson(
       targetSets: (json['targetSets'] as num).toInt(),
       targetReps: json['targetReps'] as String,
       restSeconds: (json['restSeconds'] as num?)?.toInt() ?? 90,
+      supersetGroup: (json['supersetGroup'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$$RoutineExerciseImplToJson(
@@ -26,4 +27,5 @@ Map<String, dynamic> _$$RoutineExerciseImplToJson(
       'targetSets': instance.targetSets,
       'targetReps': instance.targetReps,
       'restSeconds': instance.restSeconds,
+      'supersetGroup': instance.supersetGroup,
     };

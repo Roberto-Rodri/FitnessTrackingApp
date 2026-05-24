@@ -26,6 +26,7 @@ mixin _$RoutineExercise {
   int get targetSets => throw _privateConstructorUsedError;
   String get targetReps => throw _privateConstructorUsedError;
   int get restSeconds => throw _privateConstructorUsedError;
+  int? get supersetGroup => throw _privateConstructorUsedError;
 
   /// Serializes this RoutineExercise to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -49,7 +50,8 @@ abstract class $RoutineExerciseCopyWith<$Res> {
       int sequenceOrder,
       int targetSets,
       String targetReps,
-      int restSeconds});
+      int restSeconds,
+      int? supersetGroup});
 }
 
 /// @nodoc
@@ -73,6 +75,7 @@ class _$RoutineExerciseCopyWithImpl<$Res, $Val extends RoutineExercise>
     Object? targetSets = null,
     Object? targetReps = null,
     Object? restSeconds = null,
+    Object? supersetGroup = freezed,
   }) {
     return _then(_value.copyWith(
       routineId: null == routineId
@@ -99,6 +102,10 @@ class _$RoutineExerciseCopyWithImpl<$Res, $Val extends RoutineExercise>
           ? _value.restSeconds
           : restSeconds // ignore: cast_nullable_to_non_nullable
               as int,
+      supersetGroup: freezed == supersetGroup
+          ? _value.supersetGroup
+          : supersetGroup // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -117,7 +124,8 @@ abstract class _$$RoutineExerciseImplCopyWith<$Res>
       int sequenceOrder,
       int targetSets,
       String targetReps,
-      int restSeconds});
+      int restSeconds,
+      int? supersetGroup});
 }
 
 /// @nodoc
@@ -139,6 +147,7 @@ class __$$RoutineExerciseImplCopyWithImpl<$Res>
     Object? targetSets = null,
     Object? targetReps = null,
     Object? restSeconds = null,
+    Object? supersetGroup = freezed,
   }) {
     return _then(_$RoutineExerciseImpl(
       routineId: null == routineId
@@ -165,6 +174,10 @@ class __$$RoutineExerciseImplCopyWithImpl<$Res>
           ? _value.restSeconds
           : restSeconds // ignore: cast_nullable_to_non_nullable
               as int,
+      supersetGroup: freezed == supersetGroup
+          ? _value.supersetGroup
+          : supersetGroup // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -178,7 +191,8 @@ class _$RoutineExerciseImpl implements _RoutineExercise {
       required this.sequenceOrder,
       required this.targetSets,
       required this.targetReps,
-      this.restSeconds = 90});
+      this.restSeconds = 90,
+      this.supersetGroup});
 
   factory _$RoutineExerciseImpl.fromJson(Map<String, dynamic> json) =>
       _$$RoutineExerciseImplFromJson(json);
@@ -196,10 +210,12 @@ class _$RoutineExerciseImpl implements _RoutineExercise {
   @override
   @JsonKey()
   final int restSeconds;
+  @override
+  final int? supersetGroup;
 
   @override
   String toString() {
-    return 'RoutineExercise(routineId: $routineId, exerciseId: $exerciseId, sequenceOrder: $sequenceOrder, targetSets: $targetSets, targetReps: $targetReps, restSeconds: $restSeconds)';
+    return 'RoutineExercise(routineId: $routineId, exerciseId: $exerciseId, sequenceOrder: $sequenceOrder, targetSets: $targetSets, targetReps: $targetReps, restSeconds: $restSeconds, supersetGroup: $supersetGroup)';
   }
 
   @override
@@ -218,13 +234,15 @@ class _$RoutineExerciseImpl implements _RoutineExercise {
             (identical(other.targetReps, targetReps) ||
                 other.targetReps == targetReps) &&
             (identical(other.restSeconds, restSeconds) ||
-                other.restSeconds == restSeconds));
+                other.restSeconds == restSeconds) &&
+            (identical(other.supersetGroup, supersetGroup) ||
+                other.supersetGroup == supersetGroup));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, routineId, exerciseId,
-      sequenceOrder, targetSets, targetReps, restSeconds);
+      sequenceOrder, targetSets, targetReps, restSeconds, supersetGroup);
 
   /// Create a copy of RoutineExercise
   /// with the given fields replaced by the non-null parameter values.
@@ -250,7 +268,8 @@ abstract class _RoutineExercise implements RoutineExercise {
       required final int sequenceOrder,
       required final int targetSets,
       required final String targetReps,
-      final int restSeconds}) = _$RoutineExerciseImpl;
+      final int restSeconds,
+      final int? supersetGroup}) = _$RoutineExerciseImpl;
 
   factory _RoutineExercise.fromJson(Map<String, dynamic> json) =
       _$RoutineExerciseImpl.fromJson;
@@ -267,6 +286,8 @@ abstract class _RoutineExercise implements RoutineExercise {
   String get targetReps;
   @override
   int get restSeconds;
+  @override
+  int? get supersetGroup;
 
   /// Create a copy of RoutineExercise
   /// with the given fields replaced by the non-null parameter values.

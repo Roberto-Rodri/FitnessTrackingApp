@@ -153,6 +153,11 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   }
 
   @override
+  Future<void> updateSupersetGroup(int routineId, int exerciseId, int? newGroupId) {
+    return localDataSource.updateSupersetGroup(routineId, exerciseId, newGroupId);
+  }
+
+  @override
   Future<int> createExercise(String name, String bodyPart, String weightUnit) {
     return localDataSource.createExercise(name, bodyPart, weightUnit);
   }

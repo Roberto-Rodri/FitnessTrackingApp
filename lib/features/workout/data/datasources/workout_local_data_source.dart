@@ -42,6 +42,7 @@ abstract class WorkoutLocalDataSource {
   Future<void> updateExerciseRestTime(int routineId, int exerciseId, int restSeconds);
   Future<void> updateExerciseOrder(int routineId, List<int> exerciseIdsInOrder);
   Future<int> getNextSequenceOrder(int routineId);
+  Future<void> updateSupersetGroup(int routineId, int exerciseId, int? newGroupId);
 
   // Exercise Library Methods
   Future<int> createExercise(String name, String bodyPart, String weightUnit);
@@ -153,7 +154,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
   Future<List<RoutineExerciseDetail>> getExercisesForRoutine(int routineId) async {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
-      SELECT e.id AS exerciseId, e.name AS exerciseName, e.bodyPart, e.weightUnit, ref.sequenceOrder, ref.targetSets, ref.targetReps, ref.restSeconds
+      SELECT e.id AS exerciseId, e.name AS exerciseName, e.bodyPart, e.weightUnit, ref.sequenceOrder, ref.targetSets, ref.targetReps, ref.restSeconds, ref.supersetGroup
       FROM routine_exercise_cross_ref ref
       INNER JOIN exercises e ON ref.exerciseId = e.id
       WHERE ref.routineId = ?
@@ -427,6 +428,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
         'targetSets': targetSets,
         'targetReps': targetReps,
         'restSeconds': restSeconds,
+        'supersetGroup': null,
       });
     } catch (e) {
       throw DatabaseOperationException('Failed to add exercise to routine: $e');
@@ -504,6 +506,21 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
       [routineId],
     );
     return result.first['nextOrder'] as int;
+  }
+
+  @override
+  Future<void> updateSupersetGroup(int routineId, int exerciseId, int? newGroupId) async {
+    try {
+      final db = await dbHelper.database;
+      await db.update(
+        'routine_exercise_cross_ref',
+        {'supersetGroup': newGroupId},
+        where: 'routineId = ? AND exerciseId = ?',
+        whereArgs: [routineId, exerciseId],
+      );
+    } catch (e) {
+      throw DatabaseOperationException('Failed to update superset group: $e');
+    }
   }
 
   @override

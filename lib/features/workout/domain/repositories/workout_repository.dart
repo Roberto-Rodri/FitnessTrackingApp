@@ -41,6 +41,7 @@ abstract class WorkoutRepository {
   Future<void> updateExerciseRestTime(int routineId, int exerciseId, int restSeconds);
   Future<void> updateExerciseOrder(int routineId, List<int> exerciseIdsInOrder);
   Future<int> getNextSequenceOrder(int routineId);
+  Future<void> updateSupersetGroup(int routineId, int exerciseId, int? newGroupId);
 
   // Exercise Library Methods
   Future<int> createExercise(String name, String bodyPart, String weightUnit);
