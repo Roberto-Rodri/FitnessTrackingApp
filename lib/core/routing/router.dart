@@ -14,6 +14,7 @@ import '../../features/profile/presentation/screens/profile_settings_screen.dart
 import '../../features/profile/presentation/screens/body_weight_screen.dart';
 import '../../features/workout/presentation/screens/workout_summary_screen.dart';
 import '../../features/workout/presentation/screens/exercise_detail_screen.dart';
+import '../../features/workout/presentation/screens/share_overlay_screen.dart';
 
 abstract class RouteNames {
   static const splash = 'splash';
@@ -32,6 +33,7 @@ abstract class RouteNames {
   static const bodyWeightHistory = 'body_weight_history';
   static const workoutSummary = 'workout_summary';
   static const exerciseDetail = 'exercise_detail';
+  static const workoutShare = 'workout_share';
 }
 
 final goRouter = GoRouter(
@@ -160,6 +162,14 @@ final goRouter = GoRouter(
       builder: (context, state) {
         final id = int.parse(state.pathParameters['id']!);
         return ExerciseDetailScreen(exerciseId: id);
+      },
+    ),
+    GoRoute(
+      path: '/workout-share/:sessionId',
+      name: RouteNames.workoutShare,
+      builder: (context, state) {
+        final sessionId = int.parse(state.pathParameters['sessionId']!);
+        return ShareOverlayScreen(sessionId: sessionId);
       },
     ),
   ],
