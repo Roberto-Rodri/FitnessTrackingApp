@@ -38,9 +38,12 @@ class _ProgramEditScreenState extends ConsumerState<ProgramEditScreen> {
   }
 
   Future<void> _loadProgram() async {
+    final pid = widget.programId;
+    if (pid == null) return;
+    
     setState(() => _isLoading = true);
     try {
-      final detail = await ref.read(programDetailProvider(widget.programId!).future);
+      final detail = await ref.read(programDetailProvider(pid).future);
       setState(() {
         _nameController.text = detail.program.name;
         _days.addAll(detail.days);
@@ -260,17 +263,18 @@ class _ProgramEditScreenState extends ConsumerState<ProgramEditScreen> {
 
     try {
       final repository = ref.read(programRepositoryProvider);
-      if (widget.programId == null) {
+      final pid = widget.programId;
+      if (pid == null) {
         await repository.createProgram(name, _days);
       } else {
-        await repository.updateProgram(widget.programId!, name, _days);
+        await repository.updateProgram(pid, name, _days);
       }
       
       ref.invalidate(allProgramsProvider);
       ref.invalidate(activeProgramProvider);
       ref.invalidate(currentProgramDayProvider);
-      if (widget.programId != null) {
-        ref.invalidate(programDetailProvider(widget.programId!));
+      if (pid != null) {
+        ref.invalidate(programDetailProvider(pid));
       }
       
       if (mounted) context.pop();

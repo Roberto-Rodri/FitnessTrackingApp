@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/routing/router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/workout_set.dart';
 import 'exercise_swap_sheet.dart';
@@ -260,7 +262,7 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            if (widget.bestSet != null)
+                            if (widget.bestSet != null && widget.bestSet!['reps'] != null)
                               Text.rich(TextSpan(children: [
                                 TextSpan(text: 'Best: ', style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt2, fontSize: 12)),
                                 TextSpan(
@@ -268,9 +270,9 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                                   style: AppTheme.monoSmall(color: AppTheme.amber).copyWith(fontSize: 12),
                                 ),
                               ])),
-                            if (widget.bestSet != null && latestSet != null)
+                            if (widget.bestSet != null && latestSet != null && widget.bestSet!['reps'] != null && latestSet['reps'] != null)
                               Text('  ·  ', style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt3)),
-                            if (latestSet != null)
+                            if (latestSet != null && latestSet['reps'] != null)
                               Text.rich(TextSpan(children: [
                                 TextSpan(text: '$latestLabel: ', style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt2, fontSize: 12)),
                                 TextSpan(
@@ -284,7 +286,16 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                     ],
                   ),
                 ),
-                InkWell(
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.bar_chart, color: theme.colorScheme.onSurfaceVariant),
+                      onPressed: () {
+                        context.pushNamed(RouteNames.exerciseDetail, pathParameters: {'id': widget.exerciseId.toString()});
+                      },
+                    ),
+                    InkWell(
                   onTap: () async {
                     void showFullSwapSheet() {
                       showModalBottomSheet(
@@ -300,12 +311,13 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                       );
                     }
 
-                    if (widget.alternatives != null && widget.alternatives!.isNotEmpty) {
+                    final alts = widget.alternatives;
+                    if (alts != null && alts.isNotEmpty) {
                       final result = await showModalBottomSheet<dynamic>(
                         context: context,
                         backgroundColor: Colors.transparent,
                         builder: (context) => QuickSwapSheet(
-                          alternatives: widget.alternatives!,
+                          alternatives: alts,
                         ),
                       );
 
@@ -329,7 +341,9 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                     ),
                     child: const Icon(Icons.swap_horiz, color: AppTheme.txt2, size: 20),
                   ),
-                )
+                  ),
+                  ],
+                ),
               ],
             ),
           ),

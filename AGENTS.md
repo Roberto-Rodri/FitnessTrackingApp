@@ -22,7 +22,7 @@
 | Architecture       | Clean Architecture (Presentation → Domain → Data)  |
 | State Management   | Riverpod 2.x (`riverpod_annotation`, `AsyncNotifier`) |
 | Routing            | `go_router` with `StatefulShellRoute`              |
-| Database           | `sqflite` (SQLite), version 8                      |
+| Database           | `sqflite` (SQLite), version 9                      |
 | Models             | `freezed` + `json_serializable`                    |
 | Code Generation    | `build_runner`, `riverpod_generator`, `freezed`    |
 | Typography         | `google_fonts` (DM Sans + DM Mono)                 |
@@ -162,7 +162,7 @@ Infrastructure providers live in `lib/core/di/injection.dart`. This is the ONLY 
 
 ## 5. DATABASE SCHEMA
 
-SQLite via `sqflite`. Database version: **8**. Foreign keys enabled.
+SQLite via `sqflite`. Database version: **9**. Foreign keys enabled.
 
 ### Tables (9 total)
 
@@ -170,7 +170,7 @@ SQLite via `sqflite`. Database version: **8**. Foreign keys enabled.
 
 **routines** — id, name
 
-**routine_exercise_cross_ref** — routineId (FK CASCADE), exerciseId (FK CASCADE), sequenceOrder, targetSets, targetReps, restSeconds (default 90)
+**routine_exercise_cross_ref** — routineId (FK CASCADE), exerciseId (FK CASCADE), sequenceOrder, targetSets, targetReps, restSeconds (default 90), supersetGroup (INTEGER, nullable)
 
 **workout_sessions** — id, startTimestamp, endTimestamp, routineId, routineNameSnapshot, notes (TEXT, nullable)
 
@@ -187,7 +187,8 @@ SQLite via `sqflite`. Database version: **8**. Foreign keys enabled.
 ### Schema Rules
 - Always increment `_databaseVersion` and add `onUpgrade` handler.
 - New tables use `ON DELETE CASCADE` (or `SET NULL` for program_days.routineId).
-- Warm-up sets (`isWarmup = 1`) are excluded from PR calculations, volume totals, and target set counts.
+- Warm-up sets (`isWarmup = 1`) excluded from PR/volume/target counts.
+- Superset groups: exercises with same non-null `supersetGroup` in a routine are in the same superset.
 
 ---
 
@@ -247,10 +248,10 @@ Full-screen overlays: `/workout`, `/exercises`, `/splash`, `/settings`, `/body-w
 - Use `Theme.of(context).colorScheme.*` and `AppTheme.*` — never hardcode hex
 - PR badges use amber tint styling
 - Cards use `PressableCard` wrapper for tap animation
+- All tappable cards: scale 0.975 on press, 120ms
 - Confetti overlay on workout finish via `showConfettiProvider`
-- Training phase badge on HomeScreen avatar (green=gaining, coral=cutting, amber=maintaining)
-- Warm-up sets display muted with "W" badge, excluded from PR/volume/target counts
-- Set-by-set comparison uses training phase colors (green=improved, amber=same, red/amber=declined based on phase)
+- Superset groups: amber left bar (3px) connecting grouped exercises, "SUPERSET" badge
+- Rest timer only fires after last exercise in superset group completes a set
 
 ---
 
@@ -294,4 +295,4 @@ No known issues at this time.
 
 ---
 
-*End of AGENTS.md — v9.0*
+*End of AGENTS.md — v10.0*

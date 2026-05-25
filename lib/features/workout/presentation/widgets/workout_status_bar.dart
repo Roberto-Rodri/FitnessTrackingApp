@@ -30,8 +30,9 @@ class _WorkoutStatusBarState extends State<WorkoutStatusBar> {
   }
 
   void _updateElapsed() {
-    if (widget.startTimestamp == null) return;
-    final start = DateTime.fromMillisecondsSinceEpoch(widget.startTimestamp!);
+    final startTimestamp = widget.startTimestamp;
+    if (startTimestamp == null) return;
+    final start = DateTime.fromMillisecondsSinceEpoch(startTimestamp);
     setState(() {
       _elapsed = DateTime.now().difference(start);
     });

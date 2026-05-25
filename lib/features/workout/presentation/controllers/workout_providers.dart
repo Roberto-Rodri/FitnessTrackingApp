@@ -9,6 +9,8 @@ import '../../domain/entities/workout_session_summary.dart';
 import '../../domain/entities/routine_summary.dart';
 import '../../domain/entities/weekly_stats.dart';
 import '../../../program/presentation/controllers/program_providers.dart';
+import '../../domain/entities/exercise_history_summary.dart';
+import '../../domain/entities/workout_summary_detail.dart';
 
 part 'workout_providers.g.dart';
 
@@ -328,9 +330,23 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
         isPR = await repository.isPersonalRecord(setWithSession.exerciseId, setWithSession.weight, setWithSession.reps, id);
       }
 
+      int? nextRestSeconds;
+      if (!setWithSession.isWarmup) {
+        if (exerciseDetail.supersetGroup == null) {
+          nextRestSeconds = exerciseDetail.restSeconds;
+        } else {
+          final groupExercises = currentState.activeExercises
+              .where((e) => e.supersetGroup == exerciseDetail.supersetGroup)
+              .toList();
+          if (groupExercises.isNotEmpty && groupExercises.last.exerciseId == setWithSession.exerciseId) {
+            nextRestSeconds = exerciseDetail.restSeconds;
+          }
+        }
+      }
+
       state = AsyncData(currentState.copyWith(
         sets: newSets,
-        lastLoggedRestSeconds: exerciseDetail.restSeconds,
+        lastLoggedRestSeconds: nextRestSeconds,
         loggedSetCount: currentState.loggedSetCount + 1,
         lastPRSetId: isPR ? id : null, // Set PR ID if it's a PR, or null if it's not.
       ));
@@ -441,4 +457,81 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
       alternatives: updatedAlternatives,
     ));
   }
+}
+
+@riverpod
+Future<ExerciseHistorySummary> exerciseHistory(ExerciseHistoryRef ref, int exerciseId) async {
+  final repository = ref.watch(workoutRepositoryProvider);
+  return repository.getExerciseHistory(exerciseId);
+}
+
+@riverpod
+Future<WorkoutSummaryDetail> workoutSummary(WorkoutSummaryRef ref, int sessionId) async {
+  final repository = ref.watch(workoutRepositoryProvider);
+  
+  final sessions = await repository.getCompletedSessions();
+  final sessionSummary = sessions.firstWhere((s) => s.session.id == sessionId);
+  
+  final sets = await repository.getSetsForSession(sessionId);
+  final exerciseMap = await repository.getExerciseInfoForSession(sessionId);
+  final prCount = await repository.countPRsInSession(sessionId);
+  
+  Map<int, double> currentVolumes = {};
+  Map<int, int> currentSetsMap = {};
+  Map<int, bool> prsMap = {};
+  
+  for (var s in sets) {
+    if (s.isWarmup) continue;
+    currentSetsMap[s.exerciseId] = (currentSetsMap[s.exerciseId] ?? 0) + 1;
+    final ex = exerciseMap[s.exerciseId];
+    if (ex != null && (ex.weightUnit == 'kg' || ex.weightUnit == 'lbs')) {
+      currentVolumes[s.exerciseId] = (currentVolumes[s.exerciseId] ?? 0) + (s.weight * s.reps);
+    }
+  }
+  
+  Map<int, double> previousVolumes = {};
+  Map<int, int> previousSetsMap = {};
+  
+  for (var exId in exerciseMap.keys) {
+    final history = await repository.getExerciseHistory(exId);
+    
+    SessionVolume? previousVol;
+    for (var h in history.volumeHistory.reversed) {
+      if (h.sessionId < sessionId) {
+        previousVol = h;
+        break;
+      }
+    }
+    
+    if (previousVol != null) {
+      previousVolumes[exId] = previousVol.volume;
+      final prevSets = await repository.getSetsForSession(previousVol.sessionId);
+      previousSetsMap[exId] = prevSets.where((s) => s.exerciseId == exId && !s.isWarmup).length;
+    }
+    
+    final currentVol = history.volumeHistory.where((v) => v.sessionId == sessionId).firstOrNull;
+    if (currentVol != null) {
+      prsMap[exId] = currentVol.hasPR;
+    }
+  }
+  
+  List<ExerciseComparison> comparisons = [];
+  for (var exId in exerciseMap.keys) {
+    comparisons.add(ExerciseComparison(
+      exercise: exerciseMap[exId]!,
+      currentVolume: currentVolumes[exId] ?? 0.0,
+      previousVolume: previousVolumes[exId],
+      currentSets: currentSetsMap[exId] ?? 0,
+      previousSets: previousSetsMap[exId],
+      hasPR: prsMap[exId] ?? false,
+    ));
+  }
+  
+  return WorkoutSummaryDetail(
+    session: sessionSummary.session,
+    totalSets: sessionSummary.totalSets,
+    totalVolume: sessionSummary.totalVolume,
+    totalPRs: prCount,
+    exerciseComparisons: comparisons,
+  );
 }

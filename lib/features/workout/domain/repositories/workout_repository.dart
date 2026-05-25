@@ -7,6 +7,7 @@ import '../entities/workout_session.dart';
 import '../entities/routine_summary.dart';
 import '../entities/weekly_stats.dart';
 import '../entities/body_weight_log.dart';
+import '../entities/exercise_history_summary.dart';
 
 abstract class WorkoutRepository {
   Future<List<Exercise>> getExercises();
@@ -40,6 +41,7 @@ abstract class WorkoutRepository {
   Future<void> updateExerciseRestTime(int routineId, int exerciseId, int restSeconds);
   Future<void> updateExerciseOrder(int routineId, List<int> exerciseIdsInOrder);
   Future<int> getNextSequenceOrder(int routineId);
+  Future<void> updateSupersetGroup(int routineId, int exerciseId, int? newGroupId);
 
   // Exercise Library Methods
   Future<int> createExercise(String name, String bodyPart, String weightUnit);
@@ -49,6 +51,7 @@ abstract class WorkoutRepository {
   Future<int> getExerciseHistoryCount(int exerciseId);
   Future<List<String>> getDistinctBodyParts();
   Future<bool> exerciseNameExists(String name, {int? excludeId});
+  Future<ExerciseHistorySummary> getExerciseHistory(int exerciseId);
 
   // Alternatives Methods
   Future<void> linkAlternativeExercises(int exerciseId1, int exerciseId2);

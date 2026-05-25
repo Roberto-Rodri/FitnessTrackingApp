@@ -126,4 +126,19 @@ void main() {
     expect(session.routineId, 10);
     expect(session.notes, 'Previous notes');
   });
+
+  test('updateSupersetGroup correctly updates database', () async {
+    await dataSource.updateSupersetGroup(1, 2, 5);
+    expect(dbHelper.fakeDb.updatedRecords.isNotEmpty, true);
+    final lastUpdate = dbHelper.fakeDb.updatedRecords.last;
+    expect(lastUpdate['table'], 'routine_exercise_cross_ref');
+    expect(lastUpdate['values']['supersetGroup'], 5);
+    expect(lastUpdate['where'], 'routineId = ? AND exerciseId = ?');
+    expect(lastUpdate['whereArgs'], [1, 2]);
+
+    // Test nullable update
+    await dataSource.updateSupersetGroup(1, 2, null);
+    final nullableUpdate = dbHelper.fakeDb.updatedRecords.last;
+    expect(nullableUpdate['values']['supersetGroup'], null);
+  });
 }
