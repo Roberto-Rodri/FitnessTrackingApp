@@ -145,7 +145,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.chevron_left),
-                        onPressed: () => context.go('/'),
+                        onPressed: () => context.goNamed(RouteNames.home),
                       ),
                       Text(
                         'WORKOUT',

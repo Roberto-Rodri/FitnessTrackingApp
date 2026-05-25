@@ -262,7 +262,7 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            if (widget.bestSet != null)
+                            if (widget.bestSet != null && widget.bestSet!['reps'] != null)
                               Text.rich(TextSpan(children: [
                                 TextSpan(text: 'Best: ', style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt2, fontSize: 12)),
                                 TextSpan(
@@ -270,9 +270,9 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                                   style: AppTheme.monoSmall(color: AppTheme.amber).copyWith(fontSize: 12),
                                 ),
                               ])),
-                            if (widget.bestSet != null && latestSet != null)
+                            if (widget.bestSet != null && latestSet != null && widget.bestSet!['reps'] != null && latestSet['reps'] != null)
                               Text('  ·  ', style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt3)),
-                            if (latestSet != null)
+                            if (latestSet != null && latestSet['reps'] != null)
                               Text.rich(TextSpan(children: [
                                 TextSpan(text: '$latestLabel: ', style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt2, fontSize: 12)),
                                 TextSpan(
@@ -311,12 +311,13 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                       );
                     }
 
-                    if (widget.alternatives != null && widget.alternatives!.isNotEmpty) {
+                    final alts = widget.alternatives;
+                    if (alts != null && alts.isNotEmpty) {
                       final result = await showModalBottomSheet<dynamic>(
                         context: context,
                         backgroundColor: Colors.transparent,
                         builder: (context) => QuickSwapSheet(
-                          alternatives: widget.alternatives!,
+                          alternatives: alts,
                         ),
                       );
 

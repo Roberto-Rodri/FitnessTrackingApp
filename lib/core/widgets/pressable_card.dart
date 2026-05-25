@@ -45,7 +45,7 @@ class _PressableCardState extends State<PressableCard> with SingleTickerProvider
   void _handleTapUp(TapUpDetails details) {
     if (widget.onTap != null) {
       _controller.reverse();
-      widget.onTap!();
+      widget.onTap?.call();
     }
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/routing/router.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -44,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     
     // Navigate to home
     if (mounted) {
-      context.go('/');
+      context.goNamed(RouteNames.home);
     }
   }
 

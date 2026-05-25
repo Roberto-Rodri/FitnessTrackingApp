@@ -1268,7 +1268,7 @@ class _WorkoutSummaryProviderElement
 }
 
 String _$workoutSessionNotifierHash() =>
-    r'58c76ef0e6241fd7adcf761e2ae207e1e7d51dfa';
+    r'04d22809e36366b0bc3bb6a11cce89e440744698';
 
 /// See also [WorkoutSessionNotifier].
 @ProviderFor(WorkoutSessionNotifier)
