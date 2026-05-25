@@ -6,8 +6,11 @@ import 'package:go_router/go_router.dart';
 import '../controllers/workout_providers.dart';
 import '../widgets/active_exercise_card.dart';
 import '../widgets/workout_status_bar.dart';
+import '../widgets/superset_group_card.dart';
+import '../controllers/routine_editor_controller.dart' show RoutineBlock;
 import '../widgets/rest_timer_panel.dart';
 import '../widgets/session_notes_sheet.dart';
+import '../../domain/entities/routine_exercise_detail.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/routing/router.dart';
 
@@ -224,30 +227,84 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                 Expanded(
                   child: Stack(
                     children: [
-                      ListView.builder(
-                        itemCount: exercises.length + 1,
-                        padding: const EdgeInsets.only(bottom: 100), // padding for timer
-                        itemBuilder: (context, index) {
-                          if (index == exercises.length) {
-                            return const SizedBox(height: 16);
-                          }
+                      Builder(builder: (context) {
+                        final List<RoutineBlock> blocks = [];
+                        int? currentGroup;
+                        List<RoutineExerciseDetail> currentExercises = [];
 
-                          final ex = exercises[index];
-                          return ActiveExerciseCard(
-                            exerciseId: ex.exerciseId,
-                            exerciseName: ex.exerciseName,
-                            targetSetsAndReps: '${ex.targetSets} × ${ex.targetReps}',
-                            completedSets: activeState.sets.where((s) => s.exerciseId == ex.exerciseId).toList(),
-                            weightUnit: ex.weightUnit,
-                            bodyPart: ex.bodyPart,
-                            bestSet: activeState.bestSets[ex.exerciseId],
-                            latestSetGlobal: activeState.latestSetsGlobal[ex.exerciseId],
-                            latestSetRoutine: activeState.latestSetsRoutine[ex.exerciseId],
-                            useRoutineLatest: useRoutineLatest,
-                            alternatives: activeState.alternatives[ex.exerciseId],
-                          );
-                        },
-                      ),
+                        for (final ex in exercises) {
+                          if (ex.supersetGroup == null) {
+                            if (currentExercises.isNotEmpty) {
+                              blocks.add(RoutineBlock(supersetGroup: currentGroup, exercises: currentExercises));
+                              currentExercises = [];
+                            }
+                            blocks.add(RoutineBlock(supersetGroup: null, exercises: [ex]));
+                          } else {
+                            if (currentGroup == ex.supersetGroup) {
+                              currentExercises.add(ex);
+                            } else {
+                              if (currentExercises.isNotEmpty) {
+                                blocks.add(RoutineBlock(supersetGroup: currentGroup, exercises: currentExercises));
+                              }
+                              currentGroup = ex.supersetGroup;
+                              currentExercises = [ex];
+                            }
+                          }
+                        }
+                        if (currentExercises.isNotEmpty) {
+                          blocks.add(RoutineBlock(supersetGroup: currentGroup, exercises: currentExercises));
+                        }
+
+                        return ListView.builder(
+                          itemCount: blocks.length + 1,
+                          padding: const EdgeInsets.only(bottom: 100), // padding for timer
+                          itemBuilder: (context, index) {
+                            if (index == blocks.length) {
+                              return const SizedBox(height: 16);
+                            }
+
+                            final block = blocks[index];
+                            
+                            if (block.supersetGroup == null || block.exercises.length == 1) {
+                              final ex = block.exercises.first;
+                              return ActiveExerciseCard(
+                                exerciseId: ex.exerciseId,
+                                exerciseName: ex.exerciseName,
+                                targetSetsAndReps: '${ex.targetSets} × ${ex.targetReps}',
+                                completedSets: activeState.sets.where((s) => s.exerciseId == ex.exerciseId).toList(),
+                                weightUnit: ex.weightUnit,
+                                bodyPart: ex.bodyPart,
+                                bestSet: activeState.bestSets[ex.exerciseId],
+                                latestSetGlobal: activeState.latestSetsGlobal[ex.exerciseId],
+                                latestSetRoutine: activeState.latestSetsRoutine[ex.exerciseId],
+                                useRoutineLatest: useRoutineLatest,
+                                alternatives: activeState.alternatives[ex.exerciseId],
+                              );
+                            }
+
+                            int minSets = 999;
+                            int? activeExerciseId;
+                            for (final ex in block.exercises) {
+                              final completed = activeState.sets.where((s) => s.exerciseId == ex.exerciseId && !s.isWarmup).length;
+                              if (completed < ex.targetSets && completed < minSets) {
+                                minSets = completed;
+                                activeExerciseId = ex.exerciseId;
+                              }
+                            }
+
+                            return SupersetGroupCard(
+                              exercises: block.exercises,
+                              activeExerciseId: activeExerciseId,
+                              allSets: activeState.sets,
+                              bestSets: activeState.bestSets,
+                              latestSetsGlobal: activeState.latestSetsGlobal,
+                              latestSetsRoutine: activeState.latestSetsRoutine,
+                              useRoutineLatest: useRoutineLatest,
+                              alternatives: activeState.alternatives,
+                            );
+                          },
+                        );
+                      }),
                       const RestTimerPanel(),
                     ],
                   ),

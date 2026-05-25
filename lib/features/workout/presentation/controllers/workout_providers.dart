@@ -330,9 +330,23 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
         isPR = await repository.isPersonalRecord(setWithSession.exerciseId, setWithSession.weight, setWithSession.reps, id);
       }
 
+      int? nextRestSeconds;
+      if (!setWithSession.isWarmup) {
+        if (exerciseDetail.supersetGroup == null) {
+          nextRestSeconds = exerciseDetail.restSeconds;
+        } else {
+          final groupExercises = currentState.activeExercises
+              .where((e) => e.supersetGroup == exerciseDetail.supersetGroup)
+              .toList();
+          if (groupExercises.isNotEmpty && groupExercises.last.exerciseId == setWithSession.exerciseId) {
+            nextRestSeconds = exerciseDetail.restSeconds;
+          }
+        }
+      }
+
       state = AsyncData(currentState.copyWith(
         sets: newSets,
-        lastLoggedRestSeconds: exerciseDetail.restSeconds,
+        lastLoggedRestSeconds: nextRestSeconds,
         loggedSetCount: currentState.loggedSetCount + 1,
         lastPRSetId: isPR ? id : null, // Set PR ID if it's a PR, or null if it's not.
       ));
