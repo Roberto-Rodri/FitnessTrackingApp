@@ -85,11 +85,6 @@ class RoutineExerciseTile extends StatelessWidget {
                         '${exercise.targetSets} × ${exercise.targetReps}',
                         style: AppTheme.monoLarge(color: theme.colorScheme.onSurface).copyWith(fontSize: 16),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${exercise.restSeconds}s rest',
-                        style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt2),
-                      ),
                     ],
                   ),
                 ),

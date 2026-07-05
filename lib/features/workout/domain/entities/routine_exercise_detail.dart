@@ -12,7 +12,6 @@ class RoutineExerciseDetail with _$RoutineExerciseDetail {
     required int sequenceOrder,
     required int targetSets,
     required String targetReps,
-    @Default(90) int restSeconds,
     @Default('kg') String weightUnit,
     int? supersetGroup,
   }) = _RoutineExerciseDetail;

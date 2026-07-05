@@ -13,7 +13,7 @@ class BodyWeightCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final logsAsync = ref.watch(bodyWeightLogsNotifierProvider);
+    final logsAsync = ref.watch(bodyWeightLogsControllerProvider);
 
     return PressableCard(
       onTap: () {

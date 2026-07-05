@@ -37,6 +37,16 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   }
 
   @override
+  Future<void> updateSet(WorkoutSet set) {
+    return localDataSource.updateSet(set);
+  }
+
+  @override
+  Future<void> deleteSet(int setId) {
+    return localDataSource.deleteSet(setId);
+  }
+
+  @override
   Future<void> toggleSetWarmup(int setId, bool isWarmup) {
     return localDataSource.toggleSetWarmup(setId, isWarmup);
   }
@@ -123,8 +133,8 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   }
 
   @override
-  Future<void> addExerciseToRoutine(int routineId, int exerciseId, int sequenceOrder, int targetSets, String targetReps, int restSeconds) {
-    return localDataSource.addExerciseToRoutine(routineId, exerciseId, sequenceOrder, targetSets, targetReps, restSeconds);
+  Future<void> addExerciseToRoutine(int routineId, int exerciseId, int sequenceOrder, int targetSets, String targetReps) {
+    return localDataSource.addExerciseToRoutine(routineId, exerciseId, sequenceOrder, targetSets, targetReps);
   }
 
   @override
@@ -137,10 +147,7 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
     return localDataSource.updateExerciseTargets(routineId, exerciseId, targetSets, targetReps);
   }
 
-  @override
-  Future<void> updateExerciseRestTime(int routineId, int exerciseId, int restSeconds) {
-    return localDataSource.updateExerciseRestTime(routineId, exerciseId, restSeconds);
-  }
+
 
   @override
   Future<void> updateExerciseOrder(int routineId, List<int> exerciseIdsInOrder) {

@@ -9,7 +9,7 @@ class SessionNotesField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final sessionState = ref.watch(workoutSessionNotifierProvider).value;
+    final sessionState = ref.watch(workoutSessionControllerProvider).value;
 
     if (sessionState == null) return const SizedBox.shrink();
 
@@ -48,7 +48,7 @@ class SessionNotesField extends ConsumerWidget {
               ),
             ),
             onChanged: (text) {
-              ref.read(workoutSessionNotifierProvider.notifier).updateNotes(text);
+              ref.read(workoutSessionControllerProvider.notifier).updateNotes(text);
             },
           ),
         ],

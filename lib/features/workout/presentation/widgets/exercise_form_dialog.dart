@@ -20,7 +20,7 @@ class _ExerciseFormDialogState extends ConsumerState<ExerciseFormDialog> {
   late TextEditingController _bodyPartController;
   final _formKey = GlobalKey<FormState>();
   String _weightUnit = 'kg';
-  String? _duplicateError;
+
 
   @override
   void initState() {
@@ -37,24 +37,40 @@ class _ExerciseFormDialogState extends ConsumerState<ExerciseFormDialog> {
     super.dispose();
   }
 
+  void _showErrorSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: AppTheme.coral, fontWeight: FontWeight.bold)),
+        backgroundColor: AppTheme.bg2,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: AppTheme.coral, width: 1),
+        ),
+      ),
+    );
+  }
+
   Future<void> _save() async {
-    setState(() {
-      _duplicateError = null;
-    });
-
-    if (!_formKey.currentState!.validate()) return;
-
     final name = _nameController.text.trim();
     final bodyPart = _bodyPartController.text.trim();
-    if (bodyPart.isEmpty) return;
+
+    if (name.isEmpty) {
+      _showErrorSnackBar('Exercise name is required.');
+      return;
+    }
+
+    if (bodyPart.isEmpty) {
+      _showErrorSnackBar('Please choose a body part.');
+      return;
+    }
 
     final repository = ref.read(workoutRepositoryProvider);
     final exists = await repository.exerciseNameExists(name, excludeId: widget.existingExercise?.id);
 
     if (exists) {
-      setState(() {
-        _duplicateError = 'Exercise "$name" already exists.';
-      });
+      _showErrorSnackBar('An exercise with this name already exists.');
       return;
     }
 
@@ -71,7 +87,7 @@ class _ExerciseFormDialogState extends ConsumerState<ExerciseFormDialog> {
 
     return Dialog(
       backgroundColor: theme.colorScheme.surfaceContainerHigh,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 32.0, bottom: 24.0),
         child: Form(
@@ -87,29 +103,7 @@ class _ExerciseFormDialogState extends ConsumerState<ExerciseFormDialog> {
               ),
               const SizedBox(height: 24),
 
-              if (_duplicateError != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.amber.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.amber),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.warning_amber_rounded, color: AppTheme.amber),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _duplicateError!,
-                          style: const TextStyle(color: AppTheme.amber, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
+
 
               allExercisesAsync.when(
                 data: (exercisesList) => Autocomplete<String>(
@@ -134,7 +128,6 @@ class _ExerciseFormDialogState extends ConsumerState<ExerciseFormDialog> {
                       controller: textEditingController,
                       focusNode: focusNode,
                       label: 'Exercise Name',
-                      validator: (val) => val == null || val.trim().isEmpty ? 'Name is required' : null,
                     );
                   },
                 ),
@@ -167,7 +160,6 @@ class _ExerciseFormDialogState extends ConsumerState<ExerciseFormDialog> {
                       controller: textEditingController,
                       focusNode: focusNode,
                       label: 'Body Part',
-                      validator: (val) => val == null || val.trim().isEmpty ? 'Body part is required' : null,
                     );
                   },
                 ),

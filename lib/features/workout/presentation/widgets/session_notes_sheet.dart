@@ -16,7 +16,7 @@ class _SessionNotesSheetState extends ConsumerState<SessionNotesSheet> {
   @override
   void initState() {
     super.initState();
-    final state = ref.read(workoutSessionNotifierProvider).value;
+    final state = ref.read(workoutSessionControllerProvider).value;
     _controller = TextEditingController(text: state?.notes ?? '');
   }
 
@@ -29,7 +29,7 @@ class _SessionNotesSheetState extends ConsumerState<SessionNotesSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final sessionState = ref.watch(workoutSessionNotifierProvider).value;
+    final sessionState = ref.watch(workoutSessionControllerProvider).value;
     final previousNotes = sessionState?.previousSessionNotes;
 
     return Container(
@@ -98,7 +98,7 @@ class _SessionNotesSheetState extends ConsumerState<SessionNotesSheet> {
               ),
             ),
             onChanged: (text) {
-              ref.read(workoutSessionNotifierProvider.notifier).updateNotes(text);
+              ref.read(workoutSessionControllerProvider.notifier).updateNotes(text);
             },
           ),
           const SizedBox(height: 24),

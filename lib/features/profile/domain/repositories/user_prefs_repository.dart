@@ -5,4 +5,6 @@ abstract class UserPrefsRepository {
   Future<void> setName(String name);
   Future<TrainingPhase> getTrainingPhase();
   Future<void> setTrainingPhase(TrainingPhase phase);
+  Future<bool> getHasSeenWarmupHint();
+  Future<void> setHasSeenWarmupHint(bool value);
 }

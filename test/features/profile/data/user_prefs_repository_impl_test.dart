@@ -19,6 +19,12 @@ class FakeUserPrefsLocalDataSource implements UserPrefsLocalDataSource {
 
   @override
   Future<void> setName(String name) async {}
+
+  @override
+  Future<bool> getHasSeenWarmupHint() async => false;
+
+  @override
+  Future<void> setHasSeenWarmupHint(bool value) async {}
 }
 
 void main() {

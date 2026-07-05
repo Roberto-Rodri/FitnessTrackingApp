@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/theme.dart';
 import '../controllers/workout_providers.dart';
+import '../controllers/routine_editor_controller.dart';
 import '../../domain/entities/exercise.dart';
 import '../widgets/skeleton_loading.dart';
 import '../widgets/error_state.dart';
@@ -57,6 +58,7 @@ class _ExerciseSelectionScreenState extends ConsumerState<ExerciseSelectionScree
     if (isAlreadyAdded) {
       await repository.removeExerciseFromRoutine(widget.routineId, exercise.id!);
       ref.invalidate(routineExercisesProvider(widget.routineId));
+      ref.invalidate(routineEditorProvider(widget.routineId));
       ref.invalidate(routineListProvider);
 
       if (mounted) {
@@ -67,9 +69,10 @@ class _ExerciseSelectionScreenState extends ConsumerState<ExerciseSelectionScree
 
     HapticFeedback.lightImpact();
     final nextOrder = await repository.getNextSequenceOrder(widget.routineId);
-    await repository.addExerciseToRoutine(widget.routineId, exercise.id!, nextOrder, 3, '8-10', 90);
+    await repository.addExerciseToRoutine(widget.routineId, exercise.id!, nextOrder, 3, '8-10');
     
     ref.invalidate(routineExercisesProvider(widget.routineId));
+    ref.invalidate(routineEditorProvider(widget.routineId));
     ref.invalidate(routineListProvider);
 
     if (mounted) {
@@ -139,7 +142,7 @@ class _ExerciseSelectionScreenState extends ConsumerState<ExerciseSelectionScree
           
           allExercisesAsync.when(
             data: (allExercises) {
-              final addedIds = routineExercisesAsync.valueOrNull?.map((e) => e.exerciseId).toSet() ?? {};
+              final addedIds = routineExercisesAsync.value?.map((e) => e.exerciseId).toSet() ?? {};
 
               var filtered = _getFiltered(allExercises, _searchQuery);
               

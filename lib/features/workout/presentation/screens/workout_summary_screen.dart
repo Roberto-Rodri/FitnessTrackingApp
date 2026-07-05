@@ -50,7 +50,7 @@ class WorkoutSummaryScreen extends ConsumerWidget {
           error: (err, st) => Center(child: Text('Error: $err')),
           data: (summary) {
             final durationStr = _formatDuration(summary.session.startTimestamp, summary.session.endTimestamp);
-            final phase = profileAsync.valueOrNull?.phase ?? TrainingPhase.none;
+            final phase = profileAsync.value?.phase ?? TrainingPhase.none;
             final message = _getPhaseMessage(phase);
 
             return CustomScrollView(

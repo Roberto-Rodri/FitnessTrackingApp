@@ -16,6 +16,8 @@ abstract class WorkoutLocalDataSource {
   Future<List<Routine>> getRoutines();
   Future<int> startSession(int routineId, String routineName);
   Future<int> logSet(WorkoutSet set);
+  Future<void> updateSet(WorkoutSet set);
+  Future<void> deleteSet(int setId);
   Future<void> toggleSetWarmup(int setId, bool isWarmup);
   Future<void> endSession(int sessionId);
   Future<void> deleteSession(int sessionId);
@@ -36,10 +38,9 @@ abstract class WorkoutLocalDataSource {
   Future<List<Map<String, dynamic>>> getRoutinesWithExerciseInfo();
 
   // Part B Methods
-  Future<void> addExerciseToRoutine(int routineId, int exerciseId, int sequenceOrder, int targetSets, String targetReps, int restSeconds);
+  Future<void> addExerciseToRoutine(int routineId, int exerciseId, int sequenceOrder, int targetSets, String targetReps);
   Future<void> removeExerciseFromRoutine(int routineId, int exerciseId);
   Future<void> updateExerciseTargets(int routineId, int exerciseId, int targetSets, String targetReps);
-  Future<void> updateExerciseRestTime(int routineId, int exerciseId, int restSeconds);
   Future<void> updateExerciseOrder(int routineId, List<int> exerciseIdsInOrder);
   Future<int> getNextSequenceOrder(int routineId);
   Future<void> updateSupersetGroup(int routineId, int exerciseId, int? newGroupId);
@@ -121,6 +122,35 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
   }
 
   @override
+  Future<void> updateSet(WorkoutSet set) async {
+    try {
+      final db = await dbHelper.database;
+      await db.update(
+        'workout_sets',
+        set.toJson(),
+        where: 'id = ?',
+        whereArgs: [set.id],
+      );
+    } catch (e) {
+      throw DatabaseOperationException('Failed to update set: $e');
+    }
+  }
+
+  @override
+  Future<void> deleteSet(int setId) async {
+    try {
+      final db = await dbHelper.database;
+      await db.delete(
+        'workout_sets',
+        where: 'id = ?',
+        whereArgs: [setId],
+      );
+    } catch (e) {
+      throw DatabaseOperationException('Failed to delete set: $e');
+    }
+  }
+
+  @override
   Future<void> toggleSetWarmup(int setId, bool isWarmup) async {
     try {
       final db = await dbHelper.database;
@@ -154,7 +184,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
   Future<List<RoutineExerciseDetail>> getExercisesForRoutine(int routineId) async {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
-      SELECT e.id AS exerciseId, e.name AS exerciseName, e.bodyPart, e.weightUnit, ref.sequenceOrder, ref.targetSets, ref.targetReps, ref.restSeconds, ref.supersetGroup
+      SELECT e.id AS exerciseId, e.name AS exerciseName, e.bodyPart, e.weightUnit, ref.sequenceOrder, ref.targetSets, ref.targetReps, ref.supersetGroup
       FROM routine_exercise_cross_ref ref
       INNER JOIN exercises e ON ref.exerciseId = e.id
       WHERE ref.routineId = ?
@@ -418,7 +448,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
   }
 
   @override
-  Future<void> addExerciseToRoutine(int routineId, int exerciseId, int sequenceOrder, int targetSets, String targetReps, int restSeconds) async {
+  Future<void> addExerciseToRoutine(int routineId, int exerciseId, int sequenceOrder, int targetSets, String targetReps) async {
     try {
       final db = await dbHelper.database;
       await db.insert('routine_exercise_cross_ref', {
@@ -427,7 +457,6 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
         'sequenceOrder': sequenceOrder,
         'targetSets': targetSets,
         'targetReps': targetReps,
-        'restSeconds': restSeconds,
         'supersetGroup': null,
       });
     } catch (e) {
@@ -464,20 +493,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
     }
   }
 
-  @override
-  Future<void> updateExerciseRestTime(int routineId, int exerciseId, int restSeconds) async {
-    try {
-      final db = await dbHelper.database;
-      await db.update(
-        'routine_exercise_cross_ref',
-        {'restSeconds': restSeconds},
-        where: 'routineId = ? AND exerciseId = ?',
-        whereArgs: [routineId, exerciseId],
-      );
-    } catch (e) {
-      throw DatabaseOperationException('Failed to update exercise rest time: $e');
-    }
-  }
+
 
   @override
   Future<void> updateExerciseOrder(int routineId, List<int> exerciseIdsInOrder) async {
@@ -778,12 +794,14 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
         SELECT COUNT(*) as count FROM workout_sets ws
         INNER JOIN workout_sessions s ON ws.sessionId = s.id
         WHERE ws.exerciseId = ?
-        AND ws.weight >= ?
-        AND ws.reps >= ?
+        AND (
+          ws.weight > ? + 0.001 
+          OR (ABS(ws.weight - ?) <= 0.001 AND ws.reps >= ?)
+        )
         AND ws.id < ?
         AND s.endTimestamp IS NOT NULL
         AND coalesce(ws.isWarmup, 0) = 0
-      ''', [exerciseId, weight, reps, currentSetId]);
+      ''', [exerciseId, weight, weight, reps, currentSetId]);
       
       final count = result.first['count'] as int;
       return count == 0 && weight > 0;
@@ -805,8 +823,10 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
           SELECT 1 FROM workout_sets ws2
           INNER JOIN workout_sessions s2 ON ws2.sessionId = s2.id
           WHERE ws2.exerciseId = ws1.exerciseId
-          AND ws2.weight >= ws1.weight
-          AND ws2.reps >= ws1.reps
+          AND (
+            ws2.weight > ws1.weight + 0.001
+            OR (ABS(ws2.weight - ws1.weight) <= 0.001 AND ws2.reps >= ws1.reps)
+          )
           AND ws2.id < ws1.id
           AND s2.endTimestamp IS NOT NULL
           AND coalesce(ws2.isWarmup, 0) = 0
@@ -827,6 +847,12 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
         'id': log.id,
         'timestamp': log.date.millisecondsSinceEpoch,
         'weight': log.weight,
+        'bodyFatPercentage': log.bodyFatPercentage,
+        'muscleMass': log.muscleMass,
+        'waist': log.waist,
+        'chest': log.chest,
+        'arms': log.arms,
+        'notes': log.notes,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     } catch (e) {
       throw DatabaseOperationException('Failed to save body weight log: $e');
@@ -858,6 +884,12 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
       id: map['id'] as String,
       date: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] as int),
       weight: map['weight'] as double,
+      bodyFatPercentage: map['bodyFatPercentage'] as double?,
+      muscleMass: map['muscleMass'] as double?,
+      waist: map['waist'] as double?,
+      chest: map['chest'] as double?,
+      arms: map['arms'] as double?,
+      notes: map['notes'] as String?,
     )).toList();
   }
 
@@ -915,11 +947,11 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
         volumePerSession[sessionId] = (volumePerSession[sessionId] ?? 0.0) + (weight * reps);
         
         bool isPR = false;
-        if (weight > allTimeMaxWeight) {
+        if (weight > allTimeMaxWeight + 0.001) {
           isPR = true;
           allTimeMaxWeight = weight;
           allTimeMaxReps = reps;
-        } else if (weight == allTimeMaxWeight && reps > allTimeMaxReps) {
+        } else if ((weight - allTimeMaxWeight).abs() <= 0.001 && reps > allTimeMaxReps) {
           isPR = true;
           allTimeMaxReps = reps;
         }

@@ -1267,22 +1267,22 @@ class _WorkoutSummaryProviderElement
   int get sessionId => (origin as WorkoutSummaryProvider).sessionId;
 }
 
-String _$workoutSessionNotifierHash() =>
-    r'ddf48471cc10b38dcb24555144f12519b91ecc92';
+String _$workoutSessionControllerHash() =>
+    r'7e77eef0af78753cafa2965e8f3aa870c2677505';
 
-/// See also [WorkoutSessionNotifier].
-@ProviderFor(WorkoutSessionNotifier)
-final workoutSessionNotifierProvider =
-    AsyncNotifierProvider<WorkoutSessionNotifier, ActiveWorkoutState>.internal(
-  WorkoutSessionNotifier.new,
-  name: r'workoutSessionNotifierProvider',
+/// See also [WorkoutSessionController].
+@ProviderFor(WorkoutSessionController)
+final workoutSessionControllerProvider = AsyncNotifierProvider<
+    WorkoutSessionController, ActiveWorkoutState>.internal(
+  WorkoutSessionController.new,
+  name: r'workoutSessionControllerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$workoutSessionNotifierHash,
+      : _$workoutSessionControllerHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$WorkoutSessionNotifier = AsyncNotifier<ActiveWorkoutState>;
+typedef _$WorkoutSessionController = AsyncNotifier<ActiveWorkoutState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

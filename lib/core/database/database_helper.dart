@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 
 class DatabaseHelper {
   static const _databaseName = "IronLog.db";
-  static const _databaseVersion = 9;
+  static const _databaseVersion = 11;
 
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -109,6 +109,35 @@ class DatabaseHelper {
     if (oldVersion < 9) {
       await db.execute('ALTER TABLE routine_exercise_cross_ref ADD COLUMN supersetGroup INTEGER');
     }
+    if (oldVersion < 10) {
+      await db.execute('''
+        CREATE TABLE routine_exercise_cross_ref_new (
+          routineId INTEGER NOT NULL,
+          exerciseId INTEGER NOT NULL,
+          sequenceOrder INTEGER NOT NULL,
+          targetSets INTEGER NOT NULL,
+          targetReps TEXT NOT NULL,
+          supersetGroup INTEGER,
+          PRIMARY KEY (routineId, exerciseId),
+          FOREIGN KEY (routineId) REFERENCES routines (id) ON DELETE CASCADE,
+          FOREIGN KEY (exerciseId) REFERENCES exercises (id) ON DELETE CASCADE
+        )
+      ''');
+      await db.execute('''
+        INSERT INTO routine_exercise_cross_ref_new (routineId, exerciseId, sequenceOrder, targetSets, targetReps, supersetGroup)
+        SELECT routineId, exerciseId, sequenceOrder, targetSets, targetReps, supersetGroup FROM routine_exercise_cross_ref
+      ''');
+      await db.execute('DROP TABLE routine_exercise_cross_ref');
+      await db.execute('ALTER TABLE routine_exercise_cross_ref_new RENAME TO routine_exercise_cross_ref');
+    }
+    if (oldVersion < 11) {
+      await db.execute('ALTER TABLE body_weight_logs ADD COLUMN bodyFatPercentage REAL');
+      await db.execute('ALTER TABLE body_weight_logs ADD COLUMN muscleMass REAL');
+      await db.execute('ALTER TABLE body_weight_logs ADD COLUMN waist REAL');
+      await db.execute('ALTER TABLE body_weight_logs ADD COLUMN chest REAL');
+      await db.execute('ALTER TABLE body_weight_logs ADD COLUMN arms REAL');
+      await db.execute('ALTER TABLE body_weight_logs ADD COLUMN notes TEXT');
+    }
   }
 
   Future _onCreate(Database db, int version) async {
@@ -135,7 +164,6 @@ class DatabaseHelper {
         sequenceOrder INTEGER NOT NULL,
         targetSets INTEGER NOT NULL,
         targetReps TEXT NOT NULL,
-        restSeconds INTEGER NOT NULL DEFAULT 90,
         supersetGroup INTEGER,
         PRIMARY KEY (routineId, exerciseId),
         FOREIGN KEY (routineId) REFERENCES routines (id) ON DELETE CASCADE,
@@ -205,7 +233,13 @@ class DatabaseHelper {
       CREATE TABLE body_weight_logs (
         id TEXT PRIMARY KEY,
         timestamp INTEGER NOT NULL,
-        weight REAL NOT NULL
+        weight REAL NOT NULL,
+        bodyFatPercentage REAL,
+        muscleMass REAL,
+        waist REAL,
+        chest REAL,
+        arms REAL,
+        notes TEXT
       )
     ''');
 
@@ -232,7 +266,6 @@ class DatabaseHelper {
       'sequenceOrder': 1,
       'targetSets': 3,
       'targetReps': '8-10',
-      'restSeconds': 90,
     });
     await db.insert('routine_exercise_cross_ref', {
       'routineId': routineId,
@@ -240,7 +273,6 @@ class DatabaseHelper {
       'sequenceOrder': 2,
       'targetSets': 3,
       'targetReps': '8-10',
-      'restSeconds': 90,
     });
     await db.insert('routine_exercise_cross_ref', {
       'routineId': routineId,
@@ -248,7 +280,6 @@ class DatabaseHelper {
       'sequenceOrder': 3,
       'targetSets': 3,
       'targetReps': '5',
-      'restSeconds': 120,
     });
 
     // Additional exercises

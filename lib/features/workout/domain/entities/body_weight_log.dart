@@ -9,6 +9,12 @@ class BodyWeightLog with _$BodyWeightLog {
     required String id,
     required DateTime date,
     required double weight,
+    double? bodyFatPercentage,
+    double? muscleMass,
+    double? waist,
+    double? chest,
+    double? arms,
+    String? notes,
   }) = _BodyWeightLog;
 
   factory BodyWeightLog.fromJson(Map<String, dynamic> json) => _$BodyWeightLogFromJson(json);

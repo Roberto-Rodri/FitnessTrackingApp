@@ -11,7 +11,8 @@ class UserProfileController extends _$UserProfileController {
     final repository = ref.watch(userPrefsRepositoryProvider);
     final name = await repository.getName();
     final phase = await repository.getTrainingPhase();
-    return UserProfile(name: name, phase: phase);
+    final hasSeenWarmupHint = await repository.getHasSeenWarmupHint();
+    return UserProfile(name: name, phase: phase, hasSeenWarmupHint: hasSeenWarmupHint);
   }
 
   Future<void> saveName(String name) async {
@@ -23,6 +24,12 @@ class UserProfileController extends _$UserProfileController {
   Future<void> saveTrainingPhase(TrainingPhase phase) async {
     final repository = ref.read(userPrefsRepositoryProvider);
     await repository.setTrainingPhase(phase);
+    ref.invalidateSelf();
+  }
+
+  Future<void> markWarmupHintSeen() async {
+    final repository = ref.read(userPrefsRepositoryProvider);
+    await repository.setHasSeenWarmupHint(true);
     ref.invalidateSelf();
   }
 }

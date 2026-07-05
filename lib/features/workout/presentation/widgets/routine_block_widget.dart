@@ -57,7 +57,8 @@ class RoutineBlockWidget extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: block.exercises.asMap().entries.map((entry) {
                     final ex = entry.value;
-                    return Stack(
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         RoutineExerciseTile(
                           key: ValueKey('tile_${ex.exerciseId}'),
@@ -68,13 +69,19 @@ class RoutineBlockWidget extends StatelessWidget {
                           onDismissed: () => onDismissed(ex.exerciseId),
                         ),
                         if (isGrouped)
-                          Positioned(
-                            right: 8,
-                            top: 8,
-                            child: IconButton(
-                              icon: const Icon(Icons.link_off, size: 20, color: AppTheme.txt2),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 48, bottom: 12),
+                            child: FilledButton.icon(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppTheme.amber.withValues(alpha: 0.15),
+                                foregroundColor: AppTheme.amber,
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                minimumSize: const Size(0, 48),
+                                elevation: 0,
+                              ),
+                              icon: const Icon(Icons.link_off, size: 18),
+                              label: const Text('Unlink', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                               onPressed: () => onUnlink(ex.exerciseId),
-                              tooltip: 'Unlink from group',
                             ),
                           ),
                       ],

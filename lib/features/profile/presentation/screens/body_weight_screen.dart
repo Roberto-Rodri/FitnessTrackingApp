@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../workout/presentation/controllers/body_weight_providers.dart';
 import '../../../workout/presentation/widgets/log_weight_sheet.dart';
+import '../../../workout/domain/entities/body_weight_log.dart';
 
 class BodyWeightScreen extends ConsumerWidget {
   const BodyWeightScreen({super.key});
@@ -11,7 +12,7 @@ class BodyWeightScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final logsAsync = ref.watch(bodyWeightLogsNotifierProvider);
+    final logsAsync = ref.watch(bodyWeightLogsControllerProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.bg0,
@@ -103,38 +104,9 @@ class BodyWeightScreen extends ConsumerWidget {
                             child: const Icon(Icons.delete, color: AppTheme.bg0),
                           ),
                           onDismissed: (_) {
-                            ref.read(bodyWeightLogsNotifierProvider.notifier).deleteLog(log.id);
+                            ref.read(bodyWeightLogsControllerProvider.notifier).deleteLog(log.id);
                           },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                            decoration: const BoxDecoration(
-                              border: Border(bottom: BorderSide(color: AppTheme.bg3)),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  DateFormat('MMM d, yyyy').format(log.date),
-                                  style: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.txt2),
-                                ),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                                  textBaseline: TextBaseline.alphabetic,
-                                  children: [
-                                    Text(
-                                      log.weight.toStringAsFixed(1),
-                                      style: AppTheme.monoLarge(color: AppTheme.txt1).copyWith(fontSize: 20),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'kg',
-                                      style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt3),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
+                          child: _BodyMetricsTile(log: log),
                         );
                       },
                     ),
@@ -189,4 +161,112 @@ class _TrendChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _TrendChartPainter oldDelegate) => true;
+}
+
+class _BodyMetricsTile extends StatefulWidget {
+  final BodyWeightLog log;
+  const _BodyMetricsTile({required this.log});
+  
+  @override
+  State<_BodyMetricsTile> createState() => _BodyMetricsTileState();
+}
+
+class _BodyMetricsTileState extends State<_BodyMetricsTile> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasExtra = widget.log.bodyFatPercentage != null ||
+        widget.log.muscleMass != null ||
+        widget.log.waist != null ||
+        widget.log.chest != null ||
+        widget.log.arms != null ||
+        widget.log.notes != null;
+
+    return InkWell(
+      onTap: hasExtra ? () => setState(() => _expanded = !_expanded) : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: AppTheme.bg3)),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    if (hasExtra) ...[
+                      Icon(_expanded ? Icons.expand_less : Icons.expand_more, color: AppTheme.txt3, size: 20),
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      DateFormat('MMM d, yyyy').format(widget.log.date),
+                      style: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.txt2),
+                    ),
+                  ],
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      widget.log.weight.toStringAsFixed(1),
+                      style: AppTheme.monoLarge(color: AppTheme.txt1).copyWith(fontSize: 20),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'kg',
+                      style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt3),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            if (_expanded && hasExtra) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.bg1,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (widget.log.bodyFatPercentage != null) _buildDetailRow('Body Fat', '${widget.log.bodyFatPercentage}%', theme),
+                    if (widget.log.muscleMass != null) _buildDetailRow('Muscle Mass', '${widget.log.muscleMass} kg', theme),
+                    if (widget.log.waist != null) _buildDetailRow('Waist', '${widget.log.waist} cm', theme),
+                    if (widget.log.chest != null) _buildDetailRow('Chest', '${widget.log.chest} cm', theme),
+                    if (widget.log.arms != null) _buildDetailRow('Arms', '${widget.log.arms} cm', theme),
+                    if (widget.log.notes != null) ...[
+                      const SizedBox(height: 8),
+                      Text('Notes:', style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt3)),
+                      const SizedBox(height: 4),
+                      Text(widget.log.notes!, style: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.txt2)),
+                    ],
+                  ],
+                ),
+              )
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.txt3)),
+          Text(value, style: AppTheme.monoLarge(color: AppTheme.txt2).copyWith(fontSize: 14)),
+        ],
+      ),
+    );
+  }
 }

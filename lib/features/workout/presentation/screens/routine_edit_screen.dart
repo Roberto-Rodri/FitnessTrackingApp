@@ -241,11 +241,10 @@ class _RoutineEditScreenState extends ConsumerState<RoutineEditScreen> {
     final routineId = widget.routineId;
     if (routineId == null) return;
     
-    final result = await showEditTargetsDialog(context, ex.targetSets, ex.targetReps, ex.restSeconds);
+    final result = await showEditTargetsDialog(context, ex.targetSets, ex.targetReps);
     if (result != null) {
       final repository = ref.read(workoutRepositoryProvider);
       await repository.updateExerciseTargets(routineId, ex.exerciseId, result['sets'] as int, result['reps'] as String);
-      await repository.updateExerciseRestTime(routineId, ex.exerciseId, result['restSeconds'] as int);
       ref.invalidate(routineEditorProvider(routineId));
     }
   }

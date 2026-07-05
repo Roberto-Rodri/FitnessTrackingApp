@@ -8,9 +8,11 @@ import '../widgets/active_exercise_card.dart';
 import '../widgets/workout_status_bar.dart';
 import '../widgets/superset_group_card.dart';
 import '../controllers/routine_editor_controller.dart' show RoutineBlock;
-import '../widgets/rest_timer_panel.dart';
 import '../widgets/session_notes_sheet.dart';
+import '../widgets/exercise_picker_sheet.dart';
+import '../widgets/add_exercise_targets_dialog.dart';
 import '../../domain/entities/routine_exercise_detail.dart';
+import '../../domain/entities/exercise.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/routing/router.dart';
 
@@ -23,7 +25,7 @@ class ActiveWorkoutScreen extends ConsumerStatefulWidget {
 
 class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   Future<void> _finishWorkout() async {
-    final sessionState = ref.read(workoutSessionNotifierProvider);
+    final sessionState = ref.read(workoutSessionControllerProvider);
     final setsCount = sessionState.value?.sets.length ?? 0;
 
     final confirm = await showDialog<bool>(
@@ -97,7 +99,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       Future.delayed(const Duration(milliseconds: 100), () {
         HapticFeedback.lightImpact();
       });
-      final sessionId = await ref.read(workoutSessionNotifierProvider.notifier).endSession();
+      final sessionId = await ref.read(workoutSessionControllerProvider.notifier).endSession();
       if (mounted && sessionId != null) {
         ref.read(showConfettiProvider.notifier).state = true;
         Future.delayed(const Duration(seconds: 4), () {
@@ -110,17 +112,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(workoutSessionNotifierProvider, (previous, next) {
-      if (previous != null && next.hasValue) {
-        final prevCount = previous.value?.loggedSetCount ?? 0;
-        final nextCount = next.value?.loggedSetCount ?? 0;
-        if (nextCount > prevCount && next.value?.lastLoggedRestSeconds != null) {
-          ref.read(restTimerDurationProvider.notifier).state = next.value!.lastLoggedRestSeconds!;
-        }
-      }
-    });
-
-    final sessionState = ref.watch(workoutSessionNotifierProvider);
+    final sessionState = ref.watch(workoutSessionControllerProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -257,10 +249,57 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
 
                         return ListView.builder(
                           itemCount: blocks.length + 1,
-                          padding: const EdgeInsets.only(bottom: 100), // padding for timer
+                          padding: const EdgeInsets.only(bottom: 16),
                           itemBuilder: (context, index) {
                             if (index == blocks.length) {
-                              return const SizedBox(height: 16);
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                child: OutlinedButton.icon(
+                                  icon: const Icon(Icons.add),
+                                  label: const Text('Add exercise'),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                                  ),
+                                  onPressed: () async {
+                                    Exercise? selectedExercise;
+                                    
+                                    await showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+                                      ),
+                                      builder: (context) => ExercisePickerSheet(
+                                        onExerciseSelected: (exercise) {
+                                          selectedExercise = exercise;
+                                        },
+                                      ),
+                                    );
+                                    
+                                    if (selectedExercise == null || !context.mounted) return;
+                                    
+                                    final targets = await showAddExerciseTargetsDialog(context);
+                                    if (targets == null || !context.mounted) return;
+                                    
+                                    final sets = targets['sets'] as int;
+                                    final reps = targets['reps'] as String;
+
+                                    try {
+                                      await ref.read(workoutSessionControllerProvider.notifier)
+                                          .addExerciseToSession(selectedExercise!, sets, reps);
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Failed to add exercise: $e')),
+                                        );
+                                      }
+                                    }
+                                  },
+                                ),
+                              );
                             }
 
                             final block = blocks[index];
@@ -305,7 +344,6 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                           },
                         );
                       }),
-                      const RestTimerPanel(),
                     ],
                   ),
                 ),

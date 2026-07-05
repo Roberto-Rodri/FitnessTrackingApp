@@ -102,7 +102,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           subtitle: Text('${routine.exerciseCount} exercises'),
                           onTap: () async {
                             Navigator.of(context).pop();
-                            await ref.read(workoutSessionNotifierProvider.notifier).startSession(routine.id, routine.name);
+                            await ref.read(workoutSessionControllerProvider.notifier).startSession(routine.id, routine.name);
                             HapticFeedback.mediumImpact();
                             if (!context.mounted) return;
                             context.pushNamed(RouteNames.activeWorkout);
@@ -478,9 +478,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return const SkeletonRoutineCard(); // Fallback skeleton
     }
 
-    final activeProgram = activeProgramAsync.valueOrNull;
-    final currentDay = currentDayAsync.valueOrNull;
-    final completedDays = completedDaysAsync.valueOrNull ?? <int>{};
+    final activeProgram = activeProgramAsync.value;
+    final currentDay = currentDayAsync.value;
+    final completedDays = completedDaysAsync.value ?? <int>{};
 
 
     if (activeProgram != null && currentDay != null) {
@@ -496,7 +496,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             bodyParts: currentDay.routineId != null ? ['Push', 'Pull'] : [], // Simplification, would need routine details
             exerciseCount: 0, // Simplification, would need routine details
             onStart: currentDay.routineId != null ? () async {
-              await ref.read(workoutSessionNotifierProvider.notifier).startSession(
+              await ref.read(workoutSessionControllerProvider.notifier).startSession(
                 currentDay.routineId!,
                 currentDay.label,
                 programId: activeProgram.program.id,
@@ -565,7 +565,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(height: 8),
                 InkWell(
                   onTap: () async {
-                    await ref.read(workoutSessionNotifierProvider.notifier).startSession(routine.id, routine.name);
+                    await ref.read(workoutSessionControllerProvider.notifier).startSession(routine.id, routine.name);
                     HapticFeedback.mediumImpact();
                     if (!context.mounted) return;
                     context.pushNamed(RouteNames.activeWorkout);
@@ -717,7 +717,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         trailing: trailingWidget,
                         onTap: canStart ? () async {
                           Navigator.of(context).pop();
-                          await ref.read(workoutSessionNotifierProvider.notifier).startSession(
+                          await ref.read(workoutSessionControllerProvider.notifier).startSession(
                             day.routineId!,
                             day.label,
                             programId: programDetail.program.id,

@@ -60,7 +60,7 @@ class RoutineEditor extends _$RoutineEditor {
   }
 
   Future<void> linkExercises(int blockIndex1, int blockIndex2) async {
-    final blocks = state.valueOrNull;
+    final blocks = state.value;
     if (blocks == null) return;
 
     final block1 = blocks[blockIndex1];
@@ -94,7 +94,7 @@ class RoutineEditor extends _$RoutineEditor {
   }
 
   Future<void> unlinkExercise(int exerciseId) async {
-    final blocks = state.valueOrNull;
+    final blocks = state.value;
     if (blocks == null) return;
 
     final repository = ref.read(workoutRepositoryProvider);
@@ -123,7 +123,7 @@ class RoutineEditor extends _$RoutineEditor {
   }
 
   Future<void> reorderBlocks(int oldIndex, int newIndex) async {
-    final blocks = state.valueOrNull?.toList();
+    final blocks = state.value?.toList();
     if (blocks == null) return;
 
     if (oldIndex < newIndex) {

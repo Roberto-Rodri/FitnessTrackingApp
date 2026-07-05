@@ -11,7 +11,6 @@ class RoutineExercise with _$RoutineExercise {
     required int sequenceOrder,
     required int targetSets,
     required String targetReps,
-    @Default(90) int restSeconds,
     int? supersetGroup,
   }) = _RoutineExercise;
 

@@ -14,7 +14,12 @@ import '../../domain/entities/workout_summary_detail.dart';
 
 part 'workout_providers.g.dart';
 
-final useRoutineLatestProvider = StateProvider<bool>((ref) => true);
+final useRoutineLatestProvider = NotifierProvider<UseRoutineLatestNotifier, bool>(UseRoutineLatestNotifier.new);
+class UseRoutineLatestNotifier extends Notifier<bool> {
+  @override
+  bool build() => true;
+  set state(bool value) => super.state = value;
+}
 
 class ActiveWorkoutState {
   final int? sessionId;
@@ -26,7 +31,6 @@ class ActiveWorkoutState {
   final Map<int, Map<String, dynamic>> latestSetsGlobal;
   final Map<int, Map<String, dynamic>> latestSetsRoutine;
   final Map<int, List<Exercise>> alternatives;
-  final int? lastLoggedRestSeconds;
   final int loggedSetCount;
   final int? lastPRSetId;
   final int? programId;
@@ -46,7 +50,6 @@ class ActiveWorkoutState {
     this.latestSetsGlobal = const {},
     this.latestSetsRoutine = const {},
     this.alternatives = const {},
-    this.lastLoggedRestSeconds,
     this.loggedSetCount = 0,
     this.lastPRSetId,
     this.programId,
@@ -67,7 +70,6 @@ class ActiveWorkoutState {
     Map<int, Map<String, dynamic>>? latestSetsGlobal,
     Map<int, Map<String, dynamic>>? latestSetsRoutine,
     Map<int, List<Exercise>>? alternatives,
-    int? lastLoggedRestSeconds,
     int? loggedSetCount,
     int? lastPRSetId,
     int? programId,
@@ -87,7 +89,6 @@ class ActiveWorkoutState {
       latestSetsGlobal: latestSetsGlobal ?? this.latestSetsGlobal,
       latestSetsRoutine: latestSetsRoutine ?? this.latestSetsRoutine,
       alternatives: alternatives ?? this.alternatives,
-      lastLoggedRestSeconds: lastLoggedRestSeconds ?? this.lastLoggedRestSeconds,
       loggedSetCount: loggedSetCount ?? this.loggedSetCount,
       lastPRSetId: lastPRSetId,
       programId: programId ?? this.programId,
@@ -115,7 +116,12 @@ Future<List<WorkoutSessionSummary>> completedSessions(CompletedSessionsRef ref) 
 
 enum HistoryFilter { all, thisWeek, thisMonth }
 
-final historyFilterProvider = StateProvider<HistoryFilter>((ref) => HistoryFilter.all);
+final historyFilterProvider = NotifierProvider<HistoryFilterNotifier, HistoryFilter>(HistoryFilterNotifier.new);
+class HistoryFilterNotifier extends Notifier<HistoryFilter> {
+  @override
+  HistoryFilter build() => HistoryFilter.all;
+  set state(HistoryFilter value) => super.state = value;
+}
 
 @riverpod
 Future<List<WorkoutSessionSummary>> filteredSessions(FilteredSessionsRef ref) async {
@@ -208,7 +214,12 @@ Future<RoutineSummary?> lastRoutine(LastRoutineRef ref) async {
   return repository.getLastUsedRoutine();
 }
 
-final showConfettiProvider = StateProvider<bool>((ref) => false);
+final showConfettiProvider = NotifierProvider<ShowConfettiNotifier, bool>(ShowConfettiNotifier.new);
+class ShowConfettiNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+  set state(bool value) => super.state = value;
+}
 
 @riverpod
 Future<WorkoutSessionSummary?> previousSession(PreviousSessionRef ref, int routineId, int currentSessionId) async {
@@ -234,7 +245,7 @@ Future<WorkoutSessionSummary?> previousSession(PreviousSessionRef ref, int routi
 }
 
 @Riverpod(keepAlive: true)
-class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
+class WorkoutSessionController extends _$WorkoutSessionController {
   bool _isStarting = false;
 
   @override
@@ -330,29 +341,73 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
         isPR = await repository.isPersonalRecord(setWithSession.exerciseId, setWithSession.weight, setWithSession.reps, id);
       }
 
-      int? nextRestSeconds;
-      if (!setWithSession.isWarmup) {
-        if (exerciseDetail.supersetGroup == null) {
-          nextRestSeconds = exerciseDetail.restSeconds;
-        } else {
-          final groupExercises = currentState.activeExercises
-              .where((e) => e.supersetGroup == exerciseDetail.supersetGroup)
-              .toList();
-          if (groupExercises.isNotEmpty && groupExercises.last.exerciseId == setWithSession.exerciseId) {
-            nextRestSeconds = exerciseDetail.restSeconds;
-          }
-        }
-      }
-
       state = AsyncData(currentState.copyWith(
         sets: newSets,
-        lastLoggedRestSeconds: nextRestSeconds,
         loggedSetCount: currentState.loggedSetCount + 1,
         lastPRSetId: isPR ? id : null, // Set PR ID if it's a PR, or null if it's not.
       ));
     } catch (e) {
       // Revert on failure to the captured previous state (do NOT use AsyncError)
       state = AsyncData(currentState);
+    }
+  }
+
+  Future<void> updateSet(WorkoutSet set) async {
+    final currentState = state.value;
+    if (currentState == null || currentState.sessionId == null) return;
+    
+    try {
+      final repository = ref.read(workoutRepositoryProvider);
+      await repository.updateSet(set);
+      
+      final index = currentState.sets.indexWhere((s) => s.id == set.id);
+      if (index == -1) return;
+      
+      final newSets = List<WorkoutSet>.from(currentState.sets);
+      newSets[index] = set;
+      
+      final exerciseDetail = currentState.activeExercises.firstWhere(
+        (e) => e.exerciseId == set.exerciseId,
+      );
+
+      bool isPR = false;
+      if (!set.isWarmup && (exerciseDetail.weightUnit == 'kg' || exerciseDetail.weightUnit == 'lbs')) {
+        isPR = await repository.isPersonalRecord(set.exerciseId, set.weight, set.reps, set.id!);
+      }
+      
+      int? lastPRSetId = currentState.lastPRSetId;
+      if (isPR) {
+        lastPRSetId = set.id;
+      } else if (lastPRSetId == set.id) {
+        lastPRSetId = null; 
+      }
+      
+      state = AsyncData(currentState.copyWith(
+        sets: newSets,
+        lastPRSetId: lastPRSetId,
+      ));
+    } catch (e) {
+      // Ignore errors for now, UI should stay the same
+    }
+  }
+
+  Future<void> deleteSet(int setId) async {
+    final currentState = state.value;
+    if (currentState == null || currentState.sessionId == null) return;
+    
+    try {
+      final repository = ref.read(workoutRepositoryProvider);
+      await repository.deleteSet(setId);
+      
+      final newSets = currentState.sets.where((s) => s.id != setId).toList();
+      
+      state = AsyncData(currentState.copyWith(
+        sets: newSets,
+        lastPRSetId: currentState.lastPRSetId == setId ? null : currentState.lastPRSetId,
+        loggedSetCount: currentState.loggedSetCount > 0 ? currentState.loggedSetCount - 1 : 0,
+      ));
+    } catch (e) {
+      // Ignore errors
     }
   }
 
@@ -437,6 +492,47 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
     final repository = ref.read(workoutRepositoryProvider);
     
     // Fetch reference data for the new exercise
+    final newBest = await repository.getBestSetsForExercises([newExerciseId]);
+    final newLatestGlobal = await repository.getLatestSetsForExercises([newExerciseId]);
+    final newLatestRoutine = currentState.routineId != null 
+        ? await repository.getLatestSetsForExercisesInRoutine([newExerciseId], currentState.routineId!)
+        : <int, Map<String, dynamic>>{};
+    final newAlternatives = await repository.getAlternativesForExercises([newExerciseId]);
+
+    final updatedBestSets = Map<int, Map<String, dynamic>>.from(currentState.bestSets)..addAll(newBest);
+    final updatedLatestGlobal = Map<int, Map<String, dynamic>>.from(currentState.latestSetsGlobal)..addAll(newLatestGlobal);
+    final updatedLatestRoutine = Map<int, Map<String, dynamic>>.from(currentState.latestSetsRoutine)..addAll(newLatestRoutine);
+    final updatedAlternatives = Map<int, List<Exercise>>.from(currentState.alternatives)..addAll(newAlternatives);
+
+    state = AsyncData(currentState.copyWith(
+      activeExercises: updatedExercises,
+      bestSets: updatedBestSets,
+      latestSetsGlobal: updatedLatestGlobal,
+      latestSetsRoutine: updatedLatestRoutine,
+      alternatives: updatedAlternatives,
+    ));
+  }
+
+  Future<void> addExerciseToSession(Exercise newExercise, int targetSets, String targetReps) async {
+    final currentState = state.value;
+    if (currentState == null) return;
+    
+    final newExerciseId = newExercise.id!;
+    
+    final newDetail = RoutineExerciseDetail(
+      exerciseId: newExerciseId,
+      exerciseName: newExercise.name,
+      bodyPart: newExercise.bodyPart,
+      sequenceOrder: currentState.activeExercises.length,
+      targetSets: targetSets,
+      targetReps: targetReps,
+      weightUnit: newExercise.weightUnit,
+    );
+    
+    final updatedExercises = [...currentState.activeExercises, newDetail];
+    
+    final repository = ref.read(workoutRepositoryProvider);
+    
     final newBest = await repository.getBestSetsForExercises([newExerciseId]);
     final newLatestGlobal = await repository.getLatestSetsForExercises([newExerciseId]);
     final newLatestRoutine = currentState.routineId != null 

@@ -38,7 +38,7 @@ class _ComparisonPanelState extends ConsumerState<ComparisonPanel> {
       data: (summary) {
         if (summary == null) return const SizedBox.shrink();
 
-        final previousSetsAll = ref.watch(workoutSessionNotifierProvider).valueOrNull?.previousSetsByExercise[widget.exerciseId] ?? [];
+        final previousSetsAll = ref.watch(workoutSessionControllerProvider).value?.previousSetsByExercise[widget.exerciseId] ?? [];
         final previousSets = previousSetsAll.where((s) => s.sessionId == summary.session.id && !s.isWarmup).toList();
         
         if (previousSets.isEmpty) return const SizedBox.shrink();
@@ -143,7 +143,7 @@ class _CompareRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileControllerProvider);
-    final phase = profileAsync.valueOrNull?.phase ?? TrainingPhase.none;
+    final phase = profileAsync.value?.phase ?? TrainingPhase.none;
 
     final prevStr = '${_formatWeight(prevSet)} × ${prevSet.reps}';
     final currStr = currSet != null ? '${_formatWeight(currSet!)} × ${currSet!.reps}' : '--';

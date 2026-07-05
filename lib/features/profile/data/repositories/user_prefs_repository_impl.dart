@@ -32,4 +32,14 @@ class UserPrefsRepositoryImpl implements UserPrefsRepository {
   Future<void> setTrainingPhase(TrainingPhase phase) {
     return dataSource.setTrainingPhase(phase.name);
   }
+
+  @override
+  Future<bool> getHasSeenWarmupHint() {
+    return dataSource.getHasSeenWarmupHint();
+  }
+
+  @override
+  Future<void> setHasSeenWarmupHint(bool value) {
+    return dataSource.setHasSeenWarmupHint(value);
+  }
 }

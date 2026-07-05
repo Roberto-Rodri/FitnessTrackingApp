@@ -14,6 +14,8 @@ abstract class WorkoutRepository {
   Future<List<Routine>> getRoutines();
   Future<int> startSession(int routineId, String routineName);
   Future<int> logSet(WorkoutSet set);
+  Future<void> updateSet(WorkoutSet set);
+  Future<void> deleteSet(int setId);
   Future<void> toggleSetWarmup(int setId, bool isWarmup);
   Future<void> endSession(int sessionId);
   Future<void> deleteSession(int sessionId);
@@ -35,10 +37,9 @@ abstract class WorkoutRepository {
   Future<void> deleteRoutine(int routineId);
 
   // Routine Exercises Methods
-  Future<void> addExerciseToRoutine(int routineId, int exerciseId, int sequenceOrder, int targetSets, String targetReps, int restSeconds);
+  Future<void> addExerciseToRoutine(int routineId, int exerciseId, int sequenceOrder, int targetSets, String targetReps);
   Future<void> removeExerciseFromRoutine(int routineId, int exerciseId);
   Future<void> updateExerciseTargets(int routineId, int exerciseId, int targetSets, String targetReps);
-  Future<void> updateExerciseRestTime(int routineId, int exerciseId, int restSeconds);
   Future<void> updateExerciseOrder(int routineId, List<int> exerciseIdsInOrder);
   Future<int> getNextSequenceOrder(int routineId);
   Future<void> updateSupersetGroup(int routineId, int exerciseId, int? newGroupId);

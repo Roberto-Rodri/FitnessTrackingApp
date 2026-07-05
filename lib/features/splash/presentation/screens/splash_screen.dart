@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
@@ -107,60 +108,61 @@ class _IronLogMarkPainter extends CustomPainter {
     final scale = size.width / 200;
     canvas.scale(scale, scale);
 
-    // Outer flame: #E8A83E
-    final Paint outerFlame = Paint()
+    // 1. Radial background
+    final Paint bgPaint = Paint()
+      ..shader = ui.Gradient.radial(
+        const Offset(100, 100),
+        140,
+        [const Color(0xFF241F1A), const Color(0xFF161412)],
+        [0.0, 1.0],
+      );
+    // Clip to rounded rect if needed, but the splash background is already solid. We will just draw a 200x200 rect
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(const Rect.fromLTWH(0, 0, 200, 200), const Radius.circular(44)),
+      bgPaint,
+    );
+
+    // 2. Area fill
+    final Paint areaFillPaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = const Color(0xFFE8A83E);
-    
-    Path outerFlamePath = Path()
-      ..moveTo(100, 20)
-      ..cubicTo(100, 20, 128, 52, 128, 80)
-      ..cubicTo(128, 96, 118, 106, 108, 110)
-      ..cubicTo(116, 98, 114, 84, 106, 76)
-      ..cubicTo(106, 76, 110, 94, 100, 100)
-      ..cubicTo(90, 94, 94, 76, 94, 76)
-      ..cubicTo(86, 84, 84, 98, 92, 110)
-      ..cubicTo(82, 106, 72, 96, 72, 80)
-      ..cubicTo(72, 52, 100, 20, 100, 20)
+      ..color = const Color(0xFFE8A83E).withValues(alpha: 0.14);
+
+    final Path areaPath = Path()
+      ..moveTo(34, 158)
+      ..lineTo(34, 148)
+      ..lineTo(74, 110)
+      ..lineTo(112, 124)
+      ..lineTo(166, 46)
+      ..lineTo(166, 158)
       ..close();
-    canvas.drawPath(outerFlamePath, outerFlame);
+    canvas.drawPath(areaPath, areaFillPaint);
 
-    // Inner flame: #F5C96A opacity 0.9 (0xE5F5C96A)
-    final Paint innerFlame = Paint()
+    // 3. Trend line
+    final Paint trendLinePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = const Color(0xFFE8A83E)
+      ..strokeWidth = 14
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+      
+    final Path trendPath = Path()
+      ..moveTo(34, 148)
+      ..lineTo(74, 110)
+      ..lineTo(112, 124)
+      ..lineTo(166, 46);
+    canvas.drawPath(trendPath, trendLinePaint);
+
+    // 4. Peak node outer ring
+    final Paint outerNodePaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = const Color(0xE5F5C96A);
-    
-    Path innerFlamePath = Path()
-      ..moveTo(100, 48)
-      ..cubicTo(100, 48, 116, 66, 116, 82)
-      ..cubicTo(116, 92, 110, 100, 104, 104)
-      ..cubicTo(108, 96, 106, 86, 100, 80)
-      ..cubicTo(94, 86, 92, 96, 96, 104)
-      ..cubicTo(90, 100, 84, 92, 84, 82)
-      ..cubicTo(84, 66, 100, 48, 100, 48)
-      ..close();
-    canvas.drawPath(innerFlamePath, innerFlame);
+      ..color = const Color(0xFF161412);
+    canvas.drawCircle(const Offset(166, 46), 15, outerNodePaint);
 
-    // Flame tip highlight: #FFF5D6 opacity 0.6 (0x99FFF5D6)
-    final Paint highlight = Paint()
+    // 5. Peak node inner core
+    final Paint innerNodePaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = const Color(0x99FFF5D6);
-    
-    // ellipse cx=100 cy=54 rx=4 ry=8
-    canvas.drawOval(const Rect.fromLTRB(96, 46, 104, 62), highlight);
-
-    // Barbell
-    final Paint barbellE8A83E = Paint()..color = const Color(0xFFE8A83E);
-    final Paint barbellC8901A = Paint()..color = const Color(0xFFC8901A);
-    final Paint barbellB07B22 = Paint()..color = const Color(0xFFB07B22);
-    final Paint barbellHalfE8A83E = Paint()..color = const Color(0x7FE8A83E); // opacity 0.5
-
-    canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(2, 110, 12, 40), const Radius.circular(4)), barbellE8A83E);
-    canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(12, 116, 22, 28), const Radius.circular(5)), barbellC8901A);
-    canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(24, 126, 152, 8), const Radius.circular(4)), barbellB07B22);
-    canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(24, 126, 152, 3), const Radius.circular(1.5)), barbellHalfE8A83E);
-    canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(166, 116, 22, 28), const Radius.circular(5)), barbellC8901A);
-    canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(186, 110, 12, 40), const Radius.circular(4)), barbellE8A83E);
+      ..color = const Color(0xFFFFF5D6);
+    canvas.drawCircle(const Offset(166, 46), 11, innerNodePaint);
   }
 
   @override

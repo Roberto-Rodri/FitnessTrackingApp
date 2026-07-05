@@ -426,9 +426,9 @@ class SessionDetailScreen extends ConsumerWidget {
                     children: [
                       SizedBox(width: 32, child: Text('Set', style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2))),
                       const SizedBox(width: 16),
-                      Expanded(child: Text(weightUnit == 'custom' ? 'Weight' : weightUnit, style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2))),
-                      const SizedBox(width: 8),
                       Expanded(child: Text('Reps', style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2))),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(weightUnit == 'custom' ? 'Weight' : weightUnit, style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2))),
                       const SizedBox(width: 24), // For PR icon placeholder
                     ],
                   ),
@@ -459,14 +459,14 @@ class SessionDetailScreen extends ConsumerWidget {
                           const SizedBox(width: 20),
                           Expanded(
                             child: Text(
-                              weightText,
+                              s.reps.toString(),
                               style: AppTheme.monoLarge(color: theme.colorScheme.onSurface).copyWith(fontSize: 16),
                             ),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              s.reps.toString(),
+                              weightText,
                               style: AppTheme.monoLarge(color: theme.colorScheme.onSurface).copyWith(fontSize: 16),
                             ),
                           ),
@@ -634,9 +634,9 @@ class SessionDetailScreen extends ConsumerWidget {
                               const SizedBox(width: 8),
                               Expanded(flex: 2, child: Text('Exercise', style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2))),
                               const SizedBox(width: 8),
-                              Expanded(child: Text('Weight', style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2))),
-                              const SizedBox(width: 8),
                               Expanded(child: Text('Reps', style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2))),
+                              const SizedBox(width: 8),
+                              Expanded(child: Text('Weight', style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2))),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -678,14 +678,14 @@ class SessionDetailScreen extends ConsumerWidget {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      weightText,
+                                      s.reps.toString(),
                                       style: AppTheme.monoLarge(color: theme.colorScheme.onSurface).copyWith(fontSize: 16),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      s.reps.toString(),
+                                      weightText,
                                       style: AppTheme.monoLarge(color: theme.colorScheme.onSurface).copyWith(fontSize: 16),
                                     ),
                                   ),

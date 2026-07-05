@@ -5,13 +5,11 @@ import '../../../../core/theme/theme.dart';
 class EditTargetsDialog extends StatefulWidget {
   final int initialSets;
   final String initialReps;
-  final int initialRestSeconds;
 
   const EditTargetsDialog({
     super.key,
     required this.initialSets,
     required this.initialReps,
-    required this.initialRestSeconds,
   });
 
   @override
@@ -21,39 +19,32 @@ class EditTargetsDialog extends StatefulWidget {
 class _EditTargetsDialogState extends State<EditTargetsDialog> {
   late TextEditingController _setsController;
   late TextEditingController _repsController;
-  late TextEditingController _restController;
 
   @override
   void initState() {
     super.initState();
     _setsController = TextEditingController(text: widget.initialSets.toString());
     _repsController = TextEditingController(text: widget.initialReps);
-    _restController = TextEditingController(text: widget.initialRestSeconds.toString());
   }
 
   @override
   void dispose() {
     _setsController.dispose();
     _repsController.dispose();
-    _restController.dispose();
     super.dispose();
   }
 
   void _save() {
     final setsText = _setsController.text.trim();
     final repsText = _repsController.text.trim();
-    final restText = _restController.text.trim();
 
     final sets = int.tryParse(setsText);
     if (sets == null || sets <= 0) return;
 
     if (repsText.isEmpty) return;
 
-    final restSeconds = int.tryParse(restText);
-    if (restSeconds == null || restSeconds <= 0) return;
-
     HapticFeedback.mediumImpact();
-    Navigator.of(context).pop({'sets': sets, 'reps': repsText, 'restSeconds': restSeconds});
+    Navigator.of(context).pop({'sets': sets, 'reps': repsText});
   }
 
   @override
@@ -87,8 +78,6 @@ class _EditTargetsDialogState extends State<EditTargetsDialog> {
             _buildInputField(theme, 'Sets', _setsController, TextInputType.number),
             const SizedBox(height: 16),
             _buildInputField(theme, 'Reps', _repsController, TextInputType.text),
-            const SizedBox(height: 16),
-            _buildInputField(theme, 'Rest (s)', _restController, TextInputType.number),
             
             const SizedBox(height: 32),
             Row(
@@ -146,13 +135,12 @@ class _EditTargetsDialogState extends State<EditTargetsDialog> {
   }
 }
 
-Future<Map<String, dynamic>?> showEditTargetsDialog(BuildContext context, int initialSets, String initialReps, int initialRestSeconds) {
+Future<Map<String, dynamic>?> showEditTargetsDialog(BuildContext context, int initialSets, String initialReps) {
   return showDialog<Map<String, dynamic>>(
     context: context,
     builder: (context) => EditTargetsDialog(
       initialSets: initialSets,
       initialReps: initialReps,
-      initialRestSeconds: initialRestSeconds,
     ),
   );
 }

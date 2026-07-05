@@ -70,7 +70,7 @@ class SessionHistoryCard extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (prCountAsync.valueOrNull != null && prCountAsync.value! > 0) ...[
+                        if (prCountAsync.value != null && prCountAsync.value! > 0) ...[
                           const SizedBox(width: 8),
                           PRBadge(size: PRBadgeSize.sm, count: prCountAsync.value!),
                         ],

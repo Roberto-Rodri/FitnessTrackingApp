@@ -74,7 +74,7 @@ class BackupController extends _$BackupController {
       ref.invalidate(currentProgramDayProvider);
       ref.invalidate(completedProgramDaysProvider);
       
-      ref.invalidate(bodyWeightLogsNotifierProvider);
+      ref.invalidate(bodyWeightLogsControllerProvider);
 
       state = const AsyncData(null);
     } catch (e, st) {
