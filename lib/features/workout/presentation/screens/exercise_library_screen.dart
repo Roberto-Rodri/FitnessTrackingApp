@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/injection.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/routing/router.dart';
 import '../../../../core/theme/theme.dart';
 import '../controllers/workout_providers.dart';
 import '../../domain/entities/exercise.dart';
@@ -187,6 +189,14 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
                 exercise.name,
                 style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.bar_chart, color: AppTheme.amber),
+              title: const Text('View history'),
+              onTap: () {
+                Navigator.pop(context);
+                context.pushNamed(RouteNames.exerciseDetail, pathParameters: {'id': exercise.id!.toString()});
+              },
             ),
             ListTile(
               leading: const Icon(Icons.edit, color: AppTheme.amber),

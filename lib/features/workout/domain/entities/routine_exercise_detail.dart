@@ -14,6 +14,7 @@ class RoutineExerciseDetail with _$RoutineExerciseDetail {
     required String targetReps,
     @Default(90) int restSeconds,
     @Default('kg') String weightUnit,
+    int? supersetGroup,
   }) = _RoutineExerciseDetail;
 
   factory RoutineExerciseDetail.fromJson(Map<String, dynamic> json) =>

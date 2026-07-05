@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/routing/router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/workout_set.dart';
 import 'exercise_swap_sheet.dart';
@@ -9,6 +11,7 @@ import 'body_part_tag.dart';
 import '../../domain/entities/exercise.dart';
 import '../controllers/workout_providers.dart';
 import 'pr_badge.dart';
+import 'comparison_panel.dart';
 
 class _AnimatedSetRow extends StatefulWidget {
   final Widget child;
@@ -131,6 +134,7 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
   final FocusNode _weightFocus = FocusNode();
   final FocusNode _repsFocus = FocusNode();
   bool _showExtraSetInput = false;
+  bool _isWarmupActive = false;
 
   @override
   void dispose() {
@@ -171,6 +175,7 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
       weight: weight,
       reps: reps,
       customWeight: customWeight,
+      isWarmup: _isWarmupActive,
     );
 
     try {
@@ -182,6 +187,7 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
         _weightFocus.requestFocus();
         setState(() {
           _showExtraSetInput = false;
+          _isWarmupActive = false;
         });
       }
     } catch (_) {}
@@ -256,7 +262,7 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            if (widget.bestSet != null)
+                            if (widget.bestSet != null && widget.bestSet!['reps'] != null)
                               Text.rich(TextSpan(children: [
                                 TextSpan(text: 'Best: ', style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt2, fontSize: 12)),
                                 TextSpan(
@@ -264,9 +270,9 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                                   style: AppTheme.monoSmall(color: AppTheme.amber).copyWith(fontSize: 12),
                                 ),
                               ])),
-                            if (widget.bestSet != null && latestSet != null)
+                            if (widget.bestSet != null && latestSet != null && widget.bestSet!['reps'] != null && latestSet['reps'] != null)
                               Text('  ·  ', style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt3)),
-                            if (latestSet != null)
+                            if (latestSet != null && latestSet['reps'] != null)
                               Text.rich(TextSpan(children: [
                                 TextSpan(text: '$latestLabel: ', style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt2, fontSize: 12)),
                                 TextSpan(
@@ -280,7 +286,16 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                     ],
                   ),
                 ),
-                InkWell(
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.bar_chart, color: theme.colorScheme.onSurfaceVariant),
+                      onPressed: () {
+                        context.pushNamed(RouteNames.exerciseDetail, pathParameters: {'id': widget.exerciseId.toString()});
+                      },
+                    ),
+                    InkWell(
                   onTap: () async {
                     void showFullSwapSheet() {
                       showModalBottomSheet(
@@ -296,12 +311,13 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                       );
                     }
 
-                    if (widget.alternatives != null && widget.alternatives!.isNotEmpty) {
+                    final alts = widget.alternatives;
+                    if (alts != null && alts.isNotEmpty) {
                       final result = await showModalBottomSheet<dynamic>(
                         context: context,
                         backgroundColor: Colors.transparent,
                         builder: (context) => QuickSwapSheet(
-                          alternatives: widget.alternatives!,
+                          alternatives: alts,
                         ),
                       );
 
@@ -325,7 +341,9 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                     ),
                     child: const Icon(Icons.swap_horiz, color: AppTheme.txt2, size: 20),
                   ),
-                )
+                  ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -357,9 +375,10 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
             
             final activeState = ref.watch(workoutSessionNotifierProvider).valueOrNull;
             final isPR = set.id != null && set.id == activeState?.lastPRSetId;
+            final prevSet = activeState?.previousSetsByExercise[widget.exerciseId]?.elementAtOrNull(idx);
 
             return _AnimatedSetRow(
-              child: _buildSetRow(theme, idx.toString(), weightText, set.reps.toString(), isCompleted: true, showPRBadge: isPR),
+              child: _buildSetRow(theme, idx.toString(), weightText, set.reps.toString(), isCompleted: true, showPRBadge: isPR, set: set, previousSet: prevSet),
             );
           }),
 
@@ -367,10 +386,30 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
           if (widget.completedSets.length >= targetSets && !_showExtraSetInput)
             _buildAllSetsComplete(theme)
           else
-            _buildActiveRow(theme, currentSetNum.toString()),
+            _buildActiveRow(
+              theme, 
+              currentSetNum.toString(), 
+              ref.watch(workoutSessionNotifierProvider).valueOrNull?.previousSetsByExercise[widget.exerciseId]?.elementAtOrNull(widget.completedSets.length),
+            ),
+          const SizedBox(height: 8),
+          _buildComparisonPanel(),
           const SizedBox(height: 16),
         ],
       ),
+    );
+  }
+
+  Widget _buildComparisonPanel() {
+    final activeState = ref.watch(workoutSessionNotifierProvider).valueOrNull;
+    if (activeState == null || activeState.sessionId == null || activeState.routineId == null) {
+      return const SizedBox.shrink();
+    }
+    return ComparisonPanel(
+      routineId: activeState.routineId!,
+      currentSessionId: activeState.sessionId!,
+      exerciseId: widget.exerciseId,
+      currentSets: widget.completedSets,
+      weightUnit: widget.weightUnit,
     );
   }
 
@@ -422,17 +461,35 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
     );
   }
 
-  Widget _buildSetRow(ThemeData theme, String setNum, String weight, String reps, {bool isCompleted = false, bool showPRBadge = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 32,
-            child: Center(
-              child: Text(
-                setNum,
-                style: AppTheme.monoLarge(color: isCompleted ? AppTheme.txt2 : theme.colorScheme.onSurface).copyWith(fontSize: 16),
+  Widget _buildSetRow(ThemeData theme, String setNum, String weight, String reps, {bool isCompleted = false, bool showPRBadge = false, WorkoutSet? set, WorkoutSet? previousSet}) {
+    final isWarmup = set?.isWarmup ?? false;
+
+    return Opacity(
+      opacity: isWarmup ? 0.6 : 1.0,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+          InkWell(
+            onTap: set != null && set.id != null ? () {
+              ref.read(workoutSessionNotifierProvider.notifier).toggleWarmup(set.id!);
+            } : null,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: isWarmup ? AppTheme.amber : AppTheme.bg2,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  isWarmup ? 'W' : setNum,
+                  style: AppTheme.monoLarge(color: isWarmup ? AppTheme.bg0 : AppTheme.txt1).copyWith(fontSize: 16),
+                ),
               ),
             ),
           ),
@@ -447,7 +504,10 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
               alignment: Alignment.center,
               child: Text(
                 weight,
-                style: AppTheme.monoLarge(color: isCompleted ? AppTheme.txt2 : theme.colorScheme.onSurface).copyWith(fontSize: 18),
+                style: AppTheme.monoLarge(color: isCompleted ? AppTheme.txt2 : theme.colorScheme.onSurface).copyWith(
+                  fontSize: 18,
+                  fontStyle: isWarmup ? FontStyle.italic : null,
+                ),
               ),
             ),
           ),
@@ -462,7 +522,10 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
               alignment: Alignment.center,
               child: Text(
                 reps,
-                style: AppTheme.monoLarge(color: isCompleted ? AppTheme.txt2 : theme.colorScheme.onSurface).copyWith(fontSize: 18),
+                style: AppTheme.monoLarge(color: isCompleted ? AppTheme.txt2 : theme.colorScheme.onSurface).copyWith(
+                  fontSize: 18,
+                  fontStyle: isWarmup ? FontStyle.italic : null,
+                ),
               ),
             ),
           ),
@@ -505,20 +568,47 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
           ),
         ],
       ),
+          if (previousSet != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 48, top: 4),
+              child: Text(
+                'Prev: ${_formatWeight(previousSet.toJson())} × ${previousSet.reps}${previousSet.isWarmup ? ' (W)' : ''}',
+                style: AppTheme.monoSmall(color: AppTheme.txt3).copyWith(fontSize: 12),
+              ),
+            ),
+        ],
+      ),
+      ),
     );
   }
 
-  Widget _buildActiveRow(ThemeData theme, String setNum) {
+  Widget _buildActiveRow(ThemeData theme, String setNum, WorkoutSet? previousSet) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 32,
-            child: Center(
-              child: Text(
-                setNum,
-                style: AppTheme.monoLarge(color: theme.colorScheme.onSurface).copyWith(fontSize: 16),
+          Row(
+            children: [
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isWarmupActive = !_isWarmupActive;
+              });
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: _isWarmupActive ? AppTheme.amber : AppTheme.bg2,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  _isWarmupActive ? 'W' : setNum,
+                  style: AppTheme.monoLarge(color: _isWarmupActive ? AppTheme.bg0 : AppTheme.txt1).copyWith(fontSize: 16),
+                ),
               ),
             ),
           ),
@@ -540,6 +630,16 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
               ),
             ),
           ),
+        ],
+      ),
+          if (previousSet != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 48, top: 4),
+              child: Text(
+                'Prev: ${_formatWeight(previousSet.toJson())} × ${previousSet.reps}${previousSet.isWarmup ? ' (W)' : ''}',
+                style: AppTheme.monoSmall(color: AppTheme.txt3).copyWith(fontSize: 12),
+              ),
+            ),
         ],
       ),
     );

@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 
 class DatabaseHelper {
   static const _databaseName = "IronLog.db";
-  static const _databaseVersion = 6;
+  static const _databaseVersion = 9;
 
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -93,6 +93,22 @@ class DatabaseHelper {
         )
       ''');
     }
+    if (oldVersion < 7) {
+      await db.execute('ALTER TABLE workout_sessions ADD COLUMN notes TEXT');
+      await db.execute('''
+        CREATE TABLE body_weight_logs (
+          id TEXT PRIMARY KEY,
+          timestamp INTEGER NOT NULL,
+          weight REAL NOT NULL
+        )
+      ''');
+    }
+    if (oldVersion < 8) {
+      await db.execute('ALTER TABLE workout_sets ADD COLUMN isWarmup INTEGER DEFAULT 0');
+    }
+    if (oldVersion < 9) {
+      await db.execute('ALTER TABLE routine_exercise_cross_ref ADD COLUMN supersetGroup INTEGER');
+    }
   }
 
   Future _onCreate(Database db, int version) async {
@@ -120,6 +136,7 @@ class DatabaseHelper {
         targetSets INTEGER NOT NULL,
         targetReps TEXT NOT NULL,
         restSeconds INTEGER NOT NULL DEFAULT 90,
+        supersetGroup INTEGER,
         PRIMARY KEY (routineId, exerciseId),
         FOREIGN KEY (routineId) REFERENCES routines (id) ON DELETE CASCADE,
         FOREIGN KEY (exerciseId) REFERENCES exercises (id) ON DELETE CASCADE
@@ -132,7 +149,8 @@ class DatabaseHelper {
         startTimestamp INTEGER NOT NULL,
         endTimestamp INTEGER,
         routineId INTEGER,
-        routineNameSnapshot TEXT NOT NULL
+        routineNameSnapshot TEXT NOT NULL,
+        notes TEXT
       )
     ''');
 
@@ -145,6 +163,7 @@ class DatabaseHelper {
         reps INTEGER NOT NULL,
         rpe INTEGER,
         customWeight TEXT,
+        isWarmup INTEGER DEFAULT 0,
         FOREIGN KEY (sessionId) REFERENCES workout_sessions (id) ON DELETE CASCADE,
         FOREIGN KEY (exerciseId) REFERENCES exercises (id) ON DELETE CASCADE
       )
@@ -179,6 +198,14 @@ class DatabaseHelper {
         label TEXT NOT NULL,
         FOREIGN KEY (programId) REFERENCES programs (id) ON DELETE CASCADE,
         FOREIGN KEY (routineId) REFERENCES routines (id) ON DELETE SET NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE body_weight_logs (
+        id TEXT PRIMARY KEY,
+        timestamp INTEGER NOT NULL,
+        weight REAL NOT NULL
       )
     ''');
 

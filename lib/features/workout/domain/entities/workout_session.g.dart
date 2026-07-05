@@ -13,6 +13,7 @@ _$WorkoutSessionImpl _$$WorkoutSessionImplFromJson(Map<String, dynamic> json) =>
       endTimestamp: (json['endTimestamp'] as num?)?.toInt(),
       routineId: (json['routineId'] as num?)?.toInt(),
       routineNameSnapshot: json['routineNameSnapshot'] as String,
+      notes: json['notes'] as String?,
     );
 
 Map<String, dynamic> _$$WorkoutSessionImplToJson(
@@ -23,4 +24,5 @@ Map<String, dynamic> _$$WorkoutSessionImplToJson(
       'endTimestamp': instance.endTimestamp,
       'routineId': instance.routineId,
       'routineNameSnapshot': instance.routineNameSnapshot,
+      'notes': instance.notes,
     };

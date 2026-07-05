@@ -6,9 +6,10 @@ import '../../../../core/routing/router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/theme.dart';
 import '../controllers/workout_providers.dart';
+import '../controllers/routine_editor_controller.dart';
 import '../../domain/entities/routine_exercise_detail.dart';
 import '../widgets/edit_targets_dialog.dart';
-import '../widgets/routine_exercise_tile.dart';
+import '../widgets/routine_block_widget.dart';
 
 class RoutineEditScreen extends ConsumerStatefulWidget {
   final int? routineId;
@@ -138,11 +139,11 @@ class _RoutineEditScreenState extends ConsumerState<RoutineEditScreen> {
       );
     }
 
-    final exercisesAsync = ref.watch(routineExercisesProvider(routineId));
+    final exercisesAsync = ref.watch(routineEditorProvider(routineId));
     
     return exercisesAsync.when(
-      data: (exercises) {
-        if (exercises.isEmpty) {
+      data: (blocks) {
+        if (blocks.isEmpty) {
           return Center(
             child: Text(
               'No exercises yet. Tap + to add.',
@@ -153,8 +154,8 @@ class _RoutineEditScreenState extends ConsumerState<RoutineEditScreen> {
 
         return ReorderableListView.builder(
           padding: const EdgeInsets.only(top: 8, bottom: 80, left: 16, right: 16),
-          itemCount: exercises.length,
-          onReorder: (oldIndex, newIndex) => _onReorder(exercises, oldIndex, newIndex),
+          itemCount: blocks.length,
+          onReorder: (oldIndex, newIndex) => _onReorder(oldIndex, newIndex),
           proxyDecorator: (child, index, animation) {
             if (!_hasFiredDragHaptic) {
               HapticFeedback.mediumImpact();
@@ -190,17 +191,30 @@ class _RoutineEditScreenState extends ConsumerState<RoutineEditScreen> {
             );
           },
           itemBuilder: (context, index) {
-            final ex = exercises[index];
-            return RoutineExerciseTile(
-              key: ValueKey(ex.exerciseId),
-              exercise: ex,
-              index: index,
-              onEditTargets: () => _editTargets(ex),
-              onDismissed: () async {
+            final block = blocks[index];
+            return RoutineBlockWidget(
+              key: ValueKey('block_key_$index'),
+              block: block,
+              blockIndex: index,
+              isLastBlock: index == blocks.length - 1,
+              onUnlink: (exerciseId) {
+                HapticFeedback.lightImpact();
+                ref.read(routineEditorProvider(routineId).notifier).unlinkExercise(exerciseId);
+              },
+              onLinkWithNext: () {
+                HapticFeedback.mediumImpact();
+                ref.read(routineEditorProvider(routineId).notifier).linkExercises(index, index + 1);
+              },
+              onEditTargets: (exerciseId) {
+                // Find exercise
+                final ex = block.exercises.firstWhere((e) => e.exerciseId == exerciseId);
+                _editTargets(ex);
+              },
+              onDismissed: (exerciseId) async {
                 HapticFeedback.heavyImpact();
                 final repository = ref.read(workoutRepositoryProvider);
-                await repository.removeExerciseFromRoutine(routineId, ex.exerciseId);
-                ref.invalidate(routineExercisesProvider(routineId));
+                await repository.removeExerciseFromRoutine(routineId, exerciseId);
+                ref.invalidate(routineEditorProvider(routineId));
                 ref.invalidate(routineListProvider);
               },
             );
@@ -232,27 +246,16 @@ class _RoutineEditScreenState extends ConsumerState<RoutineEditScreen> {
       final repository = ref.read(workoutRepositoryProvider);
       await repository.updateExerciseTargets(routineId, ex.exerciseId, result['sets'] as int, result['reps'] as String);
       await repository.updateExerciseRestTime(routineId, ex.exerciseId, result['restSeconds'] as int);
-      ref.invalidate(routineExercisesProvider(routineId));
+      ref.invalidate(routineEditorProvider(routineId));
     }
   }
 
-  Future<void> _onReorder(List<RoutineExerciseDetail> currentList, int oldIndex, int newIndex) async {
+  Future<void> _onReorder(int oldIndex, int newIndex) async {
     HapticFeedback.lightImpact();
     _hasFiredDragHaptic = false;
     final routineId = widget.routineId;
     if (routineId == null) return;
     
-    if (oldIndex < newIndex) {
-      newIndex -= 1;
-    }
-    
-    final item = currentList.removeAt(oldIndex);
-    currentList.insert(newIndex, item);
-    
-    final newOrderIds = currentList.map((e) => e.exerciseId).toList();
-    
-    final repository = ref.read(workoutRepositoryProvider);
-    await repository.updateExerciseOrder(routineId, newOrderIds);
-    ref.invalidate(routineExercisesProvider(routineId));
+    await ref.read(routineEditorProvider(routineId).notifier).reorderBlocks(oldIndex, newIndex);
   }
 }

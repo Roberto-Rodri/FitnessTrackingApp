@@ -9,6 +9,8 @@ import '../../features/profile/domain/repositories/user_prefs_repository.dart';
 import '../../features/program/data/datasources/program_local_data_source.dart';
 import '../../features/program/data/repositories/program_repository_impl.dart';
 import '../../features/program/domain/repositories/program_repository.dart';
+import '../database/backup_local_data_source.dart';
+import '../database/backup_repository.dart';
 
 part 'injection.g.dart';
 
@@ -48,4 +50,16 @@ ProgramLocalDataSource programLocalDataSource(ProgramLocalDataSourceRef ref) {
 @Riverpod(keepAlive: true)
 ProgramRepository programRepository(ProgramRepositoryRef ref) {
   return ProgramRepositoryImpl(ref.watch(programLocalDataSourceProvider));
+}
+
+@Riverpod(keepAlive: true)
+BackupLocalDataSource backupLocalDataSource(BackupLocalDataSourceRef ref) {
+  final dbHelper = ref.watch(databaseHelperProvider);
+  return BackupLocalDataSourceImpl(dbHelper);
+}
+
+@Riverpod(keepAlive: true)
+BackupRepository backupRepository(BackupRepositoryRef ref) {
+  final localDataSource = ref.watch(backupLocalDataSourceProvider);
+  return BackupRepositoryImpl(localDataSource);
 }

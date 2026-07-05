@@ -8,14 +8,18 @@ import '../../domain/entities/routine_exercise_detail.dart';
 import '../../domain/entities/workout_session_summary.dart';
 import '../../domain/entities/weekly_stats.dart';
 import '../../domain/exceptions/workout_exceptions.dart';
+import '../../domain/entities/body_weight_log.dart';
+import '../../domain/entities/exercise_history_summary.dart';
 
 abstract class WorkoutLocalDataSource {
   Future<List<Exercise>> getExercises();
   Future<List<Routine>> getRoutines();
   Future<int> startSession(int routineId, String routineName);
   Future<int> logSet(WorkoutSet set);
+  Future<void> toggleSetWarmup(int setId, bool isWarmup);
   Future<void> endSession(int sessionId);
   Future<void> deleteSession(int sessionId);
+  Future<void> updateSessionNotes(int sessionId, String notes);
   Future<List<RoutineExerciseDetail>> getExercisesForRoutine(int routineId);
   Future<List<WorkoutSessionSummary>> getCompletedSessions();
   Future<List<WorkoutSet>> getSetsForSession(int sessionId);
@@ -23,6 +27,8 @@ abstract class WorkoutLocalDataSource {
   Future<Map<int, Map<String, dynamic>>> getBestSetsForExercises(List<int> exerciseIds);
   Future<Map<int, Map<String, dynamic>>> getLatestSetsForExercises(List<int> exerciseIds);
   Future<Map<int, Map<String, dynamic>>> getLatestSetsForExercisesInRoutine(List<int> exerciseIds, int routineId);
+  Future<List<WorkoutSet>> getPreviousSetsForRoutine(int routineId);
+  Future<WorkoutSession?> getPreviousSession(int routineId, int currentSessionId);
   
   Future<int> createRoutine(String name);
   Future<void> updateRoutineName(int routineId, String name);
@@ -36,6 +42,7 @@ abstract class WorkoutLocalDataSource {
   Future<void> updateExerciseRestTime(int routineId, int exerciseId, int restSeconds);
   Future<void> updateExerciseOrder(int routineId, List<int> exerciseIdsInOrder);
   Future<int> getNextSequenceOrder(int routineId);
+  Future<void> updateSupersetGroup(int routineId, int exerciseId, int? newGroupId);
 
   // Exercise Library Methods
   Future<int> createExercise(String name, String bodyPart, String weightUnit);
@@ -45,6 +52,7 @@ abstract class WorkoutLocalDataSource {
   Future<int> getExerciseHistoryCount(int exerciseId);
   Future<List<String>> getDistinctBodyParts();
   Future<bool> exerciseNameExists(String name, {int? excludeId});
+  Future<ExerciseHistorySummary> getExerciseHistory(int exerciseId);
 
   // Alternatives Methods
   Future<void> linkAlternativeExercises(int exerciseId1, int exerciseId2);
@@ -61,6 +69,11 @@ abstract class WorkoutLocalDataSource {
   // PR Methods
   Future<bool> isPersonalRecord(int exerciseId, double weight, int reps, int currentSetId);
   Future<int> countPRsInSession(int sessionId);
+
+  // Body Weight Methods
+  Future<void> saveBodyWeightLog(BodyWeightLog log);
+  Future<void> deleteBodyWeightLog(String id);
+  Future<List<BodyWeightLog>> getBodyWeightLogs();
 }
 
 class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
@@ -108,6 +121,21 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
   }
 
   @override
+  Future<void> toggleSetWarmup(int setId, bool isWarmup) async {
+    try {
+      final db = await dbHelper.database;
+      await db.update(
+        'workout_sets',
+        {'isWarmup': isWarmup ? 1 : 0},
+        where: 'id = ?',
+        whereArgs: [setId],
+      );
+    } catch (e) {
+      throw DatabaseOperationException('Failed to toggle set warmup: $e');
+    }
+  }
+
+  @override
   Future<void> endSession(int sessionId) async {
     try {
       final db = await dbHelper.database;
@@ -126,7 +154,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
   Future<List<RoutineExerciseDetail>> getExercisesForRoutine(int routineId) async {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
-      SELECT e.id AS exerciseId, e.name AS exerciseName, e.bodyPart, e.weightUnit, ref.sequenceOrder, ref.targetSets, ref.targetReps, ref.restSeconds
+      SELECT e.id AS exerciseId, e.name AS exerciseName, e.bodyPart, e.weightUnit, ref.sequenceOrder, ref.targetSets, ref.targetReps, ref.restSeconds, ref.supersetGroup
       FROM routine_exercise_cross_ref ref
       INNER JOIN exercises e ON ref.exerciseId = e.id
       WHERE ref.routineId = ?
@@ -140,7 +168,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
       SELECT ws.*, COUNT(s.id) as totalSets, 
-             SUM(CASE WHEN e.weightUnit IN ('kg', 'lbs') THEN s.weight * s.reps ELSE 0 END) as totalVolume
+             SUM(CASE WHEN e.weightUnit IN ('kg', 'lbs') AND coalesce(s.isWarmup, 0) = 0 THEN s.weight * s.reps ELSE 0 END) as totalVolume
       FROM workout_sessions ws
       LEFT JOIN workout_sets s ON ws.id = s.sessionId
       LEFT JOIN exercises e ON s.exerciseId = e.id
@@ -169,6 +197,39 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
       );
     } catch (e) {
       throw DatabaseOperationException('Failed to delete workout session: $e');
+    }
+  }
+
+  @override
+  Future<void> updateSessionNotes(int sessionId, String notes) async {
+    try {
+      final db = await dbHelper.database;
+      await db.update(
+        'workout_sessions',
+        {'notes': notes},
+        where: 'id = ?',
+        whereArgs: [sessionId],
+      );
+    } catch (e) {
+      throw DatabaseOperationException('Failed to update session notes: $e');
+    }
+  }
+
+  @override
+  Future<WorkoutSession?> getPreviousSession(int routineId, int currentSessionId) async {
+    try {
+      final db = await dbHelper.database;
+      final List<Map<String, dynamic>> maps = await db.query(
+        'workout_sessions',
+        where: 'routineId = ? AND id != ? AND endTimestamp IS NOT NULL',
+        whereArgs: [routineId, currentSessionId],
+        orderBy: 'startTimestamp DESC',
+        limit: 1,
+      );
+      if (maps.isEmpty) return null;
+      return WorkoutSession.fromJson(maps.first);
+    } catch (e) {
+      throw DatabaseOperationException('Failed to get previous session: $e');
     }
   }
 
@@ -213,6 +274,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
       INNER JOIN workout_sessions s ON ws.sessionId = s.id
       WHERE ws.exerciseId IN ($placeholders)
       AND s.endTimestamp IS NOT NULL
+      AND coalesce(ws.isWarmup, 0) = 0
       ORDER BY ws.exerciseId, ws.weight DESC, ws.reps DESC
     ''', exerciseIds);
 
@@ -280,6 +342,28 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
   }
 
   @override
+  Future<List<WorkoutSet>> getPreviousSetsForRoutine(int routineId) async {
+    final db = await dbHelper.database;
+    final sessions = await db.rawQuery('''
+      SELECT id FROM workout_sessions
+      WHERE routineId = ? AND endTimestamp IS NOT NULL
+      ORDER BY endTimestamp DESC
+      LIMIT 1
+    ''', [routineId]);
+    
+    if (sessions.isEmpty) return [];
+    
+    final sessionId = sessions.first['id'] as int;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'workout_sets',
+      where: 'sessionId = ?',
+      whereArgs: [sessionId],
+      orderBy: 'id ASC',
+    );
+    return maps.map((e) => WorkoutSet.fromJson(e)).toList();
+  }
+
+  @override
   Future<int> createRoutine(String name) async {
     try {
       final db = await dbHelper.database;
@@ -344,6 +428,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
         'targetSets': targetSets,
         'targetReps': targetReps,
         'restSeconds': restSeconds,
+        'supersetGroup': null,
       });
     } catch (e) {
       throw DatabaseOperationException('Failed to add exercise to routine: $e');
@@ -421,6 +506,21 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
       [routineId],
     );
     return result.first['nextOrder'] as int;
+  }
+
+  @override
+  Future<void> updateSupersetGroup(int routineId, int exerciseId, int? newGroupId) async {
+    try {
+      final db = await dbHelper.database;
+      await db.update(
+        'routine_exercise_cross_ref',
+        {'supersetGroup': newGroupId},
+        where: 'routineId = ? AND exerciseId = ?',
+        whereArgs: [routineId, exerciseId],
+      );
+    } catch (e) {
+      throw DatabaseOperationException('Failed to update superset group: $e');
+    }
   }
 
   @override
@@ -522,7 +622,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
       SELECT ws.*, COUNT(s.id) as totalSets, 
-             SUM(CASE WHEN e.weightUnit IN ('kg', 'lbs') THEN s.weight * s.reps ELSE 0 END) as totalVolume
+             SUM(CASE WHEN e.weightUnit IN ('kg', 'lbs') AND coalesce(s.isWarmup, 0) = 0 THEN s.weight * s.reps ELSE 0 END) as totalVolume
       FROM workout_sessions ws
       LEFT JOIN workout_sets s ON ws.id = s.sessionId
       LEFT JOIN exercises e ON s.exerciseId = e.id
@@ -682,6 +782,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
         AND ws.reps >= ?
         AND ws.id < ?
         AND s.endTimestamp IS NOT NULL
+        AND coalesce(ws.isWarmup, 0) = 0
       ''', [exerciseId, weight, reps, currentSetId]);
       
       final count = result.first['count'] as int;
@@ -699,6 +800,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
         SELECT COUNT(*) as count FROM workout_sets ws1
         WHERE ws1.sessionId = ?
         AND ws1.weight > 0
+        AND coalesce(ws1.isWarmup, 0) = 0
         AND NOT EXISTS (
           SELECT 1 FROM workout_sets ws2
           INNER JOIN workout_sessions s2 ON ws2.sessionId = s2.id
@@ -707,6 +809,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
           AND ws2.reps >= ws1.reps
           AND ws2.id < ws1.id
           AND s2.endTimestamp IS NOT NULL
+          AND coalesce(ws2.isWarmup, 0) = 0
         )
       ''', [sessionId]);
       
@@ -714,5 +817,134 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
     } catch (e) {
       throw DatabaseOperationException('Failed to count PRs in session: $e');
     }
+  }
+
+  @override
+  Future<void> saveBodyWeightLog(BodyWeightLog log) async {
+    try {
+      final db = await dbHelper.database;
+      await db.insert('body_weight_logs', {
+        'id': log.id,
+        'timestamp': log.date.millisecondsSinceEpoch,
+        'weight': log.weight,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    } catch (e) {
+      throw DatabaseOperationException('Failed to save body weight log: $e');
+    }
+  }
+
+  @override
+  Future<void> deleteBodyWeightLog(String id) async {
+    try {
+      final db = await dbHelper.database;
+      await db.delete(
+        'body_weight_logs',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    } catch (e) {
+      throw DatabaseOperationException('Failed to delete body weight log: $e');
+    }
+  }
+
+  @override
+  Future<List<BodyWeightLog>> getBodyWeightLogs() async {
+    final db = await dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'body_weight_logs',
+      orderBy: 'timestamp DESC',
+    );
+    return maps.map((map) => BodyWeightLog(
+      id: map['id'] as String,
+      date: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] as int),
+      weight: map['weight'] as double,
+    )).toList();
+  }
+
+  @override
+  Future<ExerciseHistorySummary> getExerciseHistory(int exerciseId) async {
+    final db = await dbHelper.database;
+    
+    final exerciseMaps = await db.query('exercises', where: 'id = ?', whereArgs: [exerciseId]);
+    if (exerciseMaps.isEmpty) throw DatabaseOperationException('Exercise not found');
+    final exercise = Exercise.fromJson(exerciseMaps.first);
+
+    final bestSetMaps = await db.rawQuery('''
+      SELECT * FROM workout_sets 
+      WHERE exerciseId = ? AND coalesce(isWarmup, 0) = 0
+      ORDER BY weight DESC, reps DESC 
+      LIMIT 1
+    ''', [exerciseId]);
+    WorkoutSet? allTimeBest = bestSetMaps.isNotEmpty ? WorkoutSet.fromJson(bestSetMaps.first) : null;
+
+    final sessionsWithSets = await db.rawQuery('''
+      SELECT s.* 
+      FROM workout_sessions s
+      JOIN workout_sets ws ON ws.sessionId = s.id
+      WHERE ws.exerciseId = ? AND s.endTimestamp IS NOT NULL
+      GROUP BY s.id
+      ORDER BY s.startTimestamp ASC
+    ''', [exerciseId]);
+
+    List<WorkoutSession> recentSessions = sessionsWithSets.map((m) => WorkoutSession.fromJson(m)).toList().reversed.toList();
+    
+    final setsMapList = await db.rawQuery('''
+      SELECT ws.*, s.startTimestamp
+      FROM workout_sets ws
+      JOIN workout_sessions s ON s.id = ws.sessionId
+      WHERE ws.exerciseId = ? AND coalesce(ws.isWarmup, 0) = 0 AND s.endTimestamp IS NOT NULL
+      ORDER BY s.startTimestamp ASC, ws.id ASC
+    ''', [exerciseId]);
+
+    double allTimeMaxWeight = -1;
+    int allTimeMaxReps = -1;
+    
+    Map<int, double> volumePerSession = {};
+    Map<int, bool> hasPRPerSession = {};
+    Map<int, int> timestampPerSession = {};
+
+    for (var row in setsMapList) {
+      int sessionId = row['sessionId'] as int;
+      int timestamp = row['startTimestamp'] as int;
+      double weight = (row['weight'] as num).toDouble();
+      int reps = row['reps'] as int;
+
+      timestampPerSession[sessionId] = timestamp;
+      
+      if (exercise.weightUnit == 'kg' || exercise.weightUnit == 'lbs') {
+        volumePerSession[sessionId] = (volumePerSession[sessionId] ?? 0.0) + (weight * reps);
+        
+        bool isPR = false;
+        if (weight > allTimeMaxWeight) {
+          isPR = true;
+          allTimeMaxWeight = weight;
+          allTimeMaxReps = reps;
+        } else if (weight == allTimeMaxWeight && reps > allTimeMaxReps) {
+          isPR = true;
+          allTimeMaxReps = reps;
+        }
+        
+        if (isPR) {
+          hasPRPerSession[sessionId] = true;
+        }
+      }
+    }
+
+    List<SessionVolume> volumeHistory = [];
+    for (var sessionId in timestampPerSession.keys) {
+      volumeHistory.add(SessionVolume(
+        sessionId: sessionId,
+        timestamp: timestampPerSession[sessionId]!,
+        volume: volumePerSession[sessionId] ?? 0.0,
+        hasPR: hasPRPerSession[sessionId] ?? false,
+      ));
+    }
+
+    return ExerciseHistorySummary(
+      exercise: exercise,
+      allTimeBest: allTimeBest,
+      volumeHistory: volumeHistory,
+      recentSessions: recentSessions,
+    );
   }
 }

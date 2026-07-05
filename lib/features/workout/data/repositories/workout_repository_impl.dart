@@ -5,8 +5,11 @@ import '../../domain/entities/workout_set.dart';
 import '../../domain/repositories/workout_repository.dart';
 import '../../domain/entities/routine_exercise_detail.dart';
 import '../../domain/entities/workout_session_summary.dart';
+import '../../domain/entities/workout_session.dart';
 import '../../domain/entities/routine_summary.dart';
 import '../../domain/entities/weekly_stats.dart';
+import '../../domain/entities/body_weight_log.dart';
+import '../../domain/entities/exercise_history_summary.dart';
 
 class WorkoutRepositoryImpl implements WorkoutRepository {
   final WorkoutLocalDataSource localDataSource;
@@ -34,6 +37,11 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   }
 
   @override
+  Future<void> toggleSetWarmup(int setId, bool isWarmup) {
+    return localDataSource.toggleSetWarmup(setId, isWarmup);
+  }
+
+  @override
   Future<void> endSession(int sessionId) {
     return localDataSource.endSession(sessionId);
   }
@@ -41,6 +49,11 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   @override
   Future<void> deleteSession(int sessionId) {
     return localDataSource.deleteSession(sessionId);
+  }
+
+  @override
+  Future<void> updateSessionNotes(int sessionId, String notes) {
+    return localDataSource.updateSessionNotes(sessionId, notes);
   }
 
   @override
@@ -76,6 +89,16 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   @override
   Future<Map<int, Map<String, dynamic>>> getLatestSetsForExercisesInRoutine(List<int> exerciseIds, int routineId) {
     return localDataSource.getLatestSetsForExercisesInRoutine(exerciseIds, routineId);
+  }
+
+  @override
+  Future<List<WorkoutSet>> getPreviousSetsForRoutine(int routineId) {
+    return localDataSource.getPreviousSetsForRoutine(routineId);
+  }
+
+  @override
+  Future<WorkoutSession?> getPreviousSession(int routineId, int currentSessionId) {
+    return localDataSource.getPreviousSession(routineId, currentSessionId);
   }
 
   @override
@@ -130,6 +153,11 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   }
 
   @override
+  Future<void> updateSupersetGroup(int routineId, int exerciseId, int? newGroupId) {
+    return localDataSource.updateSupersetGroup(routineId, exerciseId, newGroupId);
+  }
+
+  @override
   Future<int> createExercise(String name, String bodyPart, String weightUnit) {
     return localDataSource.createExercise(name, bodyPart, weightUnit);
   }
@@ -162,6 +190,11 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   @override
   Future<bool> exerciseNameExists(String name, {int? excludeId}) {
     return localDataSource.exerciseNameExists(name, excludeId: excludeId);
+  }
+
+  @override
+  Future<ExerciseHistorySummary> getExerciseHistory(int exerciseId) {
+    return localDataSource.getExerciseHistory(exerciseId);
   }
 
   @override
@@ -219,5 +252,20 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   @override
   Future<int> countPRsInSession(int sessionId) {
     return localDataSource.countPRsInSession(sessionId);
+  }
+
+  @override
+  Future<void> saveBodyWeightLog(BodyWeightLog log) {
+    return localDataSource.saveBodyWeightLog(log);
+  }
+
+  @override
+  Future<void> deleteBodyWeightLog(String id) {
+    return localDataSource.deleteBodyWeightLog(id);
+  }
+
+  @override
+  Future<List<BodyWeightLog>> getBodyWeightLogs() {
+    return localDataSource.getBodyWeightLogs();
   }
 }

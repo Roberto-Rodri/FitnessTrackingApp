@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../controllers/workout_providers.dart';
+import '../../../../core/routing/router.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/workout_set.dart';
+import '../controllers/routine_editor_controller.dart';
 import '../../domain/entities/workout_session_summary.dart';
 import '../../domain/entities/exercise.dart';
 import '../../../../core/theme/theme.dart';
@@ -23,17 +26,22 @@ class SessionDetailScreen extends ConsumerWidget {
     final sessionsAsync = ref.watch(completedSessionsProvider);
     final setsAsync = ref.watch(sessionSetsProvider(sessionId));
     final infoAsync = ref.watch(sessionExerciseInfoProvider(sessionId));
+    
+    final summary = sessionsAsync.value?.firstWhere(
+      (s) => s.session.id == sessionId,
+      orElse: () => throw Exception('Session not found'),
+    );
+    final routineId = summary?.session.routineId;
+    final blocksAsync = routineId != null ? ref.watch(routineEditorProvider(routineId)) : null;
+
     final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: sessionsAsync.when(
         data: (sessions) {
-          final summary = sessions.firstWhere(
-            (s) => s.session.id == sessionId,
-            orElse: () => throw Exception('Session not found'),
-          );
-          return _buildBody(context, ref, summary, setsAsync, infoAsync, theme);
+          if (summary == null) return const Center(child: Text('Session not found'));
+          return _buildBody(context, ref, summary, setsAsync, infoAsync, blocksAsync, theme);
         },
         loading: () => ListView.separated(
           padding: const EdgeInsets.all(16),
@@ -55,9 +63,10 @@ class SessionDetailScreen extends ConsumerWidget {
     WorkoutSessionSummary summary,
     AsyncValue<List<WorkoutSet>> setsAsync,
     AsyncValue<Map<int, Exercise>> infoAsync,
+    AsyncValue<List<RoutineBlock>>? blocksAsync,
     ThemeData theme,
   ) {
-    if (setsAsync.isLoading || infoAsync.isLoading) {
+    if (setsAsync.isLoading || infoAsync.isLoading || (blocksAsync?.isLoading ?? false)) {
       return ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: 3,
@@ -84,9 +93,31 @@ class SessionDetailScreen extends ConsumerWidget {
       );
     }
 
-    final Map<int, List<WorkoutSet>> groupedSets = {};
+    final Map<int, List<WorkoutSet>> groupedSetsByExercise = {};
     for (final s in sets) {
-      groupedSets.putIfAbsent(s.exerciseId, () => []).add(s);
+      groupedSetsByExercise.putIfAbsent(s.exerciseId, () => []).add(s);
+    }
+
+    final blocks = blocksAsync?.value ?? [];
+    
+    // Re-construct history blocks
+    // If an exercise is in a RoutineBlock, group it. Otherwise, standalone.
+    final List<List<int>> historyBlocks = [];
+    final Set<int> assignedExercises = {};
+
+    for (final block in blocks) {
+      final blockExercises = block.exercises.map((e) => e.exerciseId).where((id) => groupedSetsByExercise.containsKey(id)).toList();
+      if (blockExercises.isNotEmpty) {
+        historyBlocks.add(blockExercises);
+        assignedExercises.addAll(blockExercises);
+      }
+    }
+
+    // Add any exercises that were not in blocks (e.g. routine changed, or swapped exercise)
+    for (final exId in groupedSetsByExercise.keys) {
+      if (!assignedExercises.contains(exId)) {
+        historyBlocks.add([exId]);
+      }
     }
 
     final date = DateTime.fromMillisecondsSinceEpoch(summary.session.startTimestamp);
@@ -143,13 +174,35 @@ class SessionDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 32),
 
+              if (summary.session.notes != null && summary.session.notes!.isNotEmpty) ...[
+                Text(
+                  'SESSION NOTES',
+                  style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2, letterSpacing: 0.06),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.bg1,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppTheme.bg3),
+                  ),
+                  child: Text(
+                    summary.session.notes!,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.txt1, height: 1.4),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
+
               // Volume Chart
               Text(
                 'VOLUME PER EXERCISE',
                 style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2, letterSpacing: 0.06),
               ),
               const SizedBox(height: 16),
-              _buildVolumeChart(theme, groupedSets, info),
+              _buildVolumeChart(theme, groupedSetsByExercise, info),
               const SizedBox(height: 32),
 
               // Exercises List
@@ -166,12 +219,18 @@ class SessionDetailScreen extends ConsumerWidget {
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
-                final exerciseId = groupedSets.keys.elementAt(index);
-                final exerciseSets = groupedSets[exerciseId]!;
-                final exercise = info[exerciseId];
-                return _buildExerciseCard(theme, exercise, exerciseSets, index + 1);
+                final blockExerciseIds = historyBlocks[index];
+                if (blockExerciseIds.length == 1) {
+                  final exerciseId = blockExerciseIds.first;
+                  final exerciseSets = groupedSetsByExercise[exerciseId]!;
+                  final exercise = info[exerciseId];
+                  return _buildExerciseCard(context, theme, exercise, exerciseSets, index + 1);
+                } else {
+                  // Build Superset History Card
+                  return _buildSupersetHistoryCard(context, theme, blockExerciseIds, groupedSetsByExercise, info, index + 1);
+                }
               },
-              childCount: groupedSets.length,
+              childCount: historyBlocks.length,
             ),
           ),
         ),
@@ -294,7 +353,7 @@ class SessionDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildExerciseCard(ThemeData theme, Exercise? exercise, List<WorkoutSet> sets, int index) {
+  Widget _buildExerciseCard(BuildContext context, ThemeData theme, Exercise? exercise, List<WorkoutSet> sets, int index) {
     final exerciseName = exercise?.name ?? 'Unknown Exercise';
     final weightUnit = exercise?.weightUnit ?? 'kg';
     final bodyPart = exercise?.bodyPart ?? 'Unknown';
@@ -349,6 +408,13 @@ class SessionDetailScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (exercise != null)
+                IconButton(
+                  icon: const Icon(Icons.bar_chart, color: AppTheme.txt2, size: 20),
+                  onPressed: () {
+                    context.pushNamed(RouteNames.exerciseDetail, pathParameters: {'id': exercise.id.toString()});
+                  },
+                ),
             ],
           ),
           children: [
@@ -377,14 +443,20 @@ class SessionDetailScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(vertical: 6.0),
                       child: Row(
                         children: [
-                          SizedBox(
-                            width: 32,
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: s.isWarmup ? AppTheme.amber : Colors.transparent,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            alignment: Alignment.centerLeft,
                             child: Text(
-                              '$setNum',
-                              style: AppTheme.monoLarge(color: theme.colorScheme.onSurface).copyWith(fontSize: 16),
+                              s.isWarmup ? 'W' : '$setNum',
+                              style: AppTheme.monoLarge(color: s.isWarmup ? AppTheme.amber : theme.colorScheme.onSurface).copyWith(fontSize: 16),
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: 20),
                           Expanded(
                             child: Text(
                               weightText,
@@ -472,5 +544,165 @@ class SessionDetailScreen extends ConsumerWidget {
         Navigator.of(context).pop();
       }
     }
+  }
+
+  Widget _buildSupersetHistoryCard(
+    BuildContext context,
+    ThemeData theme,
+    List<int> exerciseIds,
+    Map<int, List<WorkoutSet>> groupedSetsByExercise,
+    Map<int, Exercise> info,
+    int index,
+  ) {
+    // Combine sets
+    final List<WorkoutSet> allSets = [];
+    for (final id in exerciseIds) {
+      allSets.addAll(groupedSetsByExercise[id] ?? []);
+    }
+    // Sort chronologically by ID (surrogate for time)
+    allSets.sort((a, b) => (a.id ?? 0).compareTo(b.id ?? 0));
+
+    String groupLabel = 'SUPERSET';
+    if (exerciseIds.length == 3) groupLabel = 'TRISET';
+    if (exerciseIds.length > 3) groupLabel = 'CIRCUIT';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: theme.colorScheme.outline),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: theme.colorScheme.surface,
+                      border: Border.all(color: theme.colorScheme.outline),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$index',
+                        style: AppTheme.monoLarge(color: AppTheme.txt2).copyWith(fontSize: 14),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                    decoration: BoxDecoration(
+                      color: AppTheme.amber.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                    child: Text(
+                      groupLabel,
+                      style: AppTheme.monoSmall(color: AppTheme.amber).copyWith(fontSize: 10),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    width: 3,
+                    margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.amber,
+                      borderRadius: BorderRadius.circular(1.5),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 16, bottom: 16),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              SizedBox(width: 32, child: Text('Set', style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2))),
+                              const SizedBox(width: 8),
+                              Expanded(flex: 2, child: Text('Exercise', style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2))),
+                              const SizedBox(width: 8),
+                              Expanded(child: Text('Weight', style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2))),
+                              const SizedBox(width: 8),
+                              Expanded(child: Text('Reps', style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt2))),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          ...allSets.asMap().entries.map((e) {
+                            final setNum = e.key + 1; // absolute set number within superset
+                            final s = e.value;
+                            final ex = info[s.exerciseId];
+                            final weightUnit = ex?.weightUnit ?? 'kg';
+                            final weightText = weightUnit == 'custom'
+                                ? (s.customWeight ?? '')
+                                : (weightUnit == 'plates' ? s.weight.toStringAsFixed(0) : s.weight.toString());
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6.0),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      color: s.isWarmup ? AppTheme.amber : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      s.isWarmup ? 'W' : '$setNum',
+                                      style: AppTheme.monoLarge(color: s.isWarmup ? AppTheme.amber : theme.colorScheme.onSurface).copyWith(fontSize: 16),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      ex?.name ?? 'Unknown',
+                                      style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt1, fontWeight: FontWeight.bold),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      weightText,
+                                      style: AppTheme.monoLarge(color: theme.colorScheme.onSurface).copyWith(fontSize: 16),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      s.reps.toString(),
+                                      style: AppTheme.monoLarge(color: theme.colorScheme.onSurface).copyWith(fontSize: 16),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -9,6 +9,8 @@ import '../../domain/entities/workout_session_summary.dart';
 import '../../domain/entities/routine_summary.dart';
 import '../../domain/entities/weekly_stats.dart';
 import '../../../program/presentation/controllers/program_providers.dart';
+import '../../domain/entities/exercise_history_summary.dart';
+import '../../domain/entities/workout_summary_detail.dart';
 
 part 'workout_providers.g.dart';
 
@@ -30,6 +32,9 @@ class ActiveWorkoutState {
   final int? programId;
   final int? programDayIndex;
   final bool isOverride;
+  final String notes;
+  final String? previousSessionNotes;
+  final Map<int, List<WorkoutSet>> previousSetsByExercise;
 
   const ActiveWorkoutState({
     this.sessionId,
@@ -47,6 +52,9 @@ class ActiveWorkoutState {
     this.programId,
     this.programDayIndex,
     this.isOverride = false,
+    this.notes = '',
+    this.previousSessionNotes,
+    this.previousSetsByExercise = const {},
   });
 
   ActiveWorkoutState copyWith({
@@ -65,6 +73,9 @@ class ActiveWorkoutState {
     int? programId,
     int? programDayIndex,
     bool? isOverride,
+    String? notes,
+    String? previousSessionNotes,
+    Map<int, List<WorkoutSet>>? previousSetsByExercise,
   }) {
     return ActiveWorkoutState(
       sessionId: sessionId ?? this.sessionId,
@@ -82,6 +93,9 @@ class ActiveWorkoutState {
       programId: programId ?? this.programId,
       programDayIndex: programDayIndex ?? this.programDayIndex,
       isOverride: isOverride ?? this.isOverride,
+      notes: notes ?? this.notes,
+      previousSessionNotes: previousSessionNotes ?? this.previousSessionNotes,
+      previousSetsByExercise: previousSetsByExercise ?? this.previousSetsByExercise,
     );
   }
 }
@@ -196,6 +210,29 @@ Future<RoutineSummary?> lastRoutine(LastRoutineRef ref) async {
 
 final showConfettiProvider = StateProvider<bool>((ref) => false);
 
+@riverpod
+Future<WorkoutSessionSummary?> previousSession(PreviousSessionRef ref, int routineId, int currentSessionId) async {
+  final repository = ref.watch(workoutRepositoryProvider);
+  final session = await repository.getPreviousSession(routineId, currentSessionId);
+  if (session == null) return null;
+  
+  final sets = await repository.getSetsForSession(session.id!);
+  
+  int totalSets = sets.length;
+  double totalVolume = 0.0;
+  for (final s in sets) {
+    if (!s.isWarmup) {
+      totalVolume += s.weight * s.reps;
+    }
+  }
+
+  return WorkoutSessionSummary(
+    session: session,
+    totalSets: totalSets,
+    totalVolume: totalVolume,
+  );
+}
+
 @Riverpod(keepAlive: true)
 class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
   bool _isStarting = false;
@@ -231,6 +268,19 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
       final latestSetsRoutine = await repository.getLatestSetsForExercisesInRoutine(exerciseIds, routineId);
       final alternatives = await repository.getAlternativesForExercises(exerciseIds);
       
+      final completedSessions = await repository.getCompletedSessions();
+      final previousSession = completedSessions.cast<WorkoutSessionSummary?>().firstWhere(
+        (s) => s?.session.routineId == routineId,
+        orElse: () => null,
+      );
+      final previousSessionNotes = previousSession?.session.notes;
+      
+      final previousSetsRaw = await repository.getPreviousSetsForRoutine(routineId);
+      final Map<int, List<WorkoutSet>> previousSetsByExercise = {};
+      for (final s in previousSetsRaw) {
+        previousSetsByExercise.putIfAbsent(s.exerciseId, () => []).add(s);
+      }
+
       // Step 3: Set state with EVERYTHING ready
       state = AsyncData(ActiveWorkoutState(
         sessionId: sessionId,
@@ -245,6 +295,8 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
         programId: programId,
         programDayIndex: programDayIndex,
         isOverride: isOverride,
+        previousSessionNotes: previousSessionNotes,
+        previousSetsByExercise: previousSetsByExercise,
       ));
     } catch (e, st) {
       state = AsyncError(e, st);
@@ -274,13 +326,27 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
       );
 
       bool isPR = false;
-      if (exerciseDetail.weightUnit == 'kg' || exerciseDetail.weightUnit == 'lbs') {
+      if (!setWithSession.isWarmup && (exerciseDetail.weightUnit == 'kg' || exerciseDetail.weightUnit == 'lbs')) {
         isPR = await repository.isPersonalRecord(setWithSession.exerciseId, setWithSession.weight, setWithSession.reps, id);
+      }
+
+      int? nextRestSeconds;
+      if (!setWithSession.isWarmup) {
+        if (exerciseDetail.supersetGroup == null) {
+          nextRestSeconds = exerciseDetail.restSeconds;
+        } else {
+          final groupExercises = currentState.activeExercises
+              .where((e) => e.supersetGroup == exerciseDetail.supersetGroup)
+              .toList();
+          if (groupExercises.isNotEmpty && groupExercises.last.exerciseId == setWithSession.exerciseId) {
+            nextRestSeconds = exerciseDetail.restSeconds;
+          }
+        }
       }
 
       state = AsyncData(currentState.copyWith(
         sets: newSets,
-        lastLoggedRestSeconds: exerciseDetail.restSeconds,
+        lastLoggedRestSeconds: nextRestSeconds,
         loggedSetCount: currentState.loggedSetCount + 1,
         lastPRSetId: isPR ? id : null, // Set PR ID if it's a PR, or null if it's not.
       ));
@@ -290,12 +356,15 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
     }
   }
 
-  Future<void> endSession() async {
+  Future<int?> endSession() async {
     final currentState = state.value;
-    if (currentState == null || currentState.sessionId == null) return;
+    if (currentState == null || currentState.sessionId == null) return null;
 
     try {
       final repository = ref.read(workoutRepositoryProvider);
+      if (currentState.notes.isNotEmpty) {
+        await repository.updateSessionNotes(currentState.sessionId!, currentState.notes);
+      }
       await repository.endSession(currentState.sessionId!);
       state = const AsyncData(ActiveWorkoutState());
       
@@ -312,10 +381,41 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
         ref.invalidate(activeProgramProvider);
         ref.invalidate(currentProgramDayProvider);
       }
+      return currentState.sessionId;
     } catch (e) {
       // Revert to current state on failure
       state = AsyncData(currentState);
+      return null;
     }
+  }
+
+  Future<void> toggleWarmup(int setId) async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final setIndex = currentState.sets.indexWhere((s) => s.id == setId);
+    if (setIndex == -1) return;
+
+    final targetSet = currentState.sets[setIndex];
+    final newIsWarmup = !targetSet.isWarmup;
+
+    try {
+      final repository = ref.read(workoutRepositoryProvider);
+      await repository.toggleSetWarmup(setId, newIsWarmup);
+
+      final updatedSets = List<WorkoutSet>.from(currentState.sets);
+      updatedSets[setIndex] = targetSet.copyWith(isWarmup: newIsWarmup);
+
+      state = AsyncData(currentState.copyWith(sets: updatedSets));
+    } catch (e) {
+      // Do nothing on failure, maybe log
+    }
+  }
+
+  void updateNotes(String text) {
+    final currentState = state.value;
+    if (currentState == null) return;
+    state = AsyncData(currentState.copyWith(notes: text));
   }
 
   Future<void> swapExercise(int originalExerciseId, Exercise newExercise) async {
@@ -357,4 +457,81 @@ class WorkoutSessionNotifier extends _$WorkoutSessionNotifier {
       alternatives: updatedAlternatives,
     ));
   }
+}
+
+@riverpod
+Future<ExerciseHistorySummary> exerciseHistory(ExerciseHistoryRef ref, int exerciseId) async {
+  final repository = ref.watch(workoutRepositoryProvider);
+  return repository.getExerciseHistory(exerciseId);
+}
+
+@riverpod
+Future<WorkoutSummaryDetail> workoutSummary(WorkoutSummaryRef ref, int sessionId) async {
+  final repository = ref.watch(workoutRepositoryProvider);
+  
+  final sessions = await repository.getCompletedSessions();
+  final sessionSummary = sessions.firstWhere((s) => s.session.id == sessionId);
+  
+  final sets = await repository.getSetsForSession(sessionId);
+  final exerciseMap = await repository.getExerciseInfoForSession(sessionId);
+  final prCount = await repository.countPRsInSession(sessionId);
+  
+  Map<int, double> currentVolumes = {};
+  Map<int, int> currentSetsMap = {};
+  Map<int, bool> prsMap = {};
+  
+  for (var s in sets) {
+    if (s.isWarmup) continue;
+    currentSetsMap[s.exerciseId] = (currentSetsMap[s.exerciseId] ?? 0) + 1;
+    final ex = exerciseMap[s.exerciseId];
+    if (ex != null && (ex.weightUnit == 'kg' || ex.weightUnit == 'lbs')) {
+      currentVolumes[s.exerciseId] = (currentVolumes[s.exerciseId] ?? 0) + (s.weight * s.reps);
+    }
+  }
+  
+  Map<int, double> previousVolumes = {};
+  Map<int, int> previousSetsMap = {};
+  
+  for (var exId in exerciseMap.keys) {
+    final history = await repository.getExerciseHistory(exId);
+    
+    SessionVolume? previousVol;
+    for (var h in history.volumeHistory.reversed) {
+      if (h.sessionId < sessionId) {
+        previousVol = h;
+        break;
+      }
+    }
+    
+    if (previousVol != null) {
+      previousVolumes[exId] = previousVol.volume;
+      final prevSets = await repository.getSetsForSession(previousVol.sessionId);
+      previousSetsMap[exId] = prevSets.where((s) => s.exerciseId == exId && !s.isWarmup).length;
+    }
+    
+    final currentVol = history.volumeHistory.where((v) => v.sessionId == sessionId).firstOrNull;
+    if (currentVol != null) {
+      prsMap[exId] = currentVol.hasPR;
+    }
+  }
+  
+  List<ExerciseComparison> comparisons = [];
+  for (var exId in exerciseMap.keys) {
+    comparisons.add(ExerciseComparison(
+      exercise: exerciseMap[exId]!,
+      currentVolume: currentVolumes[exId] ?? 0.0,
+      previousVolume: previousVolumes[exId],
+      currentSets: currentSetsMap[exId] ?? 0,
+      previousSets: previousSetsMap[exId],
+      hasPR: prsMap[exId] ?? false,
+    ));
+  }
+  
+  return WorkoutSummaryDetail(
+    session: sessionSummary.session,
+    totalSets: sessionSummary.totalSets,
+    totalVolume: sessionSummary.totalVolume,
+    totalPRs: prCount,
+    exerciseComparisons: comparisons,
+  );
 }

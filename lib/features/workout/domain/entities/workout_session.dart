@@ -11,6 +11,7 @@ class WorkoutSession with _$WorkoutSession {
     int? endTimestamp,
     int? routineId,
     required String routineNameSnapshot,
+    String? notes,
   }) = _WorkoutSession;
 
   factory WorkoutSession.fromJson(Map<String, dynamic> json) => _$WorkoutSessionFromJson(json);
