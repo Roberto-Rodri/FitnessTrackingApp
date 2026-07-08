@@ -324,7 +324,10 @@ class WorkoutSessionController extends _$WorkoutSessionController {
       throw NoActiveSessionException('Cannot log set — no active session');
     }
 
-    final setWithSession = set.copyWith(sessionId: currentState.sessionId!);
+    final setWithSession = set.copyWith(
+      sessionId: currentState.sessionId!,
+      weightUnit: set.weightUnit ?? currentState.activeExercises.firstWhere((e) => e.exerciseId == set.exerciseId).weightUnit,
+    );
 
     // Optimistically updating UI requires the DB ID first
     try {
@@ -529,6 +532,34 @@ class WorkoutSessionController extends _$WorkoutSessionController {
     state = AsyncValue.data(currentState.copyWith(activeExercises: updatedExercises));
   }
 
+  void updateSessionExerciseUnit(int exerciseId, String weightUnit) {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final updatedExercises = currentState.activeExercises.map((ex) {
+      if (ex.exerciseId == exerciseId) {
+        return ex.copyWith(weightUnit: weightUnit);
+      }
+      return ex;
+    }).toList();
+
+    state = AsyncValue.data(currentState.copyWith(activeExercises: updatedExercises));
+  }
+
+  void setSessionExerciseMachine(int exerciseId, int? machineId) {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final updatedExercises = currentState.activeExercises.map((ex) {
+      if (ex.exerciseId == exerciseId) {
+        return ex.copyWith(machineId: machineId);
+      }
+      return ex;
+    }).toList();
+
+    state = AsyncValue.data(currentState.copyWith(activeExercises: updatedExercises));
+  }
+
   Future<void> addExerciseToSession(Exercise newExercise, int targetSets, String targetReps) async {
     final currentState = state.value;
     if (currentState == null) return;
@@ -599,7 +630,10 @@ Future<WorkoutSummaryDetail> workoutSummary(WorkoutSummaryRef ref, int sessionId
     currentSetsMap[s.exerciseId] = (currentSetsMap[s.exerciseId] ?? 0) + 1;
     final ex = exerciseMap[s.exerciseId];
     if (ex != null && (ex.weightUnit == 'kg' || ex.weightUnit == 'lbs')) {
-      currentVolumes[s.exerciseId] = (currentVolumes[s.exerciseId] ?? 0) + (s.weight * s.reps);
+      final setUnit = s.weightUnit ?? ex.weightUnit;
+      if (setUnit == ex.weightUnit) {
+        currentVolumes[s.exerciseId] = (currentVolumes[s.exerciseId] ?? 0) + (s.weight * s.reps);
+      }
     }
   }
   

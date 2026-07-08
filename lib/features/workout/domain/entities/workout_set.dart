@@ -17,6 +17,7 @@ class WorkoutSet with _$WorkoutSet {
     int? rpe,
     String? customWeight,
     @JsonKey(fromJson: _boolFromInt, toJson: _boolToInt) @Default(false) bool isWarmup,
+    String? weightUnit,
   }) = _WorkoutSet;
 
   factory WorkoutSet.fromJson(Map<String, dynamic> json) => _$WorkoutSetFromJson(json);

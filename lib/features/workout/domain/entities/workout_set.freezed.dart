@@ -29,6 +29,7 @@ mixin _$WorkoutSet {
   String? get customWeight => throw _privateConstructorUsedError;
   @JsonKey(fromJson: _boolFromInt, toJson: _boolToInt)
   bool get isWarmup => throw _privateConstructorUsedError;
+  String? get weightUnit => throw _privateConstructorUsedError;
 
   /// Serializes this WorkoutSet to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -54,7 +55,8 @@ abstract class $WorkoutSetCopyWith<$Res> {
       int reps,
       int? rpe,
       String? customWeight,
-      @JsonKey(fromJson: _boolFromInt, toJson: _boolToInt) bool isWarmup});
+      @JsonKey(fromJson: _boolFromInt, toJson: _boolToInt) bool isWarmup,
+      String? weightUnit});
 }
 
 /// @nodoc
@@ -80,6 +82,7 @@ class _$WorkoutSetCopyWithImpl<$Res, $Val extends WorkoutSet>
     Object? rpe = freezed,
     Object? customWeight = freezed,
     Object? isWarmup = null,
+    Object? weightUnit = freezed,
   }) {
     return _then(_value.copyWith(
       id: freezed == id
@@ -114,6 +117,10 @@ class _$WorkoutSetCopyWithImpl<$Res, $Val extends WorkoutSet>
           ? _value.isWarmup
           : isWarmup // ignore: cast_nullable_to_non_nullable
               as bool,
+      weightUnit: freezed == weightUnit
+          ? _value.weightUnit
+          : weightUnit // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -134,7 +141,8 @@ abstract class _$$WorkoutSetImplCopyWith<$Res>
       int reps,
       int? rpe,
       String? customWeight,
-      @JsonKey(fromJson: _boolFromInt, toJson: _boolToInt) bool isWarmup});
+      @JsonKey(fromJson: _boolFromInt, toJson: _boolToInt) bool isWarmup,
+      String? weightUnit});
 }
 
 /// @nodoc
@@ -158,6 +166,7 @@ class __$$WorkoutSetImplCopyWithImpl<$Res>
     Object? rpe = freezed,
     Object? customWeight = freezed,
     Object? isWarmup = null,
+    Object? weightUnit = freezed,
   }) {
     return _then(_$WorkoutSetImpl(
       id: freezed == id
@@ -192,6 +201,10 @@ class __$$WorkoutSetImplCopyWithImpl<$Res>
           ? _value.isWarmup
           : isWarmup // ignore: cast_nullable_to_non_nullable
               as bool,
+      weightUnit: freezed == weightUnit
+          ? _value.weightUnit
+          : weightUnit // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -208,7 +221,8 @@ class _$WorkoutSetImpl implements _WorkoutSet {
       this.rpe,
       this.customWeight,
       @JsonKey(fromJson: _boolFromInt, toJson: _boolToInt)
-      this.isWarmup = false});
+      this.isWarmup = false,
+      this.weightUnit});
 
   factory _$WorkoutSetImpl.fromJson(Map<String, dynamic> json) =>
       _$$WorkoutSetImplFromJson(json);
@@ -230,10 +244,12 @@ class _$WorkoutSetImpl implements _WorkoutSet {
   @override
   @JsonKey(fromJson: _boolFromInt, toJson: _boolToInt)
   final bool isWarmup;
+  @override
+  final String? weightUnit;
 
   @override
   String toString() {
-    return 'WorkoutSet(id: $id, sessionId: $sessionId, exerciseId: $exerciseId, weight: $weight, reps: $reps, rpe: $rpe, customWeight: $customWeight, isWarmup: $isWarmup)';
+    return 'WorkoutSet(id: $id, sessionId: $sessionId, exerciseId: $exerciseId, weight: $weight, reps: $reps, rpe: $rpe, customWeight: $customWeight, isWarmup: $isWarmup, weightUnit: $weightUnit)';
   }
 
   @override
@@ -252,13 +268,15 @@ class _$WorkoutSetImpl implements _WorkoutSet {
             (identical(other.customWeight, customWeight) ||
                 other.customWeight == customWeight) &&
             (identical(other.isWarmup, isWarmup) ||
-                other.isWarmup == isWarmup));
+                other.isWarmup == isWarmup) &&
+            (identical(other.weightUnit, weightUnit) ||
+                other.weightUnit == weightUnit));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, sessionId, exerciseId,
-      weight, reps, rpe, customWeight, isWarmup);
+      weight, reps, rpe, customWeight, isWarmup, weightUnit);
 
   /// Create a copy of WorkoutSet
   /// with the given fields replaced by the non-null parameter values.
@@ -285,8 +303,8 @@ abstract class _WorkoutSet implements WorkoutSet {
       required final int reps,
       final int? rpe,
       final String? customWeight,
-      @JsonKey(fromJson: _boolFromInt, toJson: _boolToInt)
-      final bool isWarmup}) = _$WorkoutSetImpl;
+      @JsonKey(fromJson: _boolFromInt, toJson: _boolToInt) final bool isWarmup,
+      final String? weightUnit}) = _$WorkoutSetImpl;
 
   factory _WorkoutSet.fromJson(Map<String, dynamic> json) =
       _$WorkoutSetImpl.fromJson;
@@ -308,6 +326,8 @@ abstract class _WorkoutSet implements WorkoutSet {
   @override
   @JsonKey(fromJson: _boolFromInt, toJson: _boolToInt)
   bool get isWarmup;
+  @override
+  String? get weightUnit;
 
   /// Create a copy of WorkoutSet
   /// with the given fields replaced by the non-null parameter values.

@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 
 class DatabaseHelper {
   static const _databaseName = "IronLog.db";
-  static const _databaseVersion = 12;
+  static const _databaseVersion = 13;
 
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -147,6 +147,9 @@ class DatabaseHelper {
       ''');
       await db.execute('ALTER TABLE exercises ADD COLUMN machineId INTEGER REFERENCES machines(id) ON DELETE SET NULL');
     }
+    if (oldVersion < 13) {
+      await db.execute('ALTER TABLE workout_sets ADD COLUMN weightUnit TEXT');
+    }
   }
 
   Future _onCreate(Database db, int version) async {
@@ -209,6 +212,7 @@ class DatabaseHelper {
         rpe INTEGER,
         customWeight TEXT,
         isWarmup INTEGER DEFAULT 0,
+        weightUnit TEXT,
         FOREIGN KEY (sessionId) REFERENCES workout_sessions (id) ON DELETE CASCADE,
         FOREIGN KEY (exerciseId) REFERENCES exercises (id) ON DELETE CASCADE
       )

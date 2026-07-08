@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/exercise.dart';
 import '../controllers/workout_providers.dart';
+import 'exercise_form_dialog.dart';
+import '../../../../core/theme/theme.dart';
+import '../../../../core/di/injection.dart';
 
 class ExerciseSwapSheet extends ConsumerStatefulWidget {
   final int currentExerciseId;
@@ -84,9 +87,48 @@ class _ExerciseSwapSheetState extends ConsumerState<ExerciseSwapSheet> {
                 Expanded(
                   child: ListView.builder(
                     controller: scrollController,
-                    itemCount: filteredExercises.length,
+                    itemCount: filteredExercises.length + 1,
                     itemBuilder: (context, index) {
-                      final ex = filteredExercises[index];
+                      if (index == 0) {
+                        return ListTile(
+                          leading: const Icon(Icons.add, color: AppTheme.amber),
+                          title: const Text('Create new exercise', style: TextStyle(color: AppTheme.amber, fontWeight: FontWeight.bold)),
+                          onTap: () async {
+                            final result = await showExerciseFormDialog(context);
+                            if (result != null && context.mounted) {
+                              try {
+                                final machineId = result['machineId'] as int?;
+                                final newId = await ref.read(workoutRepositoryProvider).createExercise(
+                                  result['name'] as String,
+                                  result['bodyPart'] as String,
+                                  result['weightUnit'] as String,
+                                  machineId: machineId,
+                                );
+                                ref.invalidate(allExercisesProvider);
+                                
+                                final newEx = Exercise(
+                                  id: newId,
+                                  name: result['name'] as String,
+                                  bodyPart: result['bodyPart'] as String,
+                                  weightUnit: result['weightUnit'] as String,
+                                  machineId: machineId,
+                                );
+                                
+                                widget.onExerciseSelected(newEx);
+                                if (context.mounted) Navigator.of(context).pop();
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Failed to create: $e')),
+                                  );
+                                }
+                              }
+                            }
+                          },
+                        );
+                      }
+
+                      final ex = filteredExercises[index - 1];
                       final isActive = ex.id == widget.currentExerciseId;
 
                       return ListTile(

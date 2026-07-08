@@ -12,6 +12,7 @@ import 'body_part_tag.dart';
 import '../../domain/entities/exercise.dart';
 import '../controllers/workout_providers.dart';
 import '../controllers/machine_providers.dart';
+import 'machine_picker_sheet.dart';
 import 'pr_badge.dart';
 import 'edit_targets_dialog.dart';
 import 'comparison_panel.dart';
@@ -479,6 +480,36 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                         context.pushNamed(RouteNames.exerciseDetail, pathParameters: {'id': widget.exerciseId.toString()});
                       },
                     ),
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.more_vert, color: theme.colorScheme.onSurfaceVariant),
+                      color: theme.colorScheme.surfaceContainerHigh,
+                      onSelected: (value) async {
+                        if (value == 'unit') {
+                          await _showChangeUnitFlow(context, ref);
+                        } else if (value == 'machine') {
+                          final machine = await showMachinePickerSheet(context);
+                          if (machine != null && context.mounted) {
+                            ref.read(workoutSessionControllerProvider.notifier)
+                                .setSessionExerciseMachine(widget.exerciseId, machine.id);
+                            ref.read(workoutRepositoryProvider)
+                                .setExerciseMachine(widget.exerciseId, machine.id);
+                          } else if (machine == null && context.mounted) {
+                            // If we need a way to clear it, we could add a clear button in the sheet
+                            // For now, if they pick a machine, we assign it.
+                          }
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'unit',
+                          child: Text('Change weight unit'),
+                        ),
+                        const PopupMenuItem(
+                          value: 'machine',
+                          child: Text('Assign machine'),
+                        ),
+                      ],
+                    ),
                     InkWell(
                   onTap: () async {
                     void showFullSwapSheet() {
@@ -536,16 +567,17 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
           ...widget.completedSets.asMap().entries.map((entry) {
             final idx = entry.key + 1;
             final set = entry.value;
-            final weightText = widget.weightUnit == 'custom'
+            final actualUnit = set.weightUnit ?? widget.weightUnit;
+            final weightText = actualUnit == 'custom'
                 ? (set.customWeight ?? '')
-                : (widget.weightUnit == 'plates' ? set.weight.toStringAsFixed(0) : set.weight.toString());
+                : (actualUnit == 'plates' ? set.weight.toStringAsFixed(0) : set.weight.toString());
             
             final activeState = ref.watch(workoutSessionControllerProvider).value;
             final isPR = set.id != null && set.id == activeState?.lastPRSetId;
             final prevSet = activeState?.previousSetsByExercise[widget.exerciseId]?.elementAtOrNull(idx);
 
             return _AnimatedSetRow(
-              child: _buildSetRow(theme, idx.toString(), weightText, set.reps.toString(), isCompleted: true, showPRBadge: isPR, set: set, previousSet: prevSet, phase: phase, rangeBottom: rangeBottom, rangeTop: rangeTop),
+              child: _buildSetRow(theme, idx.toString(), weightText, set.reps.toString(), actualUnit, isCompleted: true, showPRBadge: isPR, set: set, previousSet: prevSet, phase: phase, rangeBottom: rangeBottom, rangeTop: rangeTop),
             );
           }),
 
@@ -630,7 +662,8 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
     ThemeData theme, 
     String setNum, 
     String weight, 
-    String reps, 
+    String reps,
+    String unit,
     {
       bool isCompleted = false, 
       bool showPRBadge = false, 
@@ -768,7 +801,7 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text('WEIGHT (${widget.weightUnit})'.toUpperCase(), style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt3, fontSize: 10, letterSpacing: 0.5), textAlign: TextAlign.center),
+                          Text('WEIGHT ($unit)'.toUpperCase(), style: theme.textTheme.labelSmall?.copyWith(color: AppTheme.txt3, fontSize: 10, letterSpacing: 0.5), textAlign: TextAlign.center),
                           const SizedBox(height: 4),
                           Container(
                             height: 48,
@@ -991,6 +1024,130 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
       ],
     );
   }
+
+  Future<void> _showChangeUnitFlow(BuildContext context, WidgetRef ref) async {
+    final theme = Theme.of(context);
+    
+    // 1. Pick unit
+    final selectedUnit = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: theme.colorScheme.surfaceContainerHigh,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 32, top: 16, left: 16, right: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Change Weight Unit',
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                title: const Text('kg'),
+                trailing: widget.weightUnit == 'kg' ? const Icon(Icons.check, color: AppTheme.amber) : null,
+                onTap: () => Navigator.of(context).pop('kg'),
+              ),
+              ListTile(
+                title: const Text('lbs'),
+                trailing: widget.weightUnit == 'lbs' ? const Icon(Icons.check, color: AppTheme.amber) : null,
+                onTap: () => Navigator.of(context).pop('lbs'),
+              ),
+              ListTile(
+                title: const Text('Plates'),
+                trailing: widget.weightUnit == 'plates' ? const Icon(Icons.check, color: AppTheme.amber) : null,
+                onTap: () => Navigator.of(context).pop('plates'),
+              ),
+              ListTile(
+                title: const Text('Custom'),
+                trailing: widget.weightUnit == 'custom' ? const Icon(Icons.check, color: AppTheme.amber) : null,
+                onTap: () => Navigator.of(context).pop('custom'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (selectedUnit == null || selectedUnit == widget.weightUnit || !context.mounted) return;
+
+    // 2. Today vs Routine
+    if (widget.isSessionOnly) {
+      ref.read(workoutSessionControllerProvider.notifier)
+          .updateSessionExerciseUnit(widget.exerciseId, selectedUnit);
+      return;
+    }
+
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: theme.colorScheme.surfaceContainerHigh,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 32, top: 16, left: 16, right: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Apply to',
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.today, color: AppTheme.amber),
+                title: const Text('Today only'),
+                subtitle: const Text('Update for this workout session'),
+                onTap: () => Navigator.of(context).pop('today'),
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.save, color: AppTheme.amber),
+                title: const Text('Save permanently'),
+                subtitle: const Text('Update exercise in library'),
+                onTap: () => Navigator.of(context).pop('routine'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (choice == null || !context.mounted) return;
+
+    if (choice == 'today') {
+      ref.read(workoutSessionControllerProvider.notifier)
+          .updateSessionExerciseUnit(widget.exerciseId, selectedUnit);
+    } else if (choice == 'routine') {
+      try {
+        await ref.read(workoutRepositoryProvider).updateExercise(
+          widget.exerciseId, 
+          widget.exerciseName, 
+          widget.bodyPart, 
+          selectedUnit, 
+          machineId: widget.machineId
+        );
+        ref.read(workoutSessionControllerProvider.notifier)
+            .updateSessionExerciseUnit(widget.exerciseId, selectedUnit);
+        ref.invalidate(allExercisesProvider);
+        ref.invalidate(routineListProvider);
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to save: $e')),
+          );
+        }
+      }
+    }
+  }
 }
 
 class _EditSetDialog extends StatefulWidget {
@@ -1146,5 +1303,5 @@ class _EditSetDialogState extends State<_EditSetDialog> {
         ),
       ),
     );
-  }
+}
 }

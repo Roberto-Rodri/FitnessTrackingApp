@@ -306,7 +306,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
     final placeholders = List.filled(exerciseIds.length, '?').join(',');
     
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
-      SELECT ws.exerciseId, ws.weight, ws.reps, ws.customWeight
+      SELECT ws.exerciseId, ws.weight, ws.reps, ws.customWeight, ws.weightUnit
       FROM workout_sets ws
       INNER JOIN workout_sessions s ON ws.sessionId = s.id
       WHERE ws.exerciseId IN ($placeholders)
@@ -333,7 +333,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
     final placeholders = List.filled(exerciseIds.length, '?').join(',');
 
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
-      SELECT ws.exerciseId, ws.weight, ws.reps, ws.customWeight
+      SELECT ws.exerciseId, ws.weight, ws.reps, ws.customWeight, ws.weightUnit
       FROM workout_sets ws
       INNER JOIN workout_sessions s ON ws.sessionId = s.id
       WHERE ws.exerciseId IN ($placeholders)
@@ -359,7 +359,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
     final placeholders = List.filled(exerciseIds.length, '?').join(',');
 
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
-      SELECT ws.exerciseId, ws.weight, ws.reps, ws.customWeight
+      SELECT ws.exerciseId, ws.weight, ws.reps, ws.customWeight, ws.weightUnit
       FROM workout_sets ws
       INNER JOIN workout_sessions s ON ws.sessionId = s.id
       WHERE ws.exerciseId IN ($placeholders)

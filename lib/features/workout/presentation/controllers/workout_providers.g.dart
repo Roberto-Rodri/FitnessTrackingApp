@@ -1135,7 +1135,7 @@ class _ExerciseHistoryProviderElement
   int get exerciseId => (origin as ExerciseHistoryProvider).exerciseId;
 }
 
-String _$workoutSummaryHash() => r'507d0d65b1a9769299821391c14a5a4cfaaa91a8';
+String _$workoutSummaryHash() => r'76f8596548b5985f49daf6c8f5a2af14244cde96';
 
 /// See also [workoutSummary].
 @ProviderFor(workoutSummary)
@@ -1268,7 +1268,7 @@ class _WorkoutSummaryProviderElement
 }
 
 String _$workoutSessionControllerHash() =>
-    r'6554fc4f462f7b1d7fbba182b782e1354efce7e6';
+    r'6bebda44168b02387039a905bea830f3706ca1a7';
 
 /// See also [WorkoutSessionController].
 @ProviderFor(WorkoutSessionController)
