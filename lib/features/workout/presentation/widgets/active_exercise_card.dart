@@ -355,9 +355,9 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
     final phase = profileAsync.value?.phase ?? TrainingPhase.none;
     
     // Feature 2: Machine name
+    final machinesAsync = ref.watch(machinesNotifierProvider);
     String? machineName;
     if (widget.machineId != null) {
-      final machinesAsync = ref.watch(machinesNotifierProvider);
       final machines = machinesAsync.valueOrNull ?? [];
       machineName = machines.cast<Machine?>().firstWhere((m) => m?.id == widget.machineId, orElse: () => null)?.name;
     }
@@ -493,10 +493,16 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                                 .setSessionExerciseMachine(widget.exerciseId, machine.id);
                             ref.read(workoutRepositoryProvider)
                                 .setExerciseMachine(widget.exerciseId, machine.id);
-                          } else if (machine == null && context.mounted) {
-                            // If we need a way to clear it, we could add a clear button in the sheet
-                            // For now, if they pick a machine, we assign it.
+                            ref.invalidate(allExercisesProvider);
+                            ref.invalidate(routineListProvider);
                           }
+                        } else if (value == 'clear_machine') {
+                          ref.read(workoutSessionControllerProvider.notifier)
+                              .setSessionExerciseMachine(widget.exerciseId, null);
+                          ref.read(workoutRepositoryProvider)
+                              .setExerciseMachine(widget.exerciseId, null);
+                          ref.invalidate(allExercisesProvider);
+                          ref.invalidate(routineListProvider);
                         }
                       },
                       itemBuilder: (context) => [
@@ -508,6 +514,11 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                           value: 'machine',
                           child: Text('Assign machine'),
                         ),
+                        if (widget.machineId != null)
+                          const PopupMenuItem(
+                            value: 'clear_machine',
+                            child: Text('Clear machine', style: TextStyle(color: AppTheme.error)),
+                          ),
                       ],
                     ),
                     InkWell(
