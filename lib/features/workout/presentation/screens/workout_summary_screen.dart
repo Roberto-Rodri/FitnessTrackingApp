@@ -52,6 +52,11 @@ class WorkoutSummaryScreen extends ConsumerWidget {
             final durationStr = _formatDuration(summary.session.startTimestamp, summary.session.endTimestamp);
             final phase = profileAsync.value?.phase ?? TrainingPhase.none;
             final message = _getPhaseMessage(phase);
+            
+            String weightUnit = 'kg';
+            if (summary.exerciseComparisons.isNotEmpty) {
+              weightUnit = summary.exerciseComparisons.first.exercise.weightUnit;
+            }
 
             return CustomScrollView(
               slivers: [
@@ -99,7 +104,7 @@ class WorkoutSummaryScreen extends ConsumerWidget {
                             Expanded(
                               child: _StatCard(
                                 title: 'Volume',
-                                value: '${summary.totalVolume.toStringAsFixed(0)} kg',
+                                value: '${summary.totalVolume.toStringAsFixed(0)} $weightUnit',
                                 icon: Icons.fitness_center,
                               ),
                             ),

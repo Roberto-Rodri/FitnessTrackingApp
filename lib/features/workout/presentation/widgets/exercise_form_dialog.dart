@@ -5,6 +5,9 @@ import '../../domain/entities/exercise.dart';
 import '../controllers/workout_providers.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/theme.dart';
+import '../../domain/entities/machine.dart';
+import '../controllers/machine_providers.dart';
+import 'machine_picker_sheet.dart';
 
 class ExerciseFormDialog extends ConsumerStatefulWidget {
   final Exercise? existingExercise;
@@ -20,14 +23,27 @@ class _ExerciseFormDialogState extends ConsumerState<ExerciseFormDialog> {
   late TextEditingController _bodyPartController;
   final _formKey = GlobalKey<FormState>();
   String _weightUnit = 'kg';
-
-
+  Machine? _selectedMachine;
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.existingExercise?.name ?? '');
     _bodyPartController = TextEditingController(text: widget.existingExercise?.bodyPart ?? '');
     _weightUnit = widget.existingExercise?.weightUnit ?? 'kg';
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (widget.existingExercise?.machineId != null && mounted) {
+        final machines = await ref.read(machinesNotifierProvider.future);
+        if (mounted) {
+          setState(() {
+            _selectedMachine = machines.cast<Machine?>().firstWhere(
+              (m) => m?.id == widget.existingExercise!.machineId, 
+              orElse: () => null
+            );
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -76,7 +92,12 @@ class _ExerciseFormDialogState extends ConsumerState<ExerciseFormDialog> {
 
     if (!mounted) return;
     HapticFeedback.mediumImpact();
-    Navigator.of(context).pop({'name': name, 'bodyPart': bodyPart, 'weightUnit': _weightUnit});
+    Navigator.of(context).pop({
+      'name': name, 
+      'bodyPart': bodyPart, 
+      'weightUnit': _weightUnit,
+      'machineId': _selectedMachine?.id,
+    });
   }
 
   @override
@@ -167,6 +188,54 @@ class _ExerciseFormDialogState extends ConsumerState<ExerciseFormDialog> {
                 error: (err, st) => Text('Error: $err'),
               ),
               const SizedBox(height: 24),
+              
+              Text('Machine (Optional)', style: theme.textTheme.labelMedium?.copyWith(color: AppTheme.txt2)),
+              const SizedBox(height: 8),
+              InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () async {
+                  final machine = await showMachinePickerSheet(context);
+                  if (machine != null && mounted) {
+                    setState(() => _selectedMachine = machine);
+                  }
+                },
+                child: Ink(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _selectedMachine != null ? Icons.precision_manufacturing : Icons.add_circle_outline,
+                        color: _selectedMachine != null ? theme.colorScheme.primary : AppTheme.txt2,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _selectedMachine?.name ?? 'No machine assigned',
+                          style: TextStyle(
+                            color: _selectedMachine != null ? theme.colorScheme.onSurface : AppTheme.txt2,
+                            fontWeight: _selectedMachine != null ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                      if (_selectedMachine != null)
+                        IconButton(
+                          icon: const Icon(Icons.close, size: 20),
+                          onPressed: () => setState(() => _selectedMachine = null),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        )
+                      else
+                        const Icon(Icons.chevron_right, color: AppTheme.txt2),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
               Text('Weight Unit', style: theme.textTheme.labelMedium?.copyWith(color: AppTheme.txt2)),
               const SizedBox(height: 8),
               SegmentedButton<String>(
@@ -252,8 +321,8 @@ class _ExerciseFormDialogState extends ConsumerState<ExerciseFormDialog> {
   }
 }
 
-Future<Map<String, String>?> showExerciseFormDialog(BuildContext context, {Exercise? existingExercise}) {
-  return showDialog<Map<String, String>>(
+Future<Map<String, dynamic>?> showExerciseFormDialog(BuildContext context, {Exercise? existingExercise}) {
+  return showDialog<Map<String, dynamic>>(
     context: context,
     builder: (context) => ExerciseFormDialog(existingExercise: existingExercise),
   );

@@ -7,11 +7,15 @@ import '../../domain/entities/workout_set.dart';
 import 'exercise_swap_sheet.dart';
 import 'quick_swap_sheet.dart';
 import '../../../../core/theme/theme.dart';
+import '../../domain/entities/machine.dart';
 import 'body_part_tag.dart';
 import '../../domain/entities/exercise.dart';
 import '../controllers/workout_providers.dart';
+import '../controllers/machine_providers.dart';
 import 'pr_badge.dart';
+import 'edit_targets_dialog.dart';
 import 'comparison_panel.dart';
+import '../../../../core/di/injection.dart';
 import '../../../profile/presentation/controllers/profile_providers.dart';
 import '../../../profile/domain/entities/user_profile.dart';
 
@@ -101,7 +105,9 @@ class _AnimatedPRBadgeState extends State<_AnimatedPRBadge> {
 class ActiveExerciseCard extends ConsumerStatefulWidget {
   final int exerciseId;
   final String exerciseName;
-  final String targetSetsAndReps;
+  final int targetSets;
+  final String targetReps;
+  final bool isSessionOnly;
   final List<WorkoutSet> completedSets;
   final String weightUnit;
   final String bodyPart;
@@ -110,12 +116,15 @@ class ActiveExerciseCard extends ConsumerStatefulWidget {
   final Map<String, dynamic>? latestSetRoutine;
   final bool useRoutineLatest;
   final List<Exercise>? alternatives;
+  final int? machineId;
 
   const ActiveExerciseCard({
     super.key,
     required this.exerciseId,
     required this.exerciseName,
-    required this.targetSetsAndReps,
+    required this.targetSets,
+    required this.targetReps,
+    required this.isSessionOnly,
     required this.completedSets,
     required this.weightUnit,
     required this.bodyPart,
@@ -124,6 +133,7 @@ class ActiveExerciseCard extends ConsumerStatefulWidget {
     this.latestSetRoutine,
     required this.useRoutineLatest,
     this.alternatives,
+    this.machineId,
   });
 
   @override
@@ -214,6 +224,86 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
     } catch (_) {}
   }
 
+  Future<void> _showEditTargetsFlow(BuildContext context, WidgetRef ref) async {
+    final theme = Theme.of(context);
+    final result = await showEditTargetsDialog(context, widget.targetSets, widget.targetReps);
+    if (result == null || !context.mounted) return;
+
+    final newSets = result['sets'] as int;
+    final newReps = result['reps'] as String;
+
+    if (newSets == widget.targetSets && newReps == widget.targetReps) return;
+
+    if (widget.isSessionOnly) {
+      ref.read(workoutSessionControllerProvider.notifier)
+          .updateSessionTargets(widget.exerciseId, newSets, newReps);
+      return;
+    }
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: theme.colorScheme.surfaceContainerHigh,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 32, top: 16, left: 16, right: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Apply to',
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.today, color: AppTheme.amber),
+                title: const Text('Today only'),
+                subtitle: const Text('Update for this workout session'),
+                onTap: () => Navigator.of(context).pop('today'),
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.save, color: AppTheme.amber),
+                title: const Text('Save to routine'),
+                subtitle: const Text('Update the permanent routine'),
+                onTap: () => Navigator.of(context).pop('routine'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (choice == null) return;
+
+    if (choice == 'today') {
+      ref.read(workoutSessionControllerProvider.notifier)
+          .updateSessionTargets(widget.exerciseId, newSets, newReps);
+    } else if (choice == 'routine') {
+      final routineId = ref.read(workoutSessionControllerProvider).value?.routineId;
+      if (routineId != null) {
+        try {
+          await ref.read(workoutRepositoryProvider)
+              .updateExerciseTargets(routineId, widget.exerciseId, newSets, newReps);
+          
+          ref.read(workoutSessionControllerProvider.notifier)
+              .updateSessionTargets(widget.exerciseId, newSets, newReps);
+              
+          ref.invalidate(routineListProvider);
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to save to routine: $e')),
+            );
+          }
+        }
+      }
+    }
+  }
+
   void _editSet(WorkoutSet set) {
     showDialog(
       context: context,
@@ -262,11 +352,17 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
     final theme = Theme.of(context);
     final profileAsync = ref.watch(userProfileControllerProvider);
     final phase = profileAsync.value?.phase ?? TrainingPhase.none;
+    
+    // Feature 2: Machine name
+    String? machineName;
+    if (widget.machineId != null) {
+      final machinesAsync = ref.watch(machinesNotifierProvider);
+      final machines = machinesAsync.valueOrNull ?? [];
+      machineName = machines.cast<Machine?>().firstWhere((m) => m?.id == widget.machineId, orElse: () => null)?.name;
+    }
 
-    final targetSets = int.tryParse(widget.targetSetsAndReps.split('×').first.trim()) ?? 3;
-    final targetRepsStr = widget.targetSetsAndReps.contains('×') 
-        ? widget.targetSetsAndReps.split('×').last.trim() 
-        : widget.targetSetsAndReps;
+    final targetSets = widget.targetSets;
+    final targetRepsStr = widget.targetReps;
     
     int? rangeBottom;
     int? rangeTop;
@@ -315,12 +411,22 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Row(
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
                         children: [
                           BodyPartTag(bodyPart: widget.bodyPart),
-                          const SizedBox(width: 8),
+                          if (machineName != null) ...[
+                            Text(
+                              machineName,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: AppTheme.txt2,
+                              ),
+                            ),
+                            Text('·', style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.txt2)),
+                          ],
                           Text(
-                            'Set $currentSetNum of $targetSets · Target ${widget.targetSetsAndReps}',
+                            'Set $currentSetNum of $targetSets · Target ${widget.targetSets} × ${widget.targetReps}',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: AppTheme.txt2,
                             ),
@@ -329,7 +435,8 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                       ),
                       if (widget.bestSet != null || latestSet != null) ...[
                         const SizedBox(height: 8),
-                        Row(
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             if (widget.bestSet != null && widget.bestSet!['reps'] != null)
                               Text.rich(TextSpan(children: [
@@ -359,6 +466,14 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                      icon: Icon(Icons.edit_outlined, color: theme.colorScheme.onSurfaceVariant),
+                      onPressed: () => _showEditTargetsFlow(context, ref),
+                    ),
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                       icon: Icon(Icons.bar_chart, color: theme.colorScheme.onSurfaceVariant),
                       onPressed: () {
                         context.pushNamed(RouteNames.exerciseDetail, pathParameters: {'id': widget.exerciseId.toString()});

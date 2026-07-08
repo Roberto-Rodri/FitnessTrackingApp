@@ -10,6 +10,7 @@ class Exercise with _$Exercise {
     required String name,
     required String bodyPart,
     @Default('kg') String weightUnit,
+    int? machineId,
   }) = _Exercise;
 
   factory Exercise.fromJson(Map<String, dynamic> json) => _$ExerciseFromJson(json);

@@ -10,6 +10,7 @@ import '../../domain/entities/weekly_stats.dart';
 import '../../domain/exceptions/workout_exceptions.dart';
 import '../../domain/entities/body_weight_log.dart';
 import '../../domain/entities/exercise_history_summary.dart';
+import '../../domain/entities/machine.dart';
 
 abstract class WorkoutLocalDataSource {
   Future<List<Exercise>> getExercises();
@@ -46,8 +47,8 @@ abstract class WorkoutLocalDataSource {
   Future<void> updateSupersetGroup(int routineId, int exerciseId, int? newGroupId);
 
   // Exercise Library Methods
-  Future<int> createExercise(String name, String bodyPart, String weightUnit);
-  Future<void> updateExercise(int exerciseId, String name, String bodyPart, String weightUnit);
+  Future<int> createExercise(String name, String bodyPart, String weightUnit, {int? machineId});
+  Future<void> updateExercise(int exerciseId, String name, String bodyPart, String weightUnit, {int? machineId});
   Future<void> deleteExercise(int exerciseId);
   Future<int> getExerciseUsageCount(int exerciseId);
   Future<int> getExerciseHistoryCount(int exerciseId);
@@ -60,6 +61,12 @@ abstract class WorkoutLocalDataSource {
   Future<void> unlinkAlternativeExercises(int exerciseId1, int exerciseId2);
   Future<List<Exercise>> getAlternativesForExercise(int exerciseId);
   Future<Map<int, List<Exercise>>> getAlternativesForExercises(List<int> exerciseIds);
+
+  // Machine Methods
+  Future<List<Machine>> getAllMachines();
+  Future<int> createMachine(String name);
+  Future<void> setExerciseMachine(int exerciseId, int? machineId);
+  Future<void> deleteMachine(int machineId);
 
   // Dashboard Methods
   Future<WeeklyStats> getWeeklyStats();
@@ -184,7 +191,7 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
   Future<List<RoutineExerciseDetail>> getExercisesForRoutine(int routineId) async {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
-      SELECT e.id AS exerciseId, e.name AS exerciseName, e.bodyPart, e.weightUnit, ref.sequenceOrder, ref.targetSets, ref.targetReps, ref.supersetGroup
+      SELECT e.id AS exerciseId, e.name AS exerciseName, e.bodyPart, e.weightUnit, e.machineId, ref.sequenceOrder, ref.targetSets, ref.targetReps, ref.supersetGroup
       FROM routine_exercise_cross_ref ref
       INNER JOIN exercises e ON ref.exerciseId = e.id
       WHERE ref.routineId = ?
@@ -540,26 +547,41 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
   }
 
   @override
-  Future<int> createExercise(String name, String bodyPart, String weightUnit) async {
+  Future<int> createExercise(String name, String bodyPart, String weightUnit, {int? machineId}) async {
     try {
       final db = await dbHelper.database;
-      return await db.insert('exercises', {'name': name, 'bodyPart': bodyPart, 'weightUnit': weightUnit});
+      final existing = await db.query('exercises', where: 'LOWER(name) = LOWER(?)', whereArgs: [name]);
+      if (existing.isNotEmpty) {
+        throw DatabaseOperationException('An exercise with this name already exists.');
+      }
+      return await db.insert('exercises', {
+        'name': name,
+        'bodyPart': bodyPart,
+        'weightUnit': weightUnit,
+        'machineId': machineId,
+      });
     } catch (e) {
+      if (e is DatabaseOperationException) rethrow;
       throw DatabaseOperationException('Failed to create exercise: $e');
     }
   }
 
   @override
-  Future<void> updateExercise(int exerciseId, String name, String bodyPart, String weightUnit) async {
+  Future<void> updateExercise(int exerciseId, String name, String bodyPart, String weightUnit, {int? machineId}) async {
     try {
       final db = await dbHelper.database;
-      await db.update(
-        'exercises',
-        {'name': name, 'bodyPart': bodyPart, 'weightUnit': weightUnit},
-        where: 'id = ?',
-        whereArgs: [exerciseId],
-      );
+      final existing = await db.query('exercises', where: 'LOWER(name) = LOWER(?) AND id != ?', whereArgs: [name, exerciseId]);
+      if (existing.isNotEmpty) {
+        throw DatabaseOperationException('An exercise with this name already exists.');
+      }
+      await db.update('exercises', {
+        'name': name,
+        'bodyPart': bodyPart,
+        'weightUnit': weightUnit,
+        'machineId': machineId,
+      }, where: 'id = ?', whereArgs: [exerciseId]);
     } catch (e) {
+      if (e is DatabaseOperationException) rethrow;
       throw DatabaseOperationException('Failed to update exercise: $e');
     }
   }
@@ -978,5 +1000,59 @@ class WorkoutLocalDataSourceImpl implements WorkoutLocalDataSource {
       volumeHistory: volumeHistory,
       recentSessions: recentSessions,
     );
+  }
+
+  @override
+  Future<List<Machine>> getAllMachines() async {
+    try {
+      final db = await dbHelper.database;
+      final results = await db.query('machines', orderBy: 'name COLLATE NOCASE ASC');
+      return results.map((row) => Machine.fromJson(row)).toList();
+    } catch (e) {
+      throw DatabaseOperationException('Failed to load machines: $e');
+    }
+  }
+
+  @override
+  Future<int> createMachine(String name) async {
+    try {
+      final db = await dbHelper.database;
+      
+      // Check for duplicate name
+      final existing = await db.query('machines', where: 'LOWER(name) = LOWER(?)', whereArgs: [name]);
+      if (existing.isNotEmpty) {
+        throw DatabaseOperationException('A machine with this name already exists.');
+      }
+      
+      return await db.insert('machines', {'name': name});
+    } catch (e) {
+      if (e is DatabaseOperationException) rethrow;
+      throw DatabaseOperationException('Failed to create machine: $e');
+    }
+  }
+
+  @override
+  Future<void> setExerciseMachine(int exerciseId, int? machineId) async {
+    try {
+      final db = await dbHelper.database;
+      await db.update(
+        'exercises',
+        {'machineId': machineId},
+        where: 'id = ?',
+        whereArgs: [exerciseId],
+      );
+    } catch (e) {
+      throw DatabaseOperationException('Failed to set machine for exercise: $e');
+    }
+  }
+
+  @override
+  Future<void> deleteMachine(int machineId) async {
+    try {
+      final db = await dbHelper.database;
+      await db.delete('machines', where: 'id = ?', whereArgs: [machineId]);
+    } catch (e) {
+      throw DatabaseOperationException('Failed to delete machine: $e');
+    }
   }
 }

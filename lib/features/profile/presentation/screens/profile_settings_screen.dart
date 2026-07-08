@@ -8,6 +8,7 @@ import '../widgets/name_prompt_dialog.dart';
 import '../../../../core/routing/router.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/database/backup_providers.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ProfileSettingsScreen extends ConsumerWidget {
   const ProfileSettingsScreen({super.key});
@@ -209,12 +210,21 @@ class ProfileSettingsScreen extends ConsumerWidget {
           final path = await ref.read(backupControllerProvider.notifier).exportDatabase();
           debugPrint('EXPORTED BACKUP TO: $path');
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Export requires share_plus plugin'),
-                backgroundColor: AppTheme.amber,
-              ),
+            final box = context.findRenderObject() as RenderBox?;
+            // ignore: deprecated_member_use
+            await Share.shareXFiles(
+              [XFile(path)],
+              text: 'IronLog Backup',
+              sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
             );
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Export ready'),
+                  backgroundColor: AppTheme.green,
+                ),
+              );
+            }
           }
         } catch (e) {
           if (context.mounted) {

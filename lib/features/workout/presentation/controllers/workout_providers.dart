@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/workout_set.dart';
@@ -18,6 +17,7 @@ final useRoutineLatestProvider = NotifierProvider<UseRoutineLatestNotifier, bool
 class UseRoutineLatestNotifier extends Notifier<bool> {
   @override
   bool build() => true;
+  @override
   set state(bool value) => super.state = value;
 }
 
@@ -120,6 +120,7 @@ final historyFilterProvider = NotifierProvider<HistoryFilterNotifier, HistoryFil
 class HistoryFilterNotifier extends Notifier<HistoryFilter> {
   @override
   HistoryFilter build() => HistoryFilter.all;
+  @override
   set state(HistoryFilter value) => super.state = value;
 }
 
@@ -218,6 +219,7 @@ final showConfettiProvider = NotifierProvider<ShowConfettiNotifier, bool>(ShowCo
 class ShowConfettiNotifier extends Notifier<bool> {
   @override
   bool build() => false;
+  @override
   set state(bool value) => super.state = value;
 }
 
@@ -513,6 +515,20 @@ class WorkoutSessionController extends _$WorkoutSessionController {
     ));
   }
 
+  void updateSessionTargets(int exerciseId, int targetSets, String targetReps) {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final updatedExercises = currentState.activeExercises.map((ex) {
+      if (ex.exerciseId == exerciseId) {
+        return ex.copyWith(targetSets: targetSets, targetReps: targetReps);
+      }
+      return ex;
+    }).toList();
+
+    state = AsyncValue.data(currentState.copyWith(activeExercises: updatedExercises));
+  }
+
   Future<void> addExerciseToSession(Exercise newExercise, int targetSets, String targetReps) async {
     final currentState = state.value;
     if (currentState == null) return;
@@ -527,6 +543,8 @@ class WorkoutSessionController extends _$WorkoutSessionController {
       targetSets: targetSets,
       targetReps: targetReps,
       weightUnit: newExercise.weightUnit,
+      isSessionOnly: true,
+      machineId: newExercise.machineId,
     );
     
     final updatedExercises = [...currentState.activeExercises, newDetail];

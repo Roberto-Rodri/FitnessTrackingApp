@@ -10,6 +10,7 @@ import '../../domain/entities/routine_summary.dart';
 import '../../domain/entities/weekly_stats.dart';
 import '../../domain/entities/body_weight_log.dart';
 import '../../domain/entities/exercise_history_summary.dart';
+import '../../domain/entities/machine.dart';
 
 class WorkoutRepositoryImpl implements WorkoutRepository {
   final WorkoutLocalDataSource localDataSource;
@@ -165,13 +166,13 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   }
 
   @override
-  Future<int> createExercise(String name, String bodyPart, String weightUnit) {
-    return localDataSource.createExercise(name, bodyPart, weightUnit);
+  Future<int> createExercise(String name, String bodyPart, String weightUnit, {int? machineId}) {
+    return localDataSource.createExercise(name, bodyPart, weightUnit, machineId: machineId);
   }
 
   @override
-  Future<void> updateExercise(int exerciseId, String name, String bodyPart, String weightUnit) {
-    return localDataSource.updateExercise(exerciseId, name, bodyPart, weightUnit);
+  Future<void> updateExercise(int exerciseId, String name, String bodyPart, String weightUnit, {int? machineId}) {
+    return localDataSource.updateExercise(exerciseId, name, bodyPart, weightUnit, machineId: machineId);
   }
 
   @override
@@ -274,5 +275,25 @@ class WorkoutRepositoryImpl implements WorkoutRepository {
   @override
   Future<List<BodyWeightLog>> getBodyWeightLogs() {
     return localDataSource.getBodyWeightLogs();
+  }
+
+  @override
+  Future<List<Machine>> getAllMachines() {
+    return localDataSource.getAllMachines();
+  }
+
+  @override
+  Future<int> createMachine(String name) {
+    return localDataSource.createMachine(name);
+  }
+
+  @override
+  Future<void> setExerciseMachine(int exerciseId, int? machineId) {
+    return localDataSource.setExerciseMachine(exerciseId, machineId);
+  }
+
+  @override
+  Future<void> deleteMachine(int machineId) {
+    return localDataSource.deleteMachine(machineId);
   }
 }

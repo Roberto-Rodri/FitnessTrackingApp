@@ -98,15 +98,16 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
                             final result = await showExerciseFormDialog(context);
                             if (result == null) return;
 
-                            final name = result['name']!;
-                            final bodyPart = result['bodyPart']!;
-                            final weightUnit = result['weightUnit']!;
+                            final name = result['name'] as String;
+                            final bodyPart = result['bodyPart'] as String;
+                            final weightUnit = result['weightUnit'] as String;
+                            final machineId = result['machineId'] as int?;
 
                             if (!context.mounted) return;
 
                             try {
                               final repository = ref.read(workoutRepositoryProvider);
-                              final id = await repository.createExercise(name, bodyPart, weightUnit);
+                              final id = await repository.createExercise(name, bodyPart, weightUnit, machineId: machineId);
 
                               ref.invalidate(allExercisesProvider);
                               ref.invalidate(bodyPartsProvider);
@@ -116,6 +117,7 @@ class _ExercisePickerSheetState extends ConsumerState<ExercisePickerSheet> {
                                 name: name,
                                 bodyPart: bodyPart,
                                 weightUnit: weightUnit,
+                                machineId: machineId,
                               );
 
                               widget.onExerciseSelected(newExercise);

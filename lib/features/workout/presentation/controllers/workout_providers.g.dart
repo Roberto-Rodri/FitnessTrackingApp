@@ -1268,7 +1268,7 @@ class _WorkoutSummaryProviderElement
 }
 
 String _$workoutSessionControllerHash() =>
-    r'7e77eef0af78753cafa2965e8f3aa870c2677505';
+    r'6554fc4f462f7b1d7fbba182b782e1354efce7e6';
 
 /// See also [WorkoutSessionController].
 @ProviderFor(WorkoutSessionController)

@@ -13,7 +13,9 @@ class RoutineExerciseDetail with _$RoutineExerciseDetail {
     required int targetSets,
     required String targetReps,
     @Default('kg') String weightUnit,
+    @Default(false) bool isSessionOnly,
     int? supersetGroup,
+    int? machineId,
   }) = _RoutineExerciseDetail;
 
   factory RoutineExerciseDetail.fromJson(Map<String, dynamic> json) =>

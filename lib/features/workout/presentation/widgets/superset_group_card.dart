@@ -86,7 +86,9 @@ class SupersetGroupCard extends StatelessWidget {
                         ActiveExerciseCard(
                           exerciseId: ex.exerciseId,
                           exerciseName: ex.exerciseName,
-                          targetSetsAndReps: '${ex.targetSets} × ${ex.targetReps}',
+                          targetSets: ex.targetSets,
+                          targetReps: ex.targetReps,
+                          isSessionOnly: ex.isSessionOnly,
                           completedSets: allSets.where((s) => s.exerciseId == ex.exerciseId).toList(),
                           weightUnit: ex.weightUnit,
                           bodyPart: ex.bodyPart,

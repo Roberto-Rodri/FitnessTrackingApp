@@ -8,6 +8,7 @@ import '../entities/routine_summary.dart';
 import '../entities/weekly_stats.dart';
 import '../entities/body_weight_log.dart';
 import '../entities/exercise_history_summary.dart';
+import '../entities/machine.dart';
 
 abstract class WorkoutRepository {
   Future<List<Exercise>> getExercises();
@@ -45,8 +46,8 @@ abstract class WorkoutRepository {
   Future<void> updateSupersetGroup(int routineId, int exerciseId, int? newGroupId);
 
   // Exercise Library Methods
-  Future<int> createExercise(String name, String bodyPart, String weightUnit);
-  Future<void> updateExercise(int exerciseId, String name, String bodyPart, String weightUnit);
+  Future<int> createExercise(String name, String bodyPart, String weightUnit, {int? machineId});
+  Future<void> updateExercise(int exerciseId, String name, String bodyPart, String weightUnit, {int? machineId});
   Future<void> deleteExercise(int exerciseId);
   Future<int> getExerciseUsageCount(int exerciseId);
   Future<int> getExerciseHistoryCount(int exerciseId);
@@ -59,6 +60,12 @@ abstract class WorkoutRepository {
   Future<void> unlinkAlternativeExercises(int exerciseId1, int exerciseId2);
   Future<List<Exercise>> getAlternativesForExercise(int exerciseId);
   Future<Map<int, List<Exercise>>> getAlternativesForExercises(List<int> exerciseIds);
+
+  // Machine Methods
+  Future<List<Machine>> getAllMachines();
+  Future<int> createMachine(String name);
+  Future<void> setExerciseMachine(int exerciseId, int? machineId);
+  Future<void> deleteMachine(int machineId);
 
   // Dashboard Methods
   Future<WeeklyStats> getWeeklyStats();

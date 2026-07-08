@@ -12,6 +12,7 @@ import '../widgets/exercise_form_dialog.dart';
 import '../widgets/skeleton_loading.dart';
 import '../widgets/error_state.dart';
 import '../widgets/empty_state.dart';
+import '../controllers/machine_providers.dart';
 
 class ExerciseLibraryScreen extends ConsumerStatefulWidget {
   const ExerciseLibraryScreen({super.key});
@@ -58,9 +59,9 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
     if (result != null) {
       final repository = ref.read(workoutRepositoryProvider);
       if (exercise == null) {
-        await repository.createExercise(result['name']!, result['bodyPart']!, result['weightUnit']!);
+        await repository.createExercise(result['name'] as String, result['bodyPart'] as String, result['weightUnit'] as String, machineId: result['machineId'] as int?);
       } else {
-        await repository.updateExercise(exercise.id!, result['name']!, result['bodyPart']!, result['weightUnit']!);
+        await repository.updateExercise(exercise.id!, result['name'] as String, result['bodyPart'] as String, result['weightUnit'] as String, machineId: result['machineId'] as int?);
       }
       ref.invalidate(allExercisesProvider);
       ref.invalidate(bodyPartsProvider);
@@ -277,8 +278,13 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final allExercisesAsync = ref.watch(allExercisesProvider);
     final theme = Theme.of(context);
+    final allExercisesAsync = ref.watch(allExercisesProvider);
+    final machinesAsync = ref.watch(machinesNotifierProvider);
+
+    final machinesMap = machinesAsync.valueOrNull != null
+        ? {for (var m in machinesAsync.value!) m.id: m.name}
+        : <int, String>{};
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -396,9 +402,23 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    exercise.name,
-                                    style: theme.textTheme.titleMedium,
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          exercise.name,
+                                          style: theme.textTheme.titleMedium,
+                                        ),
+                                        if (exercise.machineId != null && machinesMap.containsKey(exercise.machineId))
+                                          Text(
+                                            machinesMap[exercise.machineId]!,
+                                            style: theme.textTheme.bodySmall?.copyWith(
+                                              color: AppTheme.txt2,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                                   ),
                                   const Icon(Icons.more_vert, color: AppTheme.txt2),
                                 ],

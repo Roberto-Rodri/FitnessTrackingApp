@@ -25,7 +25,7 @@ class BackupLocalDataSourceImpl implements BackupLocalDataSource {
       );
 
       final Map<String, dynamic> exportData = {
-        'version': 8,
+        'version': 12,
         'exportDate': DateTime.now().toIso8601String(),
       };
       
@@ -53,8 +53,8 @@ class BackupLocalDataSourceImpl implements BackupLocalDataSource {
     try {
       final Map<String, dynamic> importData = jsonDecode(jsonString);
       
-      if (importData['version'] != 8) {
-        throw const FormatException('This backup was created with a different version of IronLog.');
+      if (importData['version'] < 8 || importData['version'] > 12) {
+        throw const FormatException('This backup was created with an unsupported version of IronLog.');
       }
       
       final db = await _databaseHelper.database;

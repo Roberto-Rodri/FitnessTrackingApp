@@ -1,18 +1,71 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import 'dart:ui' as ui;
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/theme/theme.dart';
 import '../controllers/workout_providers.dart';
 
-class ShareOverlayScreen extends ConsumerWidget {
+class ShareOverlayScreen extends ConsumerStatefulWidget {
   final int sessionId;
 
   const ShareOverlayScreen({super.key, required this.sessionId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final summaryAsync = ref.watch(workoutSummaryProvider(sessionId));
+  ConsumerState<ShareOverlayScreen> createState() => _ShareOverlayScreenState();
+}
+
+class _ShareOverlayScreenState extends ConsumerState<ShareOverlayScreen> {
+  final GlobalKey _globalKey = GlobalKey();
+  bool _isSharing = false;
+
+  Future<void> _shareImage() async {
+    if (_isSharing) return;
+    setState(() => _isSharing = true);
+    
+    try {
+      final boundary = _globalKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) throw Exception('Boundary not found');
+      
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) throw Exception('Failed to convert image');
+      
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/workout_share.png');
+      await file.writeAsBytes(byteData.buffer.asUint8List());
+      
+      if (!mounted) return;
+      
+      final box = context.findRenderObject() as RenderBox?;
+      // ignore: deprecated_member_use
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'Just crushed this workout on IronLog!',
+        sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to share: $e', style: const TextStyle(color: AppTheme.txt1)),
+            backgroundColor: AppTheme.coral,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSharing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final summaryAsync = ref.watch(workoutSummaryProvider(widget.sessionId));
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -30,19 +83,27 @@ class ShareOverlayScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, st) => Center(child: Text('Error: $err')),
         data: (summary) {
+          String weightUnit = 'kg';
+          if (summary.exerciseComparisons.isNotEmpty) {
+            weightUnit = summary.exerciseComparisons.first.exercise.weightUnit;
+          }
+
           return SafeArea(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Spacer(),
-                
-                // AspectRatio 9:16 for Instagram Story
-                Center(
-                  child: AspectRatio(
-                    aspectRatio: 1080 / 1920,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                      child: RepaintBoundary(
-                        child: Container(
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+                    child: Center(
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: RepaintBoundary(
+                          key: _globalKey,
+                          child: SizedBox(
+                            width: 360,
+                            height: 640,
+                            child: Container(
                           decoration: BoxDecoration(
                             color: AppTheme.bg1,
                             borderRadius: BorderRadius.circular(24),
@@ -78,7 +139,7 @@ class ShareOverlayScreen extends ConsumerWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  _ShareStatBox(label: 'VOLUME', value: '${summary.totalVolume.toStringAsFixed(0)}kg'),
+                                  _ShareStatBox(label: 'VOLUME', value: '${summary.totalVolume.toStringAsFixed(0)}$weightUnit'),
                                   const SizedBox(width: 16),
                                   _ShareStatBox(label: 'SETS', value: '${summary.totalSets}'),
                                 ],
@@ -96,16 +157,18 @@ class ShareOverlayScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                
-                const Spacer(),
+                ),
+                ),
 
                 Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: FilledButton.icon(
-                    icon: const Icon(Icons.share),
-                    label: const Text(
-                      'Share to Instagram',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    icon: _isSharing
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: AppTheme.bg0, strokeWidth: 2))
+                        : const Icon(Icons.share),
+                    label: Text(
+                      _isSharing ? 'Preparing...' : 'Share to Instagram',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppTheme.amber,
@@ -115,12 +178,7 @@ class ShareOverlayScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    onPressed: () {
-                      // TODO: Implement actual export action when plugin is added
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Export requires plugin')),
-                      );
-                    },
+                    onPressed: _isSharing ? null : _shareImage,
                   ),
                 ),
               ],
