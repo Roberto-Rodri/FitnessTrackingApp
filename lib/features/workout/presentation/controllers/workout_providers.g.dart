@@ -6,1283 +6,1184 @@ part of 'workout_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$sessionPRCountHash() => r'3b415807c9bc44422ef166a0b62266d204725d28';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
+@ProviderFor(UseRoutineLatestNotifier)
+final useRoutineLatestProvider = UseRoutineLatestNotifierProvider._();
 
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
+final class UseRoutineLatestNotifierProvider
+    extends $NotifierProvider<UseRoutineLatestNotifier, bool> {
+  UseRoutineLatestNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'useRoutineLatestProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  @override
+  String debugGetCreateSourceHash() => _$useRoutineLatestNotifierHash();
+
+  @$internal
+  @override
+  UseRoutineLatestNotifier create() => UseRoutineLatestNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
   }
 }
 
-/// See also [sessionPRCount].
+String _$useRoutineLatestNotifierHash() =>
+    r'67ca0b494c51aefad56247118437e1933fcfbceb';
+
+abstract class _$UseRoutineLatestNotifier extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(sessionPRCount)
-const sessionPRCountProvider = SessionPRCountFamily();
+final sessionPRCountProvider = SessionPRCountFamily._();
 
-/// See also [sessionPRCount].
-class SessionPRCountFamily extends Family<AsyncValue<int>> {
-  /// See also [sessionPRCount].
-  const SessionPRCountFamily();
+final class SessionPRCountProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, FutureOr<int>>
+    with $FutureModifier<int>, $FutureProvider<int> {
+  SessionPRCountProvider._({
+    required SessionPRCountFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'sessionPRCountProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
-  /// See also [sessionPRCount].
-  SessionPRCountProvider call(
-    int sessionId,
-  ) {
-    return SessionPRCountProvider(
-      sessionId,
-    );
+  @override
+  String debugGetCreateSourceHash() => _$sessionPRCountHash();
+
+  @override
+  String toString() {
+    return r'sessionPRCountProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  SessionPRCountProvider getProviderOverride(
-    covariant SessionPRCountProvider provider,
-  ) {
-    return call(
-      provider.sessionId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
+  $FutureProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
 
   @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'sessionPRCountProvider';
-}
-
-/// See also [sessionPRCount].
-class SessionPRCountProvider extends AutoDisposeFutureProvider<int> {
-  /// See also [sessionPRCount].
-  SessionPRCountProvider(
-    int sessionId,
-  ) : this._internal(
-          (ref) => sessionPRCount(
-            ref as SessionPRCountRef,
-            sessionId,
-          ),
-          from: sessionPRCountProvider,
-          name: r'sessionPRCountProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$sessionPRCountHash,
-          dependencies: SessionPRCountFamily._dependencies,
-          allTransitiveDependencies:
-              SessionPRCountFamily._allTransitiveDependencies,
-          sessionId: sessionId,
-        );
-
-  SessionPRCountProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.sessionId,
-  }) : super.internal();
-
-  final int sessionId;
-
-  @override
-  Override overrideWith(
-    FutureOr<int> Function(SessionPRCountRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: SessionPRCountProvider._internal(
-        (ref) => create(ref as SessionPRCountRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        sessionId: sessionId,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeFutureProviderElement<int> createElement() {
-    return _SessionPRCountProviderElement(this);
+  FutureOr<int> create(Ref ref) {
+    final argument = this.argument as int;
+    return sessionPRCount(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is SessionPRCountProvider && other.sessionId == sessionId;
+    return other is SessionPRCountProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, sessionId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin SessionPRCountRef on AutoDisposeFutureProviderRef<int> {
-  /// The parameter `sessionId` of this provider.
-  int get sessionId;
-}
+String _$sessionPRCountHash() => r'695f1ac078d10698930eb0fd4afa0b97e2dc7dd9';
 
-class _SessionPRCountProviderElement
-    extends AutoDisposeFutureProviderElement<int> with SessionPRCountRef {
-  _SessionPRCountProviderElement(super.provider);
+final class SessionPRCountFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<int>, int> {
+  SessionPRCountFamily._()
+    : super(
+        retry: null,
+        name: r'sessionPRCountProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  SessionPRCountProvider call(int sessionId) =>
+      SessionPRCountProvider._(argument: sessionId, from: this);
 
   @override
-  int get sessionId => (origin as SessionPRCountProvider).sessionId;
+  String toString() => r'sessionPRCountProvider';
 }
 
-String _$completedSessionsHash() => r'c064dba278beab20092e3fcbc9c19a9489711922';
-
-/// See also [completedSessions].
 @ProviderFor(completedSessions)
-final completedSessionsProvider =
-    AutoDisposeFutureProvider<List<WorkoutSessionSummary>>.internal(
-  completedSessions,
-  name: r'completedSessionsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$completedSessionsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final completedSessionsProvider = CompletedSessionsProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef CompletedSessionsRef
-    = AutoDisposeFutureProviderRef<List<WorkoutSessionSummary>>;
-String _$filteredSessionsHash() => r'6937b8abcbd82f968030732ba9185fd8a2fa65c5';
+final class CompletedSessionsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<WorkoutSessionSummary>>,
+          List<WorkoutSessionSummary>,
+          FutureOr<List<WorkoutSessionSummary>>
+        >
+    with
+        $FutureModifier<List<WorkoutSessionSummary>>,
+        $FutureProvider<List<WorkoutSessionSummary>> {
+  CompletedSessionsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'completedSessionsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
-/// See also [filteredSessions].
-@ProviderFor(filteredSessions)
-final filteredSessionsProvider =
-    AutoDisposeFutureProvider<List<WorkoutSessionSummary>>.internal(
-  filteredSessions,
-  name: r'filteredSessionsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$filteredSessionsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+  @override
+  String debugGetCreateSourceHash() => _$completedSessionsHash();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef FilteredSessionsRef
-    = AutoDisposeFutureProviderRef<List<WorkoutSessionSummary>>;
-String _$sessionSetsHash() => r'175cd83bb5c480add77063a836a535113ba847a8';
+  @$internal
+  @override
+  $FutureProviderElement<List<WorkoutSessionSummary>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
 
-/// See also [sessionSets].
-@ProviderFor(sessionSets)
-const sessionSetsProvider = SessionSetsFamily();
-
-/// See also [sessionSets].
-class SessionSetsFamily extends Family<AsyncValue<List<WorkoutSet>>> {
-  /// See also [sessionSets].
-  const SessionSetsFamily();
-
-  /// See also [sessionSets].
-  SessionSetsProvider call(
-    int sessionId,
-  ) {
-    return SessionSetsProvider(
-      sessionId,
-    );
+  @override
+  FutureOr<List<WorkoutSessionSummary>> create(Ref ref) {
+    return completedSessions(ref);
   }
-
-  @override
-  SessionSetsProvider getProviderOverride(
-    covariant SessionSetsProvider provider,
-  ) {
-    return call(
-      provider.sessionId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'sessionSetsProvider';
 }
 
-/// See also [sessionSets].
-class SessionSetsProvider extends AutoDisposeFutureProvider<List<WorkoutSet>> {
-  /// See also [sessionSets].
-  SessionSetsProvider(
-    int sessionId,
-  ) : this._internal(
-          (ref) => sessionSets(
-            ref as SessionSetsRef,
-            sessionId,
-          ),
-          from: sessionSetsProvider,
-          name: r'sessionSetsProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$sessionSetsHash,
-          dependencies: SessionSetsFamily._dependencies,
-          allTransitiveDependencies:
-              SessionSetsFamily._allTransitiveDependencies,
-          sessionId: sessionId,
-        );
+String _$completedSessionsHash() => r'8bec9b7d4ebb1d1330da4e7042eb0cec67b6acad';
 
-  SessionSetsProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.sessionId,
-  }) : super.internal();
+@ProviderFor(HistoryFilterNotifier)
+final historyFilterProvider = HistoryFilterNotifierProvider._();
 
-  final int sessionId;
+final class HistoryFilterNotifierProvider
+    extends $NotifierProvider<HistoryFilterNotifier, HistoryFilter> {
+  HistoryFilterNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'historyFilterProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
-  Override overrideWith(
-    FutureOr<List<WorkoutSet>> Function(SessionSetsRef provider) create,
-  ) {
-    return ProviderOverride(
+  String debugGetCreateSourceHash() => _$historyFilterNotifierHash();
+
+  @$internal
+  @override
+  HistoryFilterNotifier create() => HistoryFilterNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(HistoryFilter value) {
+    return $ProviderOverride(
       origin: this,
-      override: SessionSetsProvider._internal(
-        (ref) => create(ref as SessionSetsRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        sessionId: sessionId,
-      ),
+      providerOverride: $SyncValueProvider<HistoryFilter>(value),
     );
   }
+}
+
+String _$historyFilterNotifierHash() =>
+    r'3f94f725cfccefe4ff310e69eefea97d58896cfb';
+
+abstract class _$HistoryFilterNotifier extends $Notifier<HistoryFilter> {
+  HistoryFilter build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<HistoryFilter, HistoryFilter>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<HistoryFilter, HistoryFilter>,
+              HistoryFilter,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(filteredSessions)
+final filteredSessionsProvider = FilteredSessionsProvider._();
+
+final class FilteredSessionsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<WorkoutSessionSummary>>,
+          List<WorkoutSessionSummary>,
+          FutureOr<List<WorkoutSessionSummary>>
+        >
+    with
+        $FutureModifier<List<WorkoutSessionSummary>>,
+        $FutureProvider<List<WorkoutSessionSummary>> {
+  FilteredSessionsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'filteredSessionsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
-  AutoDisposeFutureProviderElement<List<WorkoutSet>> createElement() {
-    return _SessionSetsProviderElement(this);
+  String debugGetCreateSourceHash() => _$filteredSessionsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<WorkoutSessionSummary>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<WorkoutSessionSummary>> create(Ref ref) {
+    return filteredSessions(ref);
+  }
+}
+
+String _$filteredSessionsHash() => r'f00e7a5121526041c6155c1fb150525ea4464fd8';
+
+@ProviderFor(sessionSets)
+final sessionSetsProvider = SessionSetsFamily._();
+
+final class SessionSetsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<WorkoutSet>>,
+          List<WorkoutSet>,
+          FutureOr<List<WorkoutSet>>
+        >
+    with $FutureModifier<List<WorkoutSet>>, $FutureProvider<List<WorkoutSet>> {
+  SessionSetsProvider._({
+    required SessionSetsFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'sessionSetsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$sessionSetsHash();
+
+  @override
+  String toString() {
+    return r'sessionSetsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<WorkoutSet>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<WorkoutSet>> create(Ref ref) {
+    final argument = this.argument as int;
+    return sessionSets(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is SessionSetsProvider && other.sessionId == sessionId;
+    return other is SessionSetsProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, sessionId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin SessionSetsRef on AutoDisposeFutureProviderRef<List<WorkoutSet>> {
-  /// The parameter `sessionId` of this provider.
-  int get sessionId;
-}
+String _$sessionSetsHash() => r'15dfa305ca4352f1022a2913dbabb579a2e748e7';
 
-class _SessionSetsProviderElement
-    extends AutoDisposeFutureProviderElement<List<WorkoutSet>>
-    with SessionSetsRef {
-  _SessionSetsProviderElement(super.provider);
+final class SessionSetsFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<WorkoutSet>>, int> {
+  SessionSetsFamily._()
+    : super(
+        retry: null,
+        name: r'sessionSetsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  SessionSetsProvider call(int sessionId) =>
+      SessionSetsProvider._(argument: sessionId, from: this);
 
   @override
-  int get sessionId => (origin as SessionSetsProvider).sessionId;
+  String toString() => r'sessionSetsProvider';
+}
+
+@ProviderFor(sessionExerciseInfo)
+final sessionExerciseInfoProvider = SessionExerciseInfoFamily._();
+
+final class SessionExerciseInfoProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<int, Exercise>>,
+          Map<int, Exercise>,
+          FutureOr<Map<int, Exercise>>
+        >
+    with
+        $FutureModifier<Map<int, Exercise>>,
+        $FutureProvider<Map<int, Exercise>> {
+  SessionExerciseInfoProvider._({
+    required SessionExerciseInfoFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'sessionExerciseInfoProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$sessionExerciseInfoHash();
+
+  @override
+  String toString() {
+    return r'sessionExerciseInfoProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<Map<int, Exercise>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Map<int, Exercise>> create(Ref ref) {
+    final argument = this.argument as int;
+    return sessionExerciseInfo(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SessionExerciseInfoProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
 String _$sessionExerciseInfoHash() =>
-    r'f1d9b145ecc245f589c46ed1f8f3a32f45b50133';
+    r'fa70d9b1a97de0aad0e8afb02b7f5ea5175fb5db';
 
-/// See also [sessionExerciseInfo].
-@ProviderFor(sessionExerciseInfo)
-const sessionExerciseInfoProvider = SessionExerciseInfoFamily();
-
-/// See also [sessionExerciseInfo].
-class SessionExerciseInfoFamily extends Family<AsyncValue<Map<int, Exercise>>> {
-  /// See also [sessionExerciseInfo].
-  const SessionExerciseInfoFamily();
-
-  /// See also [sessionExerciseInfo].
-  SessionExerciseInfoProvider call(
-    int sessionId,
-  ) {
-    return SessionExerciseInfoProvider(
-      sessionId,
-    );
-  }
-
-  @override
-  SessionExerciseInfoProvider getProviderOverride(
-    covariant SessionExerciseInfoProvider provider,
-  ) {
-    return call(
-      provider.sessionId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'sessionExerciseInfoProvider';
-}
-
-/// See also [sessionExerciseInfo].
-class SessionExerciseInfoProvider
-    extends AutoDisposeFutureProvider<Map<int, Exercise>> {
-  /// See also [sessionExerciseInfo].
-  SessionExerciseInfoProvider(
-    int sessionId,
-  ) : this._internal(
-          (ref) => sessionExerciseInfo(
-            ref as SessionExerciseInfoRef,
-            sessionId,
-          ),
-          from: sessionExerciseInfoProvider,
-          name: r'sessionExerciseInfoProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$sessionExerciseInfoHash,
-          dependencies: SessionExerciseInfoFamily._dependencies,
-          allTransitiveDependencies:
-              SessionExerciseInfoFamily._allTransitiveDependencies,
-          sessionId: sessionId,
-        );
-
-  SessionExerciseInfoProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.sessionId,
-  }) : super.internal();
-
-  final int sessionId;
-
-  @override
-  Override overrideWith(
-    FutureOr<Map<int, Exercise>> Function(SessionExerciseInfoRef provider)
-        create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: SessionExerciseInfoProvider._internal(
-        (ref) => create(ref as SessionExerciseInfoRef),
-        from: from,
-        name: null,
+final class SessionExerciseInfoFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<Map<int, Exercise>>, int> {
+  SessionExerciseInfoFamily._()
+    : super(
+        retry: null,
+        name: r'sessionExerciseInfoProvider',
         dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        sessionId: sessionId,
-      ),
-    );
-  }
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  SessionExerciseInfoProvider call(int sessionId) =>
+      SessionExerciseInfoProvider._(argument: sessionId, from: this);
 
   @override
-  AutoDisposeFutureProviderElement<Map<int, Exercise>> createElement() {
-    return _SessionExerciseInfoProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is SessionExerciseInfoProvider && other.sessionId == sessionId;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, sessionId.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
+  String toString() => r'sessionExerciseInfoProvider';
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin SessionExerciseInfoRef
-    on AutoDisposeFutureProviderRef<Map<int, Exercise>> {
-  /// The parameter `sessionId` of this provider.
-  int get sessionId;
-}
-
-class _SessionExerciseInfoProviderElement
-    extends AutoDisposeFutureProviderElement<Map<int, Exercise>>
-    with SessionExerciseInfoRef {
-  _SessionExerciseInfoProviderElement(super.provider);
-
-  @override
-  int get sessionId => (origin as SessionExerciseInfoProvider).sessionId;
-}
-
-String _$allExercisesHash() => r'0d420f4199898881291d469750335ccc9f36a5e0';
-
-/// See also [allExercises].
 @ProviderFor(allExercises)
-final allExercisesProvider = AutoDisposeFutureProvider<List<Exercise>>.internal(
-  allExercises,
-  name: r'allExercisesProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$allExercisesHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final allExercisesProvider = AllExercisesProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef AllExercisesRef = AutoDisposeFutureProviderRef<List<Exercise>>;
-String _$exerciseAlternativesHash() =>
-    r'b9b019f4da080df8b7d962b0dc49a04837755143';
+final class AllExercisesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Exercise>>,
+          List<Exercise>,
+          FutureOr<List<Exercise>>
+        >
+    with $FutureModifier<List<Exercise>>, $FutureProvider<List<Exercise>> {
+  AllExercisesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'allExercisesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
-/// See also [exerciseAlternatives].
+  @override
+  String debugGetCreateSourceHash() => _$allExercisesHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Exercise>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Exercise>> create(Ref ref) {
+    return allExercises(ref);
+  }
+}
+
+String _$allExercisesHash() => r'fbff13aab1b10a123e7a35a02862e4c2eafd54d9';
+
 @ProviderFor(exerciseAlternatives)
-const exerciseAlternativesProvider = ExerciseAlternativesFamily();
+final exerciseAlternativesProvider = ExerciseAlternativesFamily._();
 
-/// See also [exerciseAlternatives].
-class ExerciseAlternativesFamily extends Family<AsyncValue<List<Exercise>>> {
-  /// See also [exerciseAlternatives].
-  const ExerciseAlternativesFamily();
+final class ExerciseAlternativesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Exercise>>,
+          List<Exercise>,
+          FutureOr<List<Exercise>>
+        >
+    with $FutureModifier<List<Exercise>>, $FutureProvider<List<Exercise>> {
+  ExerciseAlternativesProvider._({
+    required ExerciseAlternativesFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'exerciseAlternativesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
-  /// See also [exerciseAlternatives].
-  ExerciseAlternativesProvider call(
-    int exerciseId,
-  ) {
-    return ExerciseAlternativesProvider(
-      exerciseId,
-    );
+  @override
+  String debugGetCreateSourceHash() => _$exerciseAlternativesHash();
+
+  @override
+  String toString() {
+    return r'exerciseAlternativesProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  ExerciseAlternativesProvider getProviderOverride(
-    covariant ExerciseAlternativesProvider provider,
-  ) {
-    return call(
-      provider.exerciseId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
+  $FutureProviderElement<List<Exercise>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
 
   @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'exerciseAlternativesProvider';
-}
-
-/// See also [exerciseAlternatives].
-class ExerciseAlternativesProvider
-    extends AutoDisposeFutureProvider<List<Exercise>> {
-  /// See also [exerciseAlternatives].
-  ExerciseAlternativesProvider(
-    int exerciseId,
-  ) : this._internal(
-          (ref) => exerciseAlternatives(
-            ref as ExerciseAlternativesRef,
-            exerciseId,
-          ),
-          from: exerciseAlternativesProvider,
-          name: r'exerciseAlternativesProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$exerciseAlternativesHash,
-          dependencies: ExerciseAlternativesFamily._dependencies,
-          allTransitiveDependencies:
-              ExerciseAlternativesFamily._allTransitiveDependencies,
-          exerciseId: exerciseId,
-        );
-
-  ExerciseAlternativesProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.exerciseId,
-  }) : super.internal();
-
-  final int exerciseId;
-
-  @override
-  Override overrideWith(
-    FutureOr<List<Exercise>> Function(ExerciseAlternativesRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: ExerciseAlternativesProvider._internal(
-        (ref) => create(ref as ExerciseAlternativesRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        exerciseId: exerciseId,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeFutureProviderElement<List<Exercise>> createElement() {
-    return _ExerciseAlternativesProviderElement(this);
+  FutureOr<List<Exercise>> create(Ref ref) {
+    final argument = this.argument as int;
+    return exerciseAlternatives(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is ExerciseAlternativesProvider &&
-        other.exerciseId == exerciseId;
+    return other is ExerciseAlternativesProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, exerciseId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin ExerciseAlternativesRef on AutoDisposeFutureProviderRef<List<Exercise>> {
-  /// The parameter `exerciseId` of this provider.
-  int get exerciseId;
-}
+String _$exerciseAlternativesHash() =>
+    r'd6b5c9ed8ee69722d0747dd0116bea4746fdced6';
 
-class _ExerciseAlternativesProviderElement
-    extends AutoDisposeFutureProviderElement<List<Exercise>>
-    with ExerciseAlternativesRef {
-  _ExerciseAlternativesProviderElement(super.provider);
+final class ExerciseAlternativesFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<Exercise>>, int> {
+  ExerciseAlternativesFamily._()
+    : super(
+        retry: null,
+        name: r'exerciseAlternativesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  ExerciseAlternativesProvider call(int exerciseId) =>
+      ExerciseAlternativesProvider._(argument: exerciseId, from: this);
 
   @override
-  int get exerciseId => (origin as ExerciseAlternativesProvider).exerciseId;
+  String toString() => r'exerciseAlternativesProvider';
 }
 
-String _$routineListHash() => r'1ab89a1b0300edd89c3b0980b8d91f8e00e1b8da';
-
-/// See also [routineList].
 @ProviderFor(routineList)
-final routineListProvider =
-    AutoDisposeFutureProvider<List<RoutineSummary>>.internal(
-  routineList,
-  name: r'routineListProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$routineListHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final routineListProvider = RoutineListProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef RoutineListRef = AutoDisposeFutureProviderRef<List<RoutineSummary>>;
-String _$routineExercisesHash() => r'9b0cd9b611bffe533335b8f2a3004b1ec547d3c1';
+final class RoutineListProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<RoutineSummary>>,
+          List<RoutineSummary>,
+          FutureOr<List<RoutineSummary>>
+        >
+    with
+        $FutureModifier<List<RoutineSummary>>,
+        $FutureProvider<List<RoutineSummary>> {
+  RoutineListProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'routineListProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
-/// See also [routineExercises].
+  @override
+  String debugGetCreateSourceHash() => _$routineListHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<RoutineSummary>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<RoutineSummary>> create(Ref ref) {
+    return routineList(ref);
+  }
+}
+
+String _$routineListHash() => r'736ae0346b8322bc1da51eaea5808b188dcf2dc0';
+
 @ProviderFor(routineExercises)
-const routineExercisesProvider = RoutineExercisesFamily();
+final routineExercisesProvider = RoutineExercisesFamily._();
 
-/// See also [routineExercises].
-class RoutineExercisesFamily
-    extends Family<AsyncValue<List<RoutineExerciseDetail>>> {
-  /// See also [routineExercises].
-  const RoutineExercisesFamily();
+final class RoutineExercisesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<RoutineExerciseDetail>>,
+          List<RoutineExerciseDetail>,
+          FutureOr<List<RoutineExerciseDetail>>
+        >
+    with
+        $FutureModifier<List<RoutineExerciseDetail>>,
+        $FutureProvider<List<RoutineExerciseDetail>> {
+  RoutineExercisesProvider._({
+    required RoutineExercisesFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'routineExercisesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
-  /// See also [routineExercises].
-  RoutineExercisesProvider call(
-    int routineId,
-  ) {
-    return RoutineExercisesProvider(
-      routineId,
-    );
+  @override
+  String debugGetCreateSourceHash() => _$routineExercisesHash();
+
+  @override
+  String toString() {
+    return r'routineExercisesProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  RoutineExercisesProvider getProviderOverride(
-    covariant RoutineExercisesProvider provider,
-  ) {
-    return call(
-      provider.routineId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
+  $FutureProviderElement<List<RoutineExerciseDetail>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
 
   @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'routineExercisesProvider';
-}
-
-/// See also [routineExercises].
-class RoutineExercisesProvider
-    extends AutoDisposeFutureProvider<List<RoutineExerciseDetail>> {
-  /// See also [routineExercises].
-  RoutineExercisesProvider(
-    int routineId,
-  ) : this._internal(
-          (ref) => routineExercises(
-            ref as RoutineExercisesRef,
-            routineId,
-          ),
-          from: routineExercisesProvider,
-          name: r'routineExercisesProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$routineExercisesHash,
-          dependencies: RoutineExercisesFamily._dependencies,
-          allTransitiveDependencies:
-              RoutineExercisesFamily._allTransitiveDependencies,
-          routineId: routineId,
-        );
-
-  RoutineExercisesProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.routineId,
-  }) : super.internal();
-
-  final int routineId;
-
-  @override
-  Override overrideWith(
-    FutureOr<List<RoutineExerciseDetail>> Function(RoutineExercisesRef provider)
-        create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: RoutineExercisesProvider._internal(
-        (ref) => create(ref as RoutineExercisesRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        routineId: routineId,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeFutureProviderElement<List<RoutineExerciseDetail>>
-      createElement() {
-    return _RoutineExercisesProviderElement(this);
+  FutureOr<List<RoutineExerciseDetail>> create(Ref ref) {
+    final argument = this.argument as int;
+    return routineExercises(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is RoutineExercisesProvider && other.routineId == routineId;
+    return other is RoutineExercisesProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, routineId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin RoutineExercisesRef
-    on AutoDisposeFutureProviderRef<List<RoutineExerciseDetail>> {
-  /// The parameter `routineId` of this provider.
-  int get routineId;
-}
+String _$routineExercisesHash() => r'43c10364e555b293a04bc748d73c9fcd71f705f1';
 
-class _RoutineExercisesProviderElement
-    extends AutoDisposeFutureProviderElement<List<RoutineExerciseDetail>>
-    with RoutineExercisesRef {
-  _RoutineExercisesProviderElement(super.provider);
+final class RoutineExercisesFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<RoutineExerciseDetail>>, int> {
+  RoutineExercisesFamily._()
+    : super(
+        retry: null,
+        name: r'routineExercisesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  RoutineExercisesProvider call(int routineId) =>
+      RoutineExercisesProvider._(argument: routineId, from: this);
 
   @override
-  int get routineId => (origin as RoutineExercisesProvider).routineId;
+  String toString() => r'routineExercisesProvider';
 }
 
-String _$bodyPartsHash() => r'22a05fc8b66c8b0a03062c8c4c8ce0cb4d7616b9';
-
-/// See also [bodyParts].
 @ProviderFor(bodyParts)
-final bodyPartsProvider = AutoDisposeFutureProvider<List<String>>.internal(
-  bodyParts,
-  name: r'bodyPartsProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$bodyPartsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final bodyPartsProvider = BodyPartsProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef BodyPartsRef = AutoDisposeFutureProviderRef<List<String>>;
-String _$weeklyStatsHash() => r'fc227b8b998396f2ad857b3c341d494607f62eae';
+final class BodyPartsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<String>>,
+          List<String>,
+          FutureOr<List<String>>
+        >
+    with $FutureModifier<List<String>>, $FutureProvider<List<String>> {
+  BodyPartsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'bodyPartsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
-/// See also [weeklyStats].
+  @override
+  String debugGetCreateSourceHash() => _$bodyPartsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<String>> create(Ref ref) {
+    return bodyParts(ref);
+  }
+}
+
+String _$bodyPartsHash() => r'f04e0b641bcb20fdf93e106712982395bb73a649';
+
 @ProviderFor(weeklyStats)
-final weeklyStatsProvider = AutoDisposeFutureProvider<WeeklyStats>.internal(
-  weeklyStats,
-  name: r'weeklyStatsProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$weeklyStatsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final weeklyStatsProvider = WeeklyStatsProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef WeeklyStatsRef = AutoDisposeFutureProviderRef<WeeklyStats>;
-String _$weeklyVolumeChartHash() => r'cb303374f0e4af0d2c32ca7a56b32b2fdb27930a';
+final class WeeklyStatsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<WeeklyStats>,
+          WeeklyStats,
+          FutureOr<WeeklyStats>
+        >
+    with $FutureModifier<WeeklyStats>, $FutureProvider<WeeklyStats> {
+  WeeklyStatsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'weeklyStatsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
-/// See also [weeklyVolumeChart].
+  @override
+  String debugGetCreateSourceHash() => _$weeklyStatsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<WeeklyStats> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<WeeklyStats> create(Ref ref) {
+    return weeklyStats(ref);
+  }
+}
+
+String _$weeklyStatsHash() => r'dd2a5998e0a1acf7f1488226450fb68b2e3d4821';
+
 @ProviderFor(weeklyVolumeChart)
-final weeklyVolumeChartProvider =
-    AutoDisposeFutureProvider<List<double>>.internal(
-  weeklyVolumeChart,
-  name: r'weeklyVolumeChartProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$weeklyVolumeChartHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final weeklyVolumeChartProvider = WeeklyVolumeChartProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef WeeklyVolumeChartRef = AutoDisposeFutureProviderRef<List<double>>;
-String _$recentSessionsHash() => r'8f26076e5a50d650dc46a5d7046b60f04762b5c1';
+final class WeeklyVolumeChartProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<double>>,
+          List<double>,
+          FutureOr<List<double>>
+        >
+    with $FutureModifier<List<double>>, $FutureProvider<List<double>> {
+  WeeklyVolumeChartProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'weeklyVolumeChartProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
-/// See also [recentSessions].
+  @override
+  String debugGetCreateSourceHash() => _$weeklyVolumeChartHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<double>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<double>> create(Ref ref) {
+    return weeklyVolumeChart(ref);
+  }
+}
+
+String _$weeklyVolumeChartHash() => r'47f3aa0dbe63877b2d7c68b7325cdc7a3296897d';
+
 @ProviderFor(recentSessions)
-final recentSessionsProvider =
-    AutoDisposeFutureProvider<List<WorkoutSessionSummary>>.internal(
-  recentSessions,
-  name: r'recentSessionsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$recentSessionsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final recentSessionsProvider = RecentSessionsProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef RecentSessionsRef
-    = AutoDisposeFutureProviderRef<List<WorkoutSessionSummary>>;
-String _$lastRoutineHash() => r'8a238389c8def607233e994007c175f04af2f311';
+final class RecentSessionsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<WorkoutSessionSummary>>,
+          List<WorkoutSessionSummary>,
+          FutureOr<List<WorkoutSessionSummary>>
+        >
+    with
+        $FutureModifier<List<WorkoutSessionSummary>>,
+        $FutureProvider<List<WorkoutSessionSummary>> {
+  RecentSessionsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'recentSessionsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
-/// See also [lastRoutine].
+  @override
+  String debugGetCreateSourceHash() => _$recentSessionsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<WorkoutSessionSummary>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<WorkoutSessionSummary>> create(Ref ref) {
+    return recentSessions(ref);
+  }
+}
+
+String _$recentSessionsHash() => r'ea4e7818163300a115cb120575010b2206f02d90';
+
 @ProviderFor(lastRoutine)
-final lastRoutineProvider = AutoDisposeFutureProvider<RoutineSummary?>.internal(
-  lastRoutine,
-  name: r'lastRoutineProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$lastRoutineHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final lastRoutineProvider = LastRoutineProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef LastRoutineRef = AutoDisposeFutureProviderRef<RoutineSummary?>;
-String _$previousSessionHash() => r'dc2529dbf1af3f97dc6c728d2d84dc7ae541bd6c';
+final class LastRoutineProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<RoutineSummary?>,
+          RoutineSummary?,
+          FutureOr<RoutineSummary?>
+        >
+    with $FutureModifier<RoutineSummary?>, $FutureProvider<RoutineSummary?> {
+  LastRoutineProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'lastRoutineProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
-/// See also [previousSession].
+  @override
+  String debugGetCreateSourceHash() => _$lastRoutineHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<RoutineSummary?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<RoutineSummary?> create(Ref ref) {
+    return lastRoutine(ref);
+  }
+}
+
+String _$lastRoutineHash() => r'b57038909826ab77735856cf4bed7df8bc7c0f35';
+
+@ProviderFor(ShowConfettiNotifier)
+final showConfettiProvider = ShowConfettiNotifierProvider._();
+
+final class ShowConfettiNotifierProvider
+    extends $NotifierProvider<ShowConfettiNotifier, bool> {
+  ShowConfettiNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'showConfettiProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$showConfettiNotifierHash();
+
+  @$internal
+  @override
+  ShowConfettiNotifier create() => ShowConfettiNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$showConfettiNotifierHash() =>
+    r'cb859e07767cbe095c8bfb9ed8e8c31bcabbb8d5';
+
+abstract class _$ShowConfettiNotifier extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(previousSession)
-const previousSessionProvider = PreviousSessionFamily();
+final previousSessionProvider = PreviousSessionFamily._();
 
-/// See also [previousSession].
-class PreviousSessionFamily extends Family<AsyncValue<WorkoutSessionSummary?>> {
-  /// See also [previousSession].
-  const PreviousSessionFamily();
+final class PreviousSessionProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<WorkoutSessionSummary?>,
+          WorkoutSessionSummary?,
+          FutureOr<WorkoutSessionSummary?>
+        >
+    with
+        $FutureModifier<WorkoutSessionSummary?>,
+        $FutureProvider<WorkoutSessionSummary?> {
+  PreviousSessionProvider._({
+    required PreviousSessionFamily super.from,
+    required (int, int) super.argument,
+  }) : super(
+         retry: null,
+         name: r'previousSessionProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
-  /// See also [previousSession].
-  PreviousSessionProvider call(
-    int routineId,
-    int currentSessionId,
-  ) {
-    return PreviousSessionProvider(
-      routineId,
-      currentSessionId,
-    );
+  @override
+  String debugGetCreateSourceHash() => _$previousSessionHash();
+
+  @override
+  String toString() {
+    return r'previousSessionProvider'
+        ''
+        '$argument';
   }
 
+  @$internal
   @override
-  PreviousSessionProvider getProviderOverride(
-    covariant PreviousSessionProvider provider,
-  ) {
-    return call(
-      provider.routineId,
-      provider.currentSessionId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
+  $FutureProviderElement<WorkoutSessionSummary?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
 
   @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'previousSessionProvider';
-}
-
-/// See also [previousSession].
-class PreviousSessionProvider
-    extends AutoDisposeFutureProvider<WorkoutSessionSummary?> {
-  /// See also [previousSession].
-  PreviousSessionProvider(
-    int routineId,
-    int currentSessionId,
-  ) : this._internal(
-          (ref) => previousSession(
-            ref as PreviousSessionRef,
-            routineId,
-            currentSessionId,
-          ),
-          from: previousSessionProvider,
-          name: r'previousSessionProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$previousSessionHash,
-          dependencies: PreviousSessionFamily._dependencies,
-          allTransitiveDependencies:
-              PreviousSessionFamily._allTransitiveDependencies,
-          routineId: routineId,
-          currentSessionId: currentSessionId,
-        );
-
-  PreviousSessionProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.routineId,
-    required this.currentSessionId,
-  }) : super.internal();
-
-  final int routineId;
-  final int currentSessionId;
-
-  @override
-  Override overrideWith(
-    FutureOr<WorkoutSessionSummary?> Function(PreviousSessionRef provider)
-        create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: PreviousSessionProvider._internal(
-        (ref) => create(ref as PreviousSessionRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        routineId: routineId,
-        currentSessionId: currentSessionId,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeFutureProviderElement<WorkoutSessionSummary?> createElement() {
-    return _PreviousSessionProviderElement(this);
+  FutureOr<WorkoutSessionSummary?> create(Ref ref) {
+    final argument = this.argument as (int, int);
+    return previousSession(ref, argument.$1, argument.$2);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is PreviousSessionProvider &&
-        other.routineId == routineId &&
-        other.currentSessionId == currentSessionId;
+    return other is PreviousSessionProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, routineId.hashCode);
-    hash = _SystemHash.combine(hash, currentSessionId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin PreviousSessionRef
-    on AutoDisposeFutureProviderRef<WorkoutSessionSummary?> {
-  /// The parameter `routineId` of this provider.
-  int get routineId;
+String _$previousSessionHash() => r'323f7e024819fe1f8ad9363c1a18453df03c24b1';
 
-  /// The parameter `currentSessionId` of this provider.
-  int get currentSessionId;
-}
-
-class _PreviousSessionProviderElement
-    extends AutoDisposeFutureProviderElement<WorkoutSessionSummary?>
-    with PreviousSessionRef {
-  _PreviousSessionProviderElement(super.provider);
-
-  @override
-  int get routineId => (origin as PreviousSessionProvider).routineId;
-  @override
-  int get currentSessionId =>
-      (origin as PreviousSessionProvider).currentSessionId;
-}
-
-String _$exerciseHistoryHash() => r'96e9807a218af1c8eac33f6092763f1009e0a586';
-
-/// See also [exerciseHistory].
-@ProviderFor(exerciseHistory)
-const exerciseHistoryProvider = ExerciseHistoryFamily();
-
-/// See also [exerciseHistory].
-class ExerciseHistoryFamily extends Family<AsyncValue<ExerciseHistorySummary>> {
-  /// See also [exerciseHistory].
-  const ExerciseHistoryFamily();
-
-  /// See also [exerciseHistory].
-  ExerciseHistoryProvider call(
-    int exerciseId,
-  ) {
-    return ExerciseHistoryProvider(
-      exerciseId,
-    );
-  }
-
-  @override
-  ExerciseHistoryProvider getProviderOverride(
-    covariant ExerciseHistoryProvider provider,
-  ) {
-    return call(
-      provider.exerciseId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'exerciseHistoryProvider';
-}
-
-/// See also [exerciseHistory].
-class ExerciseHistoryProvider
-    extends AutoDisposeFutureProvider<ExerciseHistorySummary> {
-  /// See also [exerciseHistory].
-  ExerciseHistoryProvider(
-    int exerciseId,
-  ) : this._internal(
-          (ref) => exerciseHistory(
-            ref as ExerciseHistoryRef,
-            exerciseId,
-          ),
-          from: exerciseHistoryProvider,
-          name: r'exerciseHistoryProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$exerciseHistoryHash,
-          dependencies: ExerciseHistoryFamily._dependencies,
-          allTransitiveDependencies:
-              ExerciseHistoryFamily._allTransitiveDependencies,
-          exerciseId: exerciseId,
-        );
-
-  ExerciseHistoryProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.exerciseId,
-  }) : super.internal();
-
-  final int exerciseId;
-
-  @override
-  Override overrideWith(
-    FutureOr<ExerciseHistorySummary> Function(ExerciseHistoryRef provider)
-        create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: ExerciseHistoryProvider._internal(
-        (ref) => create(ref as ExerciseHistoryRef),
-        from: from,
-        name: null,
+final class PreviousSessionFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<WorkoutSessionSummary?>,
+          (int, int)
+        > {
+  PreviousSessionFamily._()
+    : super(
+        retry: null,
+        name: r'previousSessionProvider',
         dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        exerciseId: exerciseId,
-      ),
-    );
-  }
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  PreviousSessionProvider call(int routineId, int currentSessionId) =>
+      PreviousSessionProvider._(
+        argument: (routineId, currentSessionId),
+        from: this,
+      );
 
   @override
-  AutoDisposeFutureProviderElement<ExerciseHistorySummary> createElement() {
-    return _ExerciseHistoryProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is ExerciseHistoryProvider && other.exerciseId == exerciseId;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, exerciseId.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
+  String toString() => r'previousSessionProvider';
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin ExerciseHistoryRef
-    on AutoDisposeFutureProviderRef<ExerciseHistorySummary> {
-  /// The parameter `exerciseId` of this provider.
-  int get exerciseId;
-}
+@ProviderFor(WorkoutSessionController)
+final workoutSessionControllerProvider = WorkoutSessionControllerProvider._();
 
-class _ExerciseHistoryProviderElement
-    extends AutoDisposeFutureProviderElement<ExerciseHistorySummary>
-    with ExerciseHistoryRef {
-  _ExerciseHistoryProviderElement(super.provider);
-
-  @override
-  int get exerciseId => (origin as ExerciseHistoryProvider).exerciseId;
-}
-
-String _$workoutSummaryHash() => r'76f8596548b5985f49daf6c8f5a2af14244cde96';
-
-/// See also [workoutSummary].
-@ProviderFor(workoutSummary)
-const workoutSummaryProvider = WorkoutSummaryFamily();
-
-/// See also [workoutSummary].
-class WorkoutSummaryFamily extends Family<AsyncValue<WorkoutSummaryDetail>> {
-  /// See also [workoutSummary].
-  const WorkoutSummaryFamily();
-
-  /// See also [workoutSummary].
-  WorkoutSummaryProvider call(
-    int sessionId,
-  ) {
-    return WorkoutSummaryProvider(
-      sessionId,
-    );
-  }
-
-  @override
-  WorkoutSummaryProvider getProviderOverride(
-    covariant WorkoutSummaryProvider provider,
-  ) {
-    return call(
-      provider.sessionId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'workoutSummaryProvider';
-}
-
-/// See also [workoutSummary].
-class WorkoutSummaryProvider
-    extends AutoDisposeFutureProvider<WorkoutSummaryDetail> {
-  /// See also [workoutSummary].
-  WorkoutSummaryProvider(
-    int sessionId,
-  ) : this._internal(
-          (ref) => workoutSummary(
-            ref as WorkoutSummaryRef,
-            sessionId,
-          ),
-          from: workoutSummaryProvider,
-          name: r'workoutSummaryProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$workoutSummaryHash,
-          dependencies: WorkoutSummaryFamily._dependencies,
-          allTransitiveDependencies:
-              WorkoutSummaryFamily._allTransitiveDependencies,
-          sessionId: sessionId,
-        );
-
-  WorkoutSummaryProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.sessionId,
-  }) : super.internal();
-
-  final int sessionId;
-
-  @override
-  Override overrideWith(
-    FutureOr<WorkoutSummaryDetail> Function(WorkoutSummaryRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: WorkoutSummaryProvider._internal(
-        (ref) => create(ref as WorkoutSummaryRef),
-        from: from,
-        name: null,
+final class WorkoutSessionControllerProvider
+    extends
+        $AsyncNotifierProvider<WorkoutSessionController, ActiveWorkoutState> {
+  WorkoutSessionControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'workoutSessionControllerProvider',
+        isAutoDispose: false,
         dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        sessionId: sessionId,
-      ),
-    );
-  }
+        $allTransitiveDependencies: null,
+      );
 
   @override
-  AutoDisposeFutureProviderElement<WorkoutSummaryDetail> createElement() {
-    return _WorkoutSummaryProviderElement(this);
-  }
+  String debugGetCreateSourceHash() => _$workoutSessionControllerHash();
 
+  @$internal
   @override
-  bool operator ==(Object other) {
-    return other is WorkoutSummaryProvider && other.sessionId == sessionId;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, sessionId.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin WorkoutSummaryRef on AutoDisposeFutureProviderRef<WorkoutSummaryDetail> {
-  /// The parameter `sessionId` of this provider.
-  int get sessionId;
-}
-
-class _WorkoutSummaryProviderElement
-    extends AutoDisposeFutureProviderElement<WorkoutSummaryDetail>
-    with WorkoutSummaryRef {
-  _WorkoutSummaryProviderElement(super.provider);
-
-  @override
-  int get sessionId => (origin as WorkoutSummaryProvider).sessionId;
+  WorkoutSessionController create() => WorkoutSessionController();
 }
 
 String _$workoutSessionControllerHash() =>
     r'6bebda44168b02387039a905bea830f3706ca1a7';
 
-/// See also [WorkoutSessionController].
-@ProviderFor(WorkoutSessionController)
-final workoutSessionControllerProvider = AsyncNotifierProvider<
-    WorkoutSessionController, ActiveWorkoutState>.internal(
-  WorkoutSessionController.new,
-  name: r'workoutSessionControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$workoutSessionControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+abstract class _$WorkoutSessionController
+    extends $AsyncNotifier<ActiveWorkoutState> {
+  FutureOr<ActiveWorkoutState> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<ActiveWorkoutState>, ActiveWorkoutState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<ActiveWorkoutState>, ActiveWorkoutState>,
+              AsyncValue<ActiveWorkoutState>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
 
-typedef _$WorkoutSessionController = AsyncNotifier<ActiveWorkoutState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+@ProviderFor(exerciseHistory)
+final exerciseHistoryProvider = ExerciseHistoryFamily._();
+
+final class ExerciseHistoryProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<ExerciseHistorySummary>,
+          ExerciseHistorySummary,
+          FutureOr<ExerciseHistorySummary>
+        >
+    with
+        $FutureModifier<ExerciseHistorySummary>,
+        $FutureProvider<ExerciseHistorySummary> {
+  ExerciseHistoryProvider._({
+    required ExerciseHistoryFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'exerciseHistoryProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$exerciseHistoryHash();
+
+  @override
+  String toString() {
+    return r'exerciseHistoryProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<ExerciseHistorySummary> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<ExerciseHistorySummary> create(Ref ref) {
+    final argument = this.argument as int;
+    return exerciseHistory(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ExerciseHistoryProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$exerciseHistoryHash() => r'cf0a71f8faa95ce897310d61e24fb4724ff04d32';
+
+final class ExerciseHistoryFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<ExerciseHistorySummary>, int> {
+  ExerciseHistoryFamily._()
+    : super(
+        retry: null,
+        name: r'exerciseHistoryProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  ExerciseHistoryProvider call(int exerciseId) =>
+      ExerciseHistoryProvider._(argument: exerciseId, from: this);
+
+  @override
+  String toString() => r'exerciseHistoryProvider';
+}
+
+@ProviderFor(workoutSummary)
+final workoutSummaryProvider = WorkoutSummaryFamily._();
+
+final class WorkoutSummaryProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<WorkoutSummaryDetail>,
+          WorkoutSummaryDetail,
+          FutureOr<WorkoutSummaryDetail>
+        >
+    with
+        $FutureModifier<WorkoutSummaryDetail>,
+        $FutureProvider<WorkoutSummaryDetail> {
+  WorkoutSummaryProvider._({
+    required WorkoutSummaryFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'workoutSummaryProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$workoutSummaryHash();
+
+  @override
+  String toString() {
+    return r'workoutSummaryProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<WorkoutSummaryDetail> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<WorkoutSummaryDetail> create(Ref ref) {
+    final argument = this.argument as int;
+    return workoutSummary(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WorkoutSummaryProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$workoutSummaryHash() => r'5a9bc5985f3dd93b37374b8842815c56e7e59fed';
+
+final class WorkoutSummaryFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<WorkoutSummaryDetail>, int> {
+  WorkoutSummaryFamily._()
+    : super(
+        retry: null,
+        name: r'workoutSummaryProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  WorkoutSummaryProvider call(int sessionId) =>
+      WorkoutSummaryProvider._(argument: sessionId, from: this);
+
+  @override
+  String toString() => r'workoutSummaryProvider';
+}

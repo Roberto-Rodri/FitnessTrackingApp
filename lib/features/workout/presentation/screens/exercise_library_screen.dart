@@ -280,9 +280,9 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final allExercisesAsync = ref.watch(allExercisesProvider);
-    final machinesAsync = ref.watch(machinesNotifierProvider);
+    final machinesAsync = ref.watch(machinesProvider);
 
-    final machinesMap = machinesAsync.valueOrNull != null
+    final machinesMap = machinesAsync.value != null
         ? {for (var m in machinesAsync.value!) m.id: m.name}
         : <int, String>{};
 

@@ -7,7 +7,7 @@ bool _intToBool(int value) => value == 1;
 int _boolToInt(bool value) => value ? 1 : 0;
 
 @freezed
-class Program with _$Program {
+abstract class Program with _$Program {
   const factory Program({
     int? id,
     required String name,

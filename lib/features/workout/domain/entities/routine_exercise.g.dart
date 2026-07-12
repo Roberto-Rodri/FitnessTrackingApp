@@ -6,9 +6,8 @@ part of 'routine_exercise.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$RoutineExerciseImpl _$$RoutineExerciseImplFromJson(
-        Map<String, dynamic> json) =>
-    _$RoutineExerciseImpl(
+_RoutineExercise _$RoutineExerciseFromJson(Map<String, dynamic> json) =>
+    _RoutineExercise(
       routineId: (json['routineId'] as num).toInt(),
       exerciseId: (json['exerciseId'] as num).toInt(),
       sequenceOrder: (json['sequenceOrder'] as num).toInt(),
@@ -17,8 +16,7 @@ _$RoutineExerciseImpl _$$RoutineExerciseImplFromJson(
       supersetGroup: (json['supersetGroup'] as num?)?.toInt(),
     );
 
-Map<String, dynamic> _$$RoutineExerciseImplToJson(
-        _$RoutineExerciseImpl instance) =>
+Map<String, dynamic> _$RoutineExerciseToJson(_RoutineExercise instance) =>
     <String, dynamic>{
       'routineId': instance.routineId,
       'exerciseId': instance.exerciseId,

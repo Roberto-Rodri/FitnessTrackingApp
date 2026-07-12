@@ -4,7 +4,7 @@ part 'weekly_stats.freezed.dart';
 part 'weekly_stats.g.dart';
 
 @freezed
-class WeeklyStats with _$WeeklyStats {
+abstract class WeeklyStats with _$WeeklyStats {
   const factory WeeklyStats({
     required int sessionsCount,
     required double totalVolume,

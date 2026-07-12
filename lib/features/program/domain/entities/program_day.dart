@@ -4,7 +4,7 @@ part 'program_day.freezed.dart';
 part 'program_day.g.dart';
 
 @freezed
-class ProgramDay with _$ProgramDay {
+abstract class ProgramDay with _$ProgramDay {
   const factory ProgramDay({
     int? id,
     required int programId,

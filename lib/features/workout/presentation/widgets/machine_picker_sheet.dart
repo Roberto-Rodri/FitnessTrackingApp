@@ -44,8 +44,8 @@ class _MachinePickerSheetState extends ConsumerState<_MachinePickerSheet> {
     
     setState(() => _isCreating = true);
     try {
-      await ref.read(machinesNotifierProvider.notifier).createMachine(name);
-      final machines = await ref.read(machinesNotifierProvider.future);
+      await ref.read(machinesProvider.notifier).createMachine(name);
+      final machines = await ref.read(machinesProvider.future);
       final newMachine = machines.firstWhere(
         (m) => m.name.toLowerCase() == name.toLowerCase(),
       );
@@ -75,7 +75,7 @@ class _MachinePickerSheetState extends ConsumerState<_MachinePickerSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final machinesAsync = ref.watch(machinesNotifierProvider);
+    final machinesAsync = ref.watch(machinesProvider);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.8,
@@ -148,7 +148,7 @@ class _MachinePickerSheetState extends ConsumerState<_MachinePickerSheet> {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, _) => ErrorCard(
                   message: 'Failed to load machines',
-                  onRetry: () => ref.refresh(machinesNotifierProvider),
+                  onRetry: () => ref.refresh(machinesProvider),
                 ),
                 data: (machines) {
                   final filtered = _searchQuery.isEmpty 

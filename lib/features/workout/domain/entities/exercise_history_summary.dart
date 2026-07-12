@@ -7,7 +7,7 @@ part 'exercise_history_summary.freezed.dart';
 part 'exercise_history_summary.g.dart';
 
 @freezed
-class SessionVolume with _$SessionVolume {
+abstract class SessionVolume with _$SessionVolume {
   const factory SessionVolume({
     required int sessionId,
     required int timestamp,
@@ -19,7 +19,7 @@ class SessionVolume with _$SessionVolume {
 }
 
 @freezed
-class ExerciseHistorySummary with _$ExerciseHistorySummary {
+abstract class ExerciseHistorySummary with _$ExerciseHistorySummary {
   const factory ExerciseHistorySummary({
     required Exercise exercise,
     WorkoutSet? allTimeBest,

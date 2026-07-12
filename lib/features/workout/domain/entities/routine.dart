@@ -4,7 +4,7 @@ part 'routine.freezed.dart';
 part 'routine.g.dart';
 
 @freezed
-class Routine with _$Routine {
+abstract class Routine with _$Routine {
   const factory Routine({
     int? id,
     required String name,

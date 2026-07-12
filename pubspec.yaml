@@ -5,18 +5,18 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.8.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
   # State Management
-  flutter_riverpod: ^2.5.1
-  riverpod_annotation: ^2.3.5
+  flutter_riverpod: ^3.3.1
+  riverpod_annotation: ^4.0.2
 
   # Routing
-  go_router: ^13.2.0
+  go_router: ^17.3.0
 
   # Local DB
   sqflite: ^2.3.0
@@ -24,7 +24,7 @@ dependencies:
   path: ^1.9.0
 
   # Immutable Classes
-  freezed_annotation: ^2.4.1
+  freezed_annotation: ^3.1.0
   json_annotation: any
   google_fonts: ^8.0.2
   shared_preferences: ^2.5.5
@@ -37,11 +37,11 @@ dev_dependencies:
     sdk: flutter
 
   build_runner: ^2.4.8 # For codegen
-  riverpod_generator: ^2.4.0
-  freezed: ^2.4.7
+  riverpod_generator: ^4.0.3
+  freezed: ^3.2.5
   json_serializable: any
 
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.3
 
 flutter:

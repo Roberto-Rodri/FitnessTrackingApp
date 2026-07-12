@@ -355,10 +355,10 @@ class _ActiveExerciseCardState extends ConsumerState<ActiveExerciseCard> {
     final phase = profileAsync.value?.phase ?? TrainingPhase.none;
     
     // Feature 2: Machine name
-    final machinesAsync = ref.watch(machinesNotifierProvider);
+    final machinesAsync = ref.watch(machinesProvider);
     String? machineName;
     if (widget.machineId != null) {
-      final machines = machinesAsync.valueOrNull ?? [];
+      final machines = machinesAsync.value ?? [];
       machineName = machines.cast<Machine?>().firstWhere((m) => m?.id == widget.machineId, orElse: () => null)?.name;
     }
 

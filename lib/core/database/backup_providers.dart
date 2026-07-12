@@ -21,7 +21,7 @@ class BackupStats {
 }
 
 @riverpod
-Future<BackupStats> backupStats(BackupStatsRef ref) async {
+Future<BackupStats> backupStats(Ref ref) async {
   final dbHelper = ref.watch(databaseHelperProvider);
   final db = await dbHelper.database;
   

@@ -11,55 +11,69 @@ import '../../features/program/data/repositories/program_repository_impl.dart';
 import '../../features/program/domain/repositories/program_repository.dart';
 import '../database/backup_local_data_source.dart';
 import '../database/backup_repository.dart';
+import '../../features/progress/data/datasources/progress_local_data_source.dart';
+import '../../features/progress/data/repositories/progress_repository_impl.dart';
+import '../../features/progress/domain/repositories/progress_repository.dart';
 
 part 'injection.g.dart';
 
 @Riverpod(keepAlive: true)
-DatabaseHelper databaseHelper(DatabaseHelperRef ref) {
+DatabaseHelper databaseHelper(Ref ref) {
   return DatabaseHelper.instance;
 }
 
 @Riverpod(keepAlive: true)
-WorkoutLocalDataSource workoutLocalDataSource(WorkoutLocalDataSourceRef ref) {
+WorkoutLocalDataSource workoutLocalDataSource(Ref ref) {
   final dbHelper = ref.watch(databaseHelperProvider);
   return WorkoutLocalDataSourceImpl(dbHelper);
 }
 
 @Riverpod(keepAlive: true)
-WorkoutRepository workoutRepository(WorkoutRepositoryRef ref) {
+WorkoutRepository workoutRepository(Ref ref) {
   final localDataSource = ref.watch(workoutLocalDataSourceProvider);
   return WorkoutRepositoryImpl(localDataSource);
 }
 
 @Riverpod(keepAlive: true)
-UserPrefsLocalDataSource userPrefsLocalDataSource(UserPrefsLocalDataSourceRef ref) {
+UserPrefsLocalDataSource userPrefsLocalDataSource(Ref ref) {
   return UserPrefsLocalDataSource();
 }
 
 @Riverpod(keepAlive: true)
-UserPrefsRepository userPrefsRepository(UserPrefsRepositoryRef ref) {
+UserPrefsRepository userPrefsRepository(Ref ref) {
   final localDataSource = ref.watch(userPrefsLocalDataSourceProvider);
   return UserPrefsRepositoryImpl(dataSource: localDataSource);
 }
 
 @Riverpod(keepAlive: true)
-ProgramLocalDataSource programLocalDataSource(ProgramLocalDataSourceRef ref) {
+ProgramLocalDataSource programLocalDataSource(Ref ref) {
   return ProgramLocalDataSourceImpl(ref.watch(databaseHelperProvider));
 }
 
 @Riverpod(keepAlive: true)
-ProgramRepository programRepository(ProgramRepositoryRef ref) {
+ProgramRepository programRepository(Ref ref) {
   return ProgramRepositoryImpl(ref.watch(programLocalDataSourceProvider));
 }
 
 @Riverpod(keepAlive: true)
-BackupLocalDataSource backupLocalDataSource(BackupLocalDataSourceRef ref) {
+BackupLocalDataSource backupLocalDataSource(Ref ref) {
   final dbHelper = ref.watch(databaseHelperProvider);
   return BackupLocalDataSourceImpl(dbHelper);
 }
 
 @Riverpod(keepAlive: true)
-BackupRepository backupRepository(BackupRepositoryRef ref) {
+BackupRepository backupRepository(Ref ref) {
   final localDataSource = ref.watch(backupLocalDataSourceProvider);
   return BackupRepositoryImpl(localDataSource);
 }
+
+@Riverpod(keepAlive: true)
+ProgressLocalDataSource progressLocalDataSource(Ref ref) {
+  return ProgressLocalDataSource(ref.watch(databaseHelperProvider));
+}
+
+@Riverpod(keepAlive: true)
+ProgressRepository progressRepository(Ref ref) {
+  return ProgressRepositoryImpl(ref.watch(progressLocalDataSourceProvider));
+}
+

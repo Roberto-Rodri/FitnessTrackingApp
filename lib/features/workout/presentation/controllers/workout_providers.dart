@@ -13,8 +13,8 @@ import '../../domain/entities/workout_summary_detail.dart';
 
 part 'workout_providers.g.dart';
 
-final useRoutineLatestProvider = NotifierProvider<UseRoutineLatestNotifier, bool>(UseRoutineLatestNotifier.new);
-class UseRoutineLatestNotifier extends Notifier<bool> {
+@riverpod
+class UseRoutineLatestNotifier extends _$UseRoutineLatestNotifier {
   @override
   bool build() => true;
   @override
@@ -103,21 +103,21 @@ class ActiveWorkoutState {
 
 // Added sessionPRCount
 @riverpod
-Future<int> sessionPRCount(SessionPRCountRef ref, int sessionId) async {
+Future<int> sessionPRCount(Ref ref, int sessionId) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.countPRsInSession(sessionId);
 }
 
 @riverpod
-Future<List<WorkoutSessionSummary>> completedSessions(CompletedSessionsRef ref) async {
+Future<List<WorkoutSessionSummary>> completedSessions(Ref ref) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.getCompletedSessions();
 }
 
 enum HistoryFilter { all, thisWeek, thisMonth }
 
-final historyFilterProvider = NotifierProvider<HistoryFilterNotifier, HistoryFilter>(HistoryFilterNotifier.new);
-class HistoryFilterNotifier extends Notifier<HistoryFilter> {
+@riverpod
+class HistoryFilterNotifier extends _$HistoryFilterNotifier {
   @override
   HistoryFilter build() => HistoryFilter.all;
   @override
@@ -125,7 +125,7 @@ class HistoryFilterNotifier extends Notifier<HistoryFilter> {
 }
 
 @riverpod
-Future<List<WorkoutSessionSummary>> filteredSessions(FilteredSessionsRef ref) async {
+Future<List<WorkoutSessionSummary>> filteredSessions(Ref ref) async {
   final filter = ref.watch(historyFilterProvider);
   final allSessions = await ref.watch(completedSessionsProvider.future);
   
@@ -150,73 +150,73 @@ Future<List<WorkoutSessionSummary>> filteredSessions(FilteredSessionsRef ref) as
 }
 
 @riverpod
-Future<List<WorkoutSet>> sessionSets(SessionSetsRef ref, int sessionId) async {
+Future<List<WorkoutSet>> sessionSets(Ref ref, int sessionId) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.getSetsForSession(sessionId);
 }
 
 @riverpod
-Future<Map<int, Exercise>> sessionExerciseInfo(SessionExerciseInfoRef ref, int sessionId) async {
+Future<Map<int, Exercise>> sessionExerciseInfo(Ref ref, int sessionId) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.getExerciseInfoForSession(sessionId);
 }
 
 @riverpod
-Future<List<Exercise>> allExercises(AllExercisesRef ref) async {
+Future<List<Exercise>> allExercises(Ref ref) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.getExercises();
 }
 
 @riverpod
-Future<List<Exercise>> exerciseAlternatives(ExerciseAlternativesRef ref, int exerciseId) async {
+Future<List<Exercise>> exerciseAlternatives(Ref ref, int exerciseId) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.getAlternativesForExercise(exerciseId);
 }
 
 @riverpod
-Future<List<RoutineSummary>> routineList(RoutineListRef ref) async {
+Future<List<RoutineSummary>> routineList(Ref ref) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.getRoutinesWithInfo();
 }
 
 @riverpod
-Future<List<RoutineExerciseDetail>> routineExercises(RoutineExercisesRef ref, int routineId) async {
+Future<List<RoutineExerciseDetail>> routineExercises(Ref ref, int routineId) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.getExercisesForRoutine(routineId);
 }
 
 @riverpod
-Future<List<String>> bodyParts(BodyPartsRef ref) async {
+Future<List<String>> bodyParts(Ref ref) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.getDistinctBodyParts();
 }
 
 @riverpod
-Future<WeeklyStats> weeklyStats(WeeklyStatsRef ref) async {
+Future<WeeklyStats> weeklyStats(Ref ref) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.getWeeklyStats();
 }
 
 @riverpod
-Future<List<double>> weeklyVolumeChart(WeeklyVolumeChartRef ref) async {
+Future<List<double>> weeklyVolumeChart(Ref ref) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.getWeeklyVolumeChart();
 }
 
 @riverpod
-Future<List<WorkoutSessionSummary>> recentSessions(RecentSessionsRef ref) async {
+Future<List<WorkoutSessionSummary>> recentSessions(Ref ref) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.getRecentSessions(3);
 }
 
 @riverpod
-Future<RoutineSummary?> lastRoutine(LastRoutineRef ref) async {
+Future<RoutineSummary?> lastRoutine(Ref ref) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.getLastUsedRoutine();
 }
 
-final showConfettiProvider = NotifierProvider<ShowConfettiNotifier, bool>(ShowConfettiNotifier.new);
-class ShowConfettiNotifier extends Notifier<bool> {
+@riverpod
+class ShowConfettiNotifier extends _$ShowConfettiNotifier {
   @override
   bool build() => false;
   @override
@@ -224,7 +224,7 @@ class ShowConfettiNotifier extends Notifier<bool> {
 }
 
 @riverpod
-Future<WorkoutSessionSummary?> previousSession(PreviousSessionRef ref, int routineId, int currentSessionId) async {
+Future<WorkoutSessionSummary?> previousSession(Ref ref, int routineId, int currentSessionId) async {
   final repository = ref.watch(workoutRepositoryProvider);
   final session = await repository.getPreviousSession(routineId, currentSessionId);
   if (session == null) return null;
@@ -605,13 +605,13 @@ class WorkoutSessionController extends _$WorkoutSessionController {
 }
 
 @riverpod
-Future<ExerciseHistorySummary> exerciseHistory(ExerciseHistoryRef ref, int exerciseId) async {
+Future<ExerciseHistorySummary> exerciseHistory(Ref ref, int exerciseId) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.getExerciseHistory(exerciseId);
 }
 
 @riverpod
-Future<WorkoutSummaryDetail> workoutSummary(WorkoutSummaryRef ref, int sessionId) async {
+Future<WorkoutSummaryDetail> workoutSummary(Ref ref, int sessionId) async {
   final repository = ref.watch(workoutRepositoryProvider);
   
   final sessions = await repository.getCompletedSessions();

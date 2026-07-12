@@ -4,7 +4,7 @@ part 'body_weight_log.freezed.dart';
 part 'body_weight_log.g.dart';
 
 @freezed
-class BodyWeightLog with _$BodyWeightLog {
+abstract class BodyWeightLog with _$BodyWeightLog {
   const factory BodyWeightLog({
     required String id,
     required DateTime date,

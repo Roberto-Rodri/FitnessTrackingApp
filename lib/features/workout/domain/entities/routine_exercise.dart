@@ -4,7 +4,7 @@ part 'routine_exercise.freezed.dart';
 part 'routine_exercise.g.dart';
 
 @freezed
-class RoutineExercise with _$RoutineExercise {
+abstract class RoutineExercise with _$RoutineExercise {
   const factory RoutineExercise({
     required int routineId,
     required int exerciseId,

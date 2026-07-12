@@ -4,7 +4,7 @@ part 'workout_session.freezed.dart';
 part 'workout_session.g.dart';
 
 @freezed
-class WorkoutSession with _$WorkoutSession {
+abstract class WorkoutSession with _$WorkoutSession {
   const factory WorkoutSession({
     int? id,
     required int startTimestamp,

@@ -7,7 +7,7 @@ bool _boolFromInt(int? value) => value == 1;
 int _boolToInt(bool value) => value ? 1 : 0;
 
 @freezed
-class WorkoutSet with _$WorkoutSet {
+abstract class WorkoutSet with _$WorkoutSet {
   const factory WorkoutSet({
     int? id,
     required int sessionId,

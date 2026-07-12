@@ -6,7 +6,7 @@ part 'program_detail.freezed.dart';
 part 'program_detail.g.dart';
 
 @freezed
-class ProgramDetail with _$ProgramDetail {
+abstract class ProgramDetail with _$ProgramDetail {
   const factory ProgramDetail({
     required Program program,
     required List<ProgramDay> days,

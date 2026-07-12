@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,266 +9,284 @@ part of 'workout_session.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
-
-WorkoutSession _$WorkoutSessionFromJson(Map<String, dynamic> json) {
-  return _WorkoutSession.fromJson(json);
-}
 
 /// @nodoc
 mixin _$WorkoutSession {
-  int? get id => throw _privateConstructorUsedError;
-  int get startTimestamp => throw _privateConstructorUsedError;
-  int? get endTimestamp => throw _privateConstructorUsedError;
-  int? get routineId => throw _privateConstructorUsedError;
-  String get routineNameSnapshot => throw _privateConstructorUsedError;
-  String? get notes => throw _privateConstructorUsedError;
+
+ int? get id; int get startTimestamp; int? get endTimestamp; int? get routineId; String get routineNameSnapshot; String? get notes;
+/// Create a copy of WorkoutSession
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$WorkoutSessionCopyWith<WorkoutSession> get copyWith => _$WorkoutSessionCopyWithImpl<WorkoutSession>(this as WorkoutSession, _$identity);
 
   /// Serializes this WorkoutSession to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of WorkoutSession
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $WorkoutSessionCopyWith<WorkoutSession> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is WorkoutSession&&(identical(other.id, id) || other.id == id)&&(identical(other.startTimestamp, startTimestamp) || other.startTimestamp == startTimestamp)&&(identical(other.endTimestamp, endTimestamp) || other.endTimestamp == endTimestamp)&&(identical(other.routineId, routineId) || other.routineId == routineId)&&(identical(other.routineNameSnapshot, routineNameSnapshot) || other.routineNameSnapshot == routineNameSnapshot)&&(identical(other.notes, notes) || other.notes == notes));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,startTimestamp,endTimestamp,routineId,routineNameSnapshot,notes);
+
+@override
+String toString() {
+  return 'WorkoutSession(id: $id, startTimestamp: $startTimestamp, endTimestamp: $endTimestamp, routineId: $routineId, routineNameSnapshot: $routineNameSnapshot, notes: $notes)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $WorkoutSessionCopyWith<$Res> {
-  factory $WorkoutSessionCopyWith(
-          WorkoutSession value, $Res Function(WorkoutSession) then) =
-      _$WorkoutSessionCopyWithImpl<$Res, WorkoutSession>;
-  @useResult
-  $Res call(
-      {int? id,
-      int startTimestamp,
-      int? endTimestamp,
-      int? routineId,
-      String routineNameSnapshot,
-      String? notes});
-}
+abstract mixin class $WorkoutSessionCopyWith<$Res>  {
+  factory $WorkoutSessionCopyWith(WorkoutSession value, $Res Function(WorkoutSession) _then) = _$WorkoutSessionCopyWithImpl;
+@useResult
+$Res call({
+ int? id, int startTimestamp, int? endTimestamp, int? routineId, String routineNameSnapshot, String? notes
+});
 
+
+
+
+}
 /// @nodoc
-class _$WorkoutSessionCopyWithImpl<$Res, $Val extends WorkoutSession>
+class _$WorkoutSessionCopyWithImpl<$Res>
     implements $WorkoutSessionCopyWith<$Res> {
-  _$WorkoutSessionCopyWithImpl(this._value, this._then);
+  _$WorkoutSessionCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final WorkoutSession _self;
+  final $Res Function(WorkoutSession) _then;
 
-  /// Create a copy of WorkoutSession
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = freezed,
-    Object? startTimestamp = null,
-    Object? endTimestamp = freezed,
-    Object? routineId = freezed,
-    Object? routineNameSnapshot = null,
-    Object? notes = freezed,
-  }) {
-    return _then(_value.copyWith(
-      id: freezed == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as int?,
-      startTimestamp: null == startTimestamp
-          ? _value.startTimestamp
-          : startTimestamp // ignore: cast_nullable_to_non_nullable
-              as int,
-      endTimestamp: freezed == endTimestamp
-          ? _value.endTimestamp
-          : endTimestamp // ignore: cast_nullable_to_non_nullable
-              as int?,
-      routineId: freezed == routineId
-          ? _value.routineId
-          : routineId // ignore: cast_nullable_to_non_nullable
-              as int?,
-      routineNameSnapshot: null == routineNameSnapshot
-          ? _value.routineNameSnapshot
-          : routineNameSnapshot // ignore: cast_nullable_to_non_nullable
-              as String,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
-  }
+/// Create a copy of WorkoutSession
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? startTimestamp = null,Object? endTimestamp = freezed,Object? routineId = freezed,Object? routineNameSnapshot = null,Object? notes = freezed,}) {
+  return _then(_self.copyWith(
+id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int?,startTimestamp: null == startTimestamp ? _self.startTimestamp : startTimestamp // ignore: cast_nullable_to_non_nullable
+as int,endTimestamp: freezed == endTimestamp ? _self.endTimestamp : endTimestamp // ignore: cast_nullable_to_non_nullable
+as int?,routineId: freezed == routineId ? _self.routineId : routineId // ignore: cast_nullable_to_non_nullable
+as int?,routineNameSnapshot: null == routineNameSnapshot ? _self.routineNameSnapshot : routineNameSnapshot // ignore: cast_nullable_to_non_nullable
+as String,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
 }
 
-/// @nodoc
-abstract class _$$WorkoutSessionImplCopyWith<$Res>
-    implements $WorkoutSessionCopyWith<$Res> {
-  factory _$$WorkoutSessionImplCopyWith(_$WorkoutSessionImpl value,
-          $Res Function(_$WorkoutSessionImpl) then) =
-      __$$WorkoutSessionImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call(
-      {int? id,
-      int startTimestamp,
-      int? endTimestamp,
-      int? routineId,
-      String routineNameSnapshot,
-      String? notes});
 }
 
-/// @nodoc
-class __$$WorkoutSessionImplCopyWithImpl<$Res>
-    extends _$WorkoutSessionCopyWithImpl<$Res, _$WorkoutSessionImpl>
-    implements _$$WorkoutSessionImplCopyWith<$Res> {
-  __$$WorkoutSessionImplCopyWithImpl(
-      _$WorkoutSessionImpl _value, $Res Function(_$WorkoutSessionImpl) _then)
-      : super(_value, _then);
 
-  /// Create a copy of WorkoutSession
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = freezed,
-    Object? startTimestamp = null,
-    Object? endTimestamp = freezed,
-    Object? routineId = freezed,
-    Object? routineNameSnapshot = null,
-    Object? notes = freezed,
-  }) {
-    return _then(_$WorkoutSessionImpl(
-      id: freezed == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as int?,
-      startTimestamp: null == startTimestamp
-          ? _value.startTimestamp
-          : startTimestamp // ignore: cast_nullable_to_non_nullable
-              as int,
-      endTimestamp: freezed == endTimestamp
-          ? _value.endTimestamp
-          : endTimestamp // ignore: cast_nullable_to_non_nullable
-              as int?,
-      routineId: freezed == routineId
-          ? _value.routineId
-          : routineId // ignore: cast_nullable_to_non_nullable
-              as int?,
-      routineNameSnapshot: null == routineNameSnapshot
-          ? _value.routineNameSnapshot
-          : routineNameSnapshot // ignore: cast_nullable_to_non_nullable
-              as String,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
-  }
+/// Adds pattern-matching-related methods to [WorkoutSession].
+extension WorkoutSessionPatterns on WorkoutSession {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _WorkoutSession value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _WorkoutSession() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _WorkoutSession value)  $default,){
+final _that = this;
+switch (_that) {
+case _WorkoutSession():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _WorkoutSession value)?  $default,){
+final _that = this;
+switch (_that) {
+case _WorkoutSession() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  int startTimestamp,  int? endTimestamp,  int? routineId,  String routineNameSnapshot,  String? notes)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _WorkoutSession() when $default != null:
+return $default(_that.id,_that.startTimestamp,_that.endTimestamp,_that.routineId,_that.routineNameSnapshot,_that.notes);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  int startTimestamp,  int? endTimestamp,  int? routineId,  String routineNameSnapshot,  String? notes)  $default,) {final _that = this;
+switch (_that) {
+case _WorkoutSession():
+return $default(_that.id,_that.startTimestamp,_that.endTimestamp,_that.routineId,_that.routineNameSnapshot,_that.notes);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  int startTimestamp,  int? endTimestamp,  int? routineId,  String routineNameSnapshot,  String? notes)?  $default,) {final _that = this;
+switch (_that) {
+case _WorkoutSession() when $default != null:
+return $default(_that.id,_that.startTimestamp,_that.endTimestamp,_that.routineId,_that.routineNameSnapshot,_that.notes);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$WorkoutSessionImpl implements _WorkoutSession {
-  const _$WorkoutSessionImpl(
-      {this.id,
-      required this.startTimestamp,
-      this.endTimestamp,
-      this.routineId,
-      required this.routineNameSnapshot,
-      this.notes});
 
-  factory _$WorkoutSessionImpl.fromJson(Map<String, dynamic> json) =>
-      _$$WorkoutSessionImplFromJson(json);
+class _WorkoutSession implements WorkoutSession {
+  const _WorkoutSession({this.id, required this.startTimestamp, this.endTimestamp, this.routineId, required this.routineNameSnapshot, this.notes});
+  factory _WorkoutSession.fromJson(Map<String, dynamic> json) => _$WorkoutSessionFromJson(json);
 
-  @override
-  final int? id;
-  @override
-  final int startTimestamp;
-  @override
-  final int? endTimestamp;
-  @override
-  final int? routineId;
-  @override
-  final String routineNameSnapshot;
-  @override
-  final String? notes;
+@override final  int? id;
+@override final  int startTimestamp;
+@override final  int? endTimestamp;
+@override final  int? routineId;
+@override final  String routineNameSnapshot;
+@override final  String? notes;
 
-  @override
-  String toString() {
-    return 'WorkoutSession(id: $id, startTimestamp: $startTimestamp, endTimestamp: $endTimestamp, routineId: $routineId, routineNameSnapshot: $routineNameSnapshot, notes: $notes)';
-  }
+/// Create a copy of WorkoutSession
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$WorkoutSessionCopyWith<_WorkoutSession> get copyWith => __$WorkoutSessionCopyWithImpl<_WorkoutSession>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$WorkoutSessionImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.startTimestamp, startTimestamp) ||
-                other.startTimestamp == startTimestamp) &&
-            (identical(other.endTimestamp, endTimestamp) ||
-                other.endTimestamp == endTimestamp) &&
-            (identical(other.routineId, routineId) ||
-                other.routineId == routineId) &&
-            (identical(other.routineNameSnapshot, routineNameSnapshot) ||
-                other.routineNameSnapshot == routineNameSnapshot) &&
-            (identical(other.notes, notes) || other.notes == notes));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, id, startTimestamp, endTimestamp,
-      routineId, routineNameSnapshot, notes);
-
-  /// Create a copy of WorkoutSession
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$WorkoutSessionImplCopyWith<_$WorkoutSessionImpl> get copyWith =>
-      __$$WorkoutSessionImplCopyWithImpl<_$WorkoutSessionImpl>(
-          this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$WorkoutSessionImplToJson(
-      this,
-    );
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$WorkoutSessionToJson(this, );
 }
 
-abstract class _WorkoutSession implements WorkoutSession {
-  const factory _WorkoutSession(
-      {final int? id,
-      required final int startTimestamp,
-      final int? endTimestamp,
-      final int? routineId,
-      required final String routineNameSnapshot,
-      final String? notes}) = _$WorkoutSessionImpl;
-
-  factory _WorkoutSession.fromJson(Map<String, dynamic> json) =
-      _$WorkoutSessionImpl.fromJson;
-
-  @override
-  int? get id;
-  @override
-  int get startTimestamp;
-  @override
-  int? get endTimestamp;
-  @override
-  int? get routineId;
-  @override
-  String get routineNameSnapshot;
-  @override
-  String? get notes;
-
-  /// Create a copy of WorkoutSession
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$WorkoutSessionImplCopyWith<_$WorkoutSessionImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WorkoutSession&&(identical(other.id, id) || other.id == id)&&(identical(other.startTimestamp, startTimestamp) || other.startTimestamp == startTimestamp)&&(identical(other.endTimestamp, endTimestamp) || other.endTimestamp == endTimestamp)&&(identical(other.routineId, routineId) || other.routineId == routineId)&&(identical(other.routineNameSnapshot, routineNameSnapshot) || other.routineNameSnapshot == routineNameSnapshot)&&(identical(other.notes, notes) || other.notes == notes));
 }
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,startTimestamp,endTimestamp,routineId,routineNameSnapshot,notes);
+
+@override
+String toString() {
+  return 'WorkoutSession(id: $id, startTimestamp: $startTimestamp, endTimestamp: $endTimestamp, routineId: $routineId, routineNameSnapshot: $routineNameSnapshot, notes: $notes)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$WorkoutSessionCopyWith<$Res> implements $WorkoutSessionCopyWith<$Res> {
+  factory _$WorkoutSessionCopyWith(_WorkoutSession value, $Res Function(_WorkoutSession) _then) = __$WorkoutSessionCopyWithImpl;
+@override @useResult
+$Res call({
+ int? id, int startTimestamp, int? endTimestamp, int? routineId, String routineNameSnapshot, String? notes
+});
+
+
+
+
+}
+/// @nodoc
+class __$WorkoutSessionCopyWithImpl<$Res>
+    implements _$WorkoutSessionCopyWith<$Res> {
+  __$WorkoutSessionCopyWithImpl(this._self, this._then);
+
+  final _WorkoutSession _self;
+  final $Res Function(_WorkoutSession) _then;
+
+/// Create a copy of WorkoutSession
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? startTimestamp = null,Object? endTimestamp = freezed,Object? routineId = freezed,Object? routineNameSnapshot = null,Object? notes = freezed,}) {
+  return _then(_WorkoutSession(
+id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int?,startTimestamp: null == startTimestamp ? _self.startTimestamp : startTimestamp // ignore: cast_nullable_to_non_nullable
+as int,endTimestamp: freezed == endTimestamp ? _self.endTimestamp : endTimestamp // ignore: cast_nullable_to_non_nullable
+as int?,routineId: freezed == routineId ? _self.routineId : routineId // ignore: cast_nullable_to_non_nullable
+as int?,routineNameSnapshot: null == routineNameSnapshot ? _self.routineNameSnapshot : routineNameSnapshot // ignore: cast_nullable_to_non_nullable
+as String,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+// dart format on

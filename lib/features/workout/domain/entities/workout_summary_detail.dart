@@ -5,7 +5,7 @@ import 'exercise.dart';
 part 'workout_summary_detail.freezed.dart';
 
 @freezed
-class WorkoutSummaryDetail with _$WorkoutSummaryDetail {
+abstract class WorkoutSummaryDetail with _$WorkoutSummaryDetail {
   const factory WorkoutSummaryDetail({
     required WorkoutSession session,
     required int totalSets,
@@ -16,7 +16,7 @@ class WorkoutSummaryDetail with _$WorkoutSummaryDetail {
 }
 
 @freezed
-class ExerciseComparison with _$ExerciseComparison {
+abstract class ExerciseComparison with _$ExerciseComparison {
   const factory ExerciseComparison({
     required Exercise exercise,
     required double currentVolume,

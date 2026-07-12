@@ -8,13 +8,13 @@ import '../../../workout/presentation/controllers/workout_providers.dart';
 part 'program_providers.g.dart';
 
 @riverpod
-Future<List<Program>> allPrograms(AllProgramsRef ref) async {
+Future<List<Program>> allPrograms(Ref ref) async {
   final repository = ref.watch(programRepositoryProvider);
   return repository.getAllPrograms();
 }
 
 @riverpod
-Future<ProgramDetail?> activeProgram(ActiveProgramRef ref) async {
+Future<ProgramDetail?> activeProgram(Ref ref) async {
   final repository = ref.watch(programRepositoryProvider);
   final program = await repository.getActiveProgram();
   if (program == null) return null;
@@ -22,13 +22,13 @@ Future<ProgramDetail?> activeProgram(ActiveProgramRef ref) async {
 }
 
 @riverpod
-Future<ProgramDetail> programDetail(ProgramDetailRef ref, int programId) async {
+Future<ProgramDetail> programDetail(Ref ref, int programId) async {
   final repository = ref.watch(programRepositoryProvider);
   return repository.getProgramDetail(programId);
 }
 
 @riverpod
-Future<ProgramDay?> currentProgramDay(CurrentProgramDayRef ref) async {
+Future<ProgramDay?> currentProgramDay(Ref ref) async {
   final repository = ref.watch(programRepositoryProvider);
   final program = await repository.getActiveProgram();
   if (program == null) return null;
@@ -36,7 +36,7 @@ Future<ProgramDay?> currentProgramDay(CurrentProgramDayRef ref) async {
 }
 
 @riverpod
-Future<Set<int>> completedProgramDays(CompletedProgramDaysRef ref) async {
+Future<Set<int>> completedProgramDays(Ref ref) async {
   final activeProgram = await ref.watch(activeProgramProvider.future);
   if (activeProgram == null) return {};
   

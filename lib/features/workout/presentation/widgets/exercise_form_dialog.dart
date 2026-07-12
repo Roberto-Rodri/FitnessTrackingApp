@@ -33,7 +33,7 @@ class _ExerciseFormDialogState extends ConsumerState<ExerciseFormDialog> {
     
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (widget.existingExercise?.machineId != null && mounted) {
-        final machines = await ref.read(machinesNotifierProvider.future);
+        final machines = await ref.read(machinesProvider.future);
         if (mounted) {
           setState(() {
             _selectedMachine = machines.cast<Machine?>().firstWhere(
