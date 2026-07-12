@@ -182,12 +182,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ],
                     ],
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      context.pushNamed(RouteNames.profileSettings);
-                    },
-                    child: Container(
-                      width: 38,
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.analytics_outlined),
+                        color: theme.colorScheme.primary,
+                        onPressed: () => context.pushNamed(RouteNames.progressReport),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () {
+                          context.pushNamed(RouteNames.profileSettings);
+                        },
+                        child: Container(
+                          width: 38,
                       height: 38,
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surfaceContainerHigh,
@@ -208,12 +216,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             color: theme.colorScheme.primary,
                           ),
                         ),
-                      ),
-                    ),
-                  ),
+                      ), // closes Center
+                    ), // closes Container
+                  ), // closes GestureDetector
                 ],
               ),
-              const SizedBox(height: 24),
+            ],
+          ),
+            const SizedBox(height: 24),
               
               _buildProgramOrFallbackDashboard(context, ref),
               

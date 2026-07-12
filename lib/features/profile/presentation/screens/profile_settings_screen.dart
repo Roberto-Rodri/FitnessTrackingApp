@@ -62,6 +62,15 @@ class ProfileSettingsScreen extends ConsumerWidget {
                     context.pushNamed(RouteNames.bodyWeightHistory);
                   },
                 ),
+                const SizedBox(height: 16),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text('Progress Report', style: theme.textTheme.titleMedium),
+                  trailing: Icon(Icons.analytics_outlined, color: theme.colorScheme.primary),
+                  onTap: () {
+                    context.pushNamed(RouteNames.progressReport);
+                  },
+                ),
                 const SizedBox(height: 32),
 
                 // Training Phase Section

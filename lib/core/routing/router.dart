@@ -15,6 +15,7 @@ import '../../features/profile/presentation/screens/body_weight_screen.dart';
 import '../../features/workout/presentation/screens/workout_summary_screen.dart';
 import '../../features/workout/presentation/screens/exercise_detail_screen.dart';
 import '../../features/workout/presentation/screens/share_overlay_screen.dart';
+import '../../features/progress/presentation/screens/progress_report_screen.dart';
 
 abstract class RouteNames {
   static const splash = 'splash';
@@ -34,6 +35,7 @@ abstract class RouteNames {
   static const workoutSummary = 'workout_summary';
   static const exerciseDetail = 'exercise_detail';
   static const workoutShare = 'workout_share';
+  static const progressReport = 'progress_report';
 }
 
 final goRouter = GoRouter(
@@ -171,6 +173,11 @@ final goRouter = GoRouter(
         final sessionId = int.parse(state.pathParameters['sessionId']!);
         return ShareOverlayScreen(sessionId: sessionId);
       },
+    ),
+    GoRoute(
+      path: '/progress_report',
+      name: RouteNames.progressReport,
+      builder: (context, state) => const ProgressReportScreen(),
     ),
   ],
 );
