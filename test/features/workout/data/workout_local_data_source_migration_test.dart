@@ -74,6 +74,12 @@ void main() {
         'id': 'log1',
         'timestamp': date.millisecondsSinceEpoch,
         'weight': 75.5,
+        'bodyFatPercentage': null,
+        'muscleMass': null,
+        'waist': null,
+        'chest': null,
+        'arms': null,
+        'notes': null,
       });
     });
 
