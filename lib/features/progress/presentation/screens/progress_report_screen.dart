@@ -1,13 +1,18 @@
+import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/theme/theme.dart';
 import '../../../profile/domain/entities/user_profile.dart';
 import '../../domain/entities/progress_report_data.dart';
 import '../controllers/progress_providers.dart';
+import '../utils/progress_pdf_generator.dart';
 
 class ProgressReportScreen extends ConsumerStatefulWidget {
   const ProgressReportScreen({super.key});
@@ -19,6 +24,12 @@ class ProgressReportScreen extends ConsumerStatefulWidget {
 class _ProgressReportScreenState extends ConsumerState<ProgressReportScreen> {
   late DateTime _startDate;
   late DateTime _endDate;
+
+  // Captures the full report surface for image export. Attached in the widget
+  // tree unconditionally (see `_buildReportContent`), so it is valid even if
+  // the user has not scrolled the report.
+  final GlobalKey _reportKey = GlobalKey();
+  bool _isExporting = false;
 
   @override
   void initState() {
@@ -57,6 +68,154 @@ class _ProgressReportScreenState extends ConsumerState<ProgressReportScreen> {
     }
   }
 
+  // --- Export ---
+
+  void _showExportSheet() {
+    // Only offer export when a report has actually been generated.
+    final data = ref.read(progressReportProvider(_startDate, _endDate)).value;
+    if (data == null) {
+      _showError('Report is still loading. Please try again in a moment.');
+      return;
+    }
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppTheme.bg2,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppTheme.bg3,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'EXPORT REPORT',
+                    style: Theme.of(sheetContext).textTheme.labelSmall?.copyWith(
+                          color: AppTheme.txt2,
+                          letterSpacing: 1.0,
+                        ),
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.image_outlined, color: AppTheme.amber),
+                title: const Text('Share as Image', style: TextStyle(color: AppTheme.txt0)),
+                subtitle: const Text('A single PNG snapshot', style: TextStyle(color: AppTheme.txt2)),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  _shareAsImage();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf_outlined, color: AppTheme.amber),
+                title: const Text('Share as PDF', style: TextStyle(color: AppTheme.txt0)),
+                subtitle: const Text('A paginated document', style: TextStyle(color: AppTheme.txt2)),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  _shareAsPdf();
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _shareAsImage() async {
+    if (_isExporting) return;
+    setState(() => _isExporting = true);
+    try {
+      // Let the loading overlay paint before we do the synchronous capture.
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      final boundary =
+          _reportKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) throw Exception('Report is not ready to capture.');
+
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) throw Exception('Failed to render image.');
+
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/ironlog_progress_report.png');
+      await file.writeAsBytes(byteData.buffer.asUint8List());
+
+      if (!mounted) return;
+      final box = context.findRenderObject() as RenderBox?;
+      // ignore: deprecated_member_use
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'My IronLog progress report',
+        sharePositionOrigin:
+            box != null ? box.localToGlobal(Offset.zero) & box.size : null,
+      );
+    } catch (e) {
+      _showError('Could not export image: $e');
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
+  }
+
+  Future<void> _shareAsPdf() async {
+    if (_isExporting) return;
+
+    final data = ref.read(progressReportProvider(_startDate, _endDate)).value;
+    if (data == null) {
+      _showError('Report is not ready yet. Please wait for it to load.');
+      return;
+    }
+
+    setState(() => _isExporting = true);
+    try {
+      final bytes = await generateProgressReportPdf(data);
+
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/ironlog_progress_report.pdf');
+      await file.writeAsBytes(bytes);
+
+      if (!mounted) return;
+      final box = context.findRenderObject() as RenderBox?;
+      // ignore: deprecated_member_use
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'My IronLog progress report',
+        sharePositionOrigin:
+            box != null ? box.localToGlobal(Offset.zero) & box.size : null,
+      );
+    } catch (e) {
+      _showError('Could not export PDF: $e');
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: AppTheme.txt0)),
+        backgroundColor: AppTheme.coral,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -67,33 +226,66 @@ class _ProgressReportScreenState extends ConsumerState<ProgressReportScreen> {
       appBar: AppBar(
         title: const Text('Progress Report'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.ios_share),
+            tooltip: 'Export report',
+            onPressed: _isExporting ? null : _showExportSheet,
+          ),
+        ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildDateRangeHeader(theme),
-            Expanded(
-              child: reportAsync.when(
-                data: (data) => _buildReportContent(context, theme, data),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, color: AppTheme.error, size: 48),
-                      const SizedBox(height: 16),
-                      Text('Failed to generate report:\n$e', textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => ref.invalidate(progressReportProvider(_startDate, _endDate)),
-                        child: const Text('Retry'),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _buildDateRangeHeader(theme),
+                Expanded(
+                  child: reportAsync.when(
+                    data: (data) => _buildReportContent(context, theme, data),
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline, color: AppTheme.error, size: 48),
+                          const SizedBox(height: 16),
+                          Text('Failed to generate report:\n$e', textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => ref.invalidate(progressReportProvider(_startDate, _endDate)),
+                            child: const Text('Retry'),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
+          if (_isExporting) _buildExportingOverlay(theme),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExportingOverlay(ThemeData theme) {
+    return Positioned.fill(
+      child: ColoredBox(
+        color: AppTheme.bg0.withValues(alpha: 0.7),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(color: AppTheme.amber),
+              const SizedBox(height: 16),
+              Text(
+                'Preparing export…',
+                style: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.txt1),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -130,19 +322,32 @@ class _ProgressReportScreenState extends ConsumerState<ProgressReportScreen> {
   }
 
   Widget _buildReportContent(BuildContext context, ThemeData theme, ProgressReportData data) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        _buildPhaseBadge(theme, data.phase),
-        const SizedBox(height: 24),
-        _buildStratum1(theme, data),
-        const SizedBox(height: 32),
-        _buildStratum2(theme, data),
-        const SizedBox(height: 32),
-        _buildStratum3(theme, data),
-        const SizedBox(height: 32),
-        _buildStratum4(theme, data),
-      ],
+    // A non-lazy SingleChildScrollView lays out the entire report, so the
+    // RepaintBoundary below has valid geometry for the full surface even when
+    // the user has not scrolled to the bottom. The solid bg0 Container keeps
+    // the captured PNG opaque rather than transparent.
+    return SingleChildScrollView(
+      child: RepaintBoundary(
+        key: _reportKey,
+        child: Container(
+          color: AppTheme.bg0,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildPhaseBadge(theme, data.phase),
+              const SizedBox(height: 24),
+              _buildStratum1(theme, data),
+              const SizedBox(height: 32),
+              _buildStratum2(theme, data),
+              const SizedBox(height: 32),
+              _buildStratum3(theme, data),
+              const SizedBox(height: 32),
+              _buildStratum4(theme, data),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
