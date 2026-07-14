@@ -82,7 +82,7 @@ class BodyWeightCard extends ConsumerWidget {
                 );
               },
               loading: () => const CircularProgressIndicator(),
-              error: (_, __) => const Text('Error loading weight'),
+              error: (_, _) => const Text('Error loading weight'),
             ),
           ],
         ),

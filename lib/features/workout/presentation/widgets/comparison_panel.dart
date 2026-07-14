@@ -101,7 +101,7 @@ class _ComparisonPanelState extends ConsumerState<ComparisonPanel> {
         padding: EdgeInsets.all(16.0),
         child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }

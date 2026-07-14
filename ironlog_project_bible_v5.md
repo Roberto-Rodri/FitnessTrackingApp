@@ -90,8 +90,10 @@ Shareable analytical report for a coach (trainer + nutritionist), weekly default
 - **PHASE A — Finish Report:** Part 3 (export to shareable PDF/image; reuse share_plus + path_provider, RepaintBoundary). ← immediate next.
 - **PHASE B — Housekeeping:** keep AGENTS.md/Bible current; fix Paste-JSON-Backup controller leak (`profile_settings_screen.dart`); clear residual lint.
 - **PHASE C — Full QA pass:** whole-app bug hunt.
-- **PHASE D — Backlog:** future features (decide per-feature whether deep research is warranted).
-
+- **PHASE D — Backlog (Future Features):**
+    - *NEAT / Daily Steps:* Add a simple daily step tracker to contextualize weight loss stalls.
+    - *Sleep / Recovery Score:* Add a 1-10 subjective RPE for daily energy/sleep to explain fluctuations in e1RM and volume.
+    - *Body Fat % Tracking Adjustments:* Restrict logging frequency to weekly or apply aggressive smoothing to prevent daily fluctuation anxiety.
 ---
 
 ## 8. WORKING NORMS

@@ -274,36 +274,9 @@ class ProfileSettingsScreen extends ConsumerWidget {
         final confirm = await _showWarningDialog(context, ref);
         if (confirm == true && context.mounted) {
           // Open paste dialog as fallback for missing file_picker
-          final controller = TextEditingController();
           final jsonString = await showDialog<String>(
             context: context,
-            builder: (ctx) => AlertDialog(
-              backgroundColor: AppTheme.bg1,
-              title: const Text('Paste JSON Backup', style: TextStyle(color: AppTheme.txt1)),
-              content: TextField(
-                controller: controller,
-                maxLines: 5,
-                style: const TextStyle(color: AppTheme.txt1),
-                decoration: InputDecoration(
-                  hintText: '{"version": 8, ...}',
-                  hintStyle: const TextStyle(color: AppTheme.txt2),
-                  filled: true,
-                  fillColor: AppTheme.bg0,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancel', style: TextStyle(color: AppTheme.txt2)),
-                ),
-                FilledButton(
-                  style: FilledButton.styleFrom(backgroundColor: AppTheme.coral, foregroundColor: AppTheme.txt1),
-                  onPressed: () => Navigator.pop(ctx, controller.text),
-                  child: const Text('Replace'),
-                ),
-              ],
-            ),
+            builder: (ctx) => const _PasteBackupDialog(),
           );
 
           if (jsonString != null && jsonString.isNotEmpty && context.mounted) {
@@ -415,7 +388,7 @@ class ProfileSettingsScreen extends ConsumerWidget {
                   width: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-                error: (_, __) => const Text('Could not load stats', style: TextStyle(color: AppTheme.coral)),
+                error: (_, _) => const Text('Could not load stats', style: TextStyle(color: AppTheme.coral)),
               ),
             ),
           ],
@@ -432,6 +405,62 @@ class ProfileSettingsScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Self-contained dialog that owns its [TextEditingController] and disposes it
+/// in [State.dispose] (AGENTS.md §12), pops with the pasted JSON string.
+class _PasteBackupDialog extends StatefulWidget {
+  const _PasteBackupDialog();
+
+  @override
+  State<_PasteBackupDialog> createState() => _PasteBackupDialogState();
+}
+
+class _PasteBackupDialogState extends State<_PasteBackupDialog> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppTheme.bg1,
+      title: const Text('Paste JSON Backup', style: TextStyle(color: AppTheme.txt1)),
+      content: TextField(
+        controller: _controller,
+        maxLines: 5,
+        style: const TextStyle(color: AppTheme.txt1),
+        decoration: InputDecoration(
+          hintText: '{"version": 8, ...}',
+          hintStyle: const TextStyle(color: AppTheme.txt2),
+          filled: true,
+          fillColor: AppTheme.bg0,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel', style: TextStyle(color: AppTheme.txt2)),
+        ),
+        FilledButton(
+          style: FilledButton.styleFrom(backgroundColor: AppTheme.coral, foregroundColor: AppTheme.txt1),
+          onPressed: () => Navigator.pop(context, _controller.text),
+          child: const Text('Replace'),
+        ),
+      ],
     );
   }
 }
