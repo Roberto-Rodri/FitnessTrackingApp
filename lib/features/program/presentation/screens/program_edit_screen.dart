@@ -44,6 +44,7 @@ class _ProgramEditScreenState extends ConsumerState<ProgramEditScreen> {
     setState(() => _isLoading = true);
     try {
       final detail = await ref.read(programDetailProvider(pid).future);
+      if (!mounted) return;
       setState(() {
         _nameController.text = detail.program.name;
         _days.addAll(detail.days);
@@ -124,57 +125,23 @@ class _ProgramEditScreenState extends ConsumerState<ProgramEditScreen> {
   }
 
   void _editDayLabel(int index) async {
-    final controller = TextEditingController(text: _days[index].label);
+    // The dialog is a self-contained StatefulWidget that owns and disposes its
+    // own TextEditingController in its State.dispose(). That runs only after the
+    // dialog route has fully unmounted (post exit-transition), so the controller
+    // is never disposed while its TextField is still animating out.
     final newLabel = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh, // bg2
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Rename day', style: TextStyle(
-          fontSize: 18, fontWeight: FontWeight.w700,
-          color: Theme.of(context).colorScheme.onSurface,
-        )),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: 'Day name',
-            filled: true,
-            fillColor: Theme.of(context).colorScheme.outline, // bg3
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide.none,
-            ),
-          ),
-          style: TextStyle(
-            fontSize: 16, fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppTheme.txt2)),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, controller.text.trim()),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.amber,
-            ),
-            child: const Text('Save', style: TextStyle(
-              color: Color(0xFF1C1000), fontWeight: FontWeight.w700,
-            )),
-          ),
-        ],
-      ),
+      builder: (_) => _RenameDayDialog(initialLabel: _days[index].label),
     );
-    
+
+    // Guard against use of a stale State/context after the async gap.
+    if (!context.mounted) return;
+
     if (newLabel != null && newLabel.isNotEmpty && newLabel != _days[index].label) {
       setState(() {
         _days[index] = _days[index].copyWith(label: newLabel);
       });
     }
-    controller.dispose();
   }
 
   void _deleteDay(int index) {
@@ -240,6 +207,8 @@ class _ProgramEditScreenState extends ConsumerState<ProgramEditScreen> {
         ),
       ),
     );
+
+    if (!context.mounted) return;
 
     if (selectedRoutineId != null) {
       setState(() {
@@ -516,6 +485,81 @@ class _ProgramEditScreenState extends ConsumerState<ProgramEditScreen> {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// Self-contained rename dialog. It owns its [TextEditingController] and disposes
+/// it in [State.dispose], which fires only after the dialog route has fully
+/// unmounted. This avoids disposing the controller while its [TextField] is still
+/// mounted/animating out — which previously caused a "TextEditingController used
+/// after being disposed" error that cascaded into a '_dependents.isEmpty' crash.
+class _RenameDayDialog extends StatefulWidget {
+  final String initialLabel;
+
+  const _RenameDayDialog({required this.initialLabel});
+
+  @override
+  State<_RenameDayDialog> createState() => _RenameDayDialogState();
+}
+
+class _RenameDayDialogState extends State<_RenameDayDialog> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialLabel);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AlertDialog(
+      backgroundColor: theme.colorScheme.surfaceContainerHigh, // bg2
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: Text('Rename day', style: TextStyle(
+        fontSize: 18, fontWeight: FontWeight.w700,
+        color: theme.colorScheme.onSurface,
+      )),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        decoration: InputDecoration(
+          hintText: 'Day name',
+          filled: true,
+          fillColor: theme.colorScheme.outline, // bg3
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        style: TextStyle(
+          fontSize: 16, fontWeight: FontWeight.w600,
+          color: theme.colorScheme.onSurface,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel', style: TextStyle(color: AppTheme.txt2)),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _controller.text.trim()),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppTheme.amber,
+          ),
+          child: const Text('Save', style: TextStyle(
+            color: Color(0xFF1C1000), fontWeight: FontWeight.w700,
+          )),
+        ),
+      ],
     );
   }
 }

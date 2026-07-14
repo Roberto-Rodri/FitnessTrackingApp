@@ -197,15 +197,15 @@ class ProgramCard extends ConsumerWidget {
       ),
     );
 
-    if (confirmed == true) {
-      HapticFeedback.heavyImpact();
-      final repository = ref.read(programRepositoryProvider);
-      await repository.deleteProgram(program.id!);
-      ref.invalidate(allProgramsProvider);
-      ref.invalidate(activeProgramProvider);
-      ref.invalidate(currentProgramDayProvider);
-      ref.invalidate(completedProgramDaysProvider);
-    }
+    if (confirmed != true || !context.mounted) return;
+
+    HapticFeedback.heavyImpact();
+    final repository = ref.read(programRepositoryProvider);
+    await repository.deleteProgram(program.id!);
+    ref.invalidate(allProgramsProvider);
+    ref.invalidate(activeProgramProvider);
+    ref.invalidate(currentProgramDayProvider);
+    ref.invalidate(completedProgramDaysProvider);
   }
 
   Widget _buildMenuButton(BuildContext context, WidgetRef ref) {
